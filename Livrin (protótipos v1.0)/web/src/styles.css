@@ -1,0 +1,13 @@
+body{margin:0;background:#0d1117;color:#e6e6e6;font:15px system-ui}
+.card{max-width:380px;margin:60px auto;padding:24px;background:#1a1d23;border-radius:12px}
+.app{display:flex;min-height:100vh}aside{width:220px;padding:16px;background:#12151b;display:flex;flex-direction:column;gap:8px}
+section{flex:1;padding:24px}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+article{background:#1a1d23;padding:16px;border-radius:12px;margin-bottom:12px}
+form{display:flex;flex-direction:column;gap:12px;max-width:520px}label{display:flex;flex-direction:column;gap:4px}
+input,select,textarea{padding:10px;background:#262a33;border:0;border-radius:8px;color:inherit}
+button{padding:10px;border:0;border-radius:8px;background:#0052d9;color:#fff;cursor:pointer}
+aside button{background:none;text-align:left}aside button.on{background:#1f3a6b}
+.err{background:#2d2327;border-left:3px solid #f99;padding:10px;margin:12px 0}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.chips button,.ghost{background:#262a33}.chips button.on{background:#0052d9}
+.badge{background:#262a33;padding:2px 8px;border-radius:8px;font-size:12px}a{color:#8ab4ff}section input{width:100%;box-sizing:border-box}
+.hc,.hc *{background:#000!important;color:#ff0!important;border-color:#ff0!important}.hc button{border:2px solid #ff0}

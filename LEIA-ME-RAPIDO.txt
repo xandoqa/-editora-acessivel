@@ -1,0 +1,8 @@
+1) Abra o Docker Desktop e espere ficar "Engine running".
+2) De dois cliques em iniciar.bat (a 1a vez demora alguns minutos).
+3) Abra http://localhost:5173
+4) Entre com:
+   E-mail: admin@livrin.local
+   Senha:  Admin12345
+Para parar: parar.bat (ou Ctrl+C na janela).
+Para trocar e-mail/senha: edite ADMIN_EMAIL e ADMIN_PASSWORD no arquivo .env e rode iniciar.bat de novo.

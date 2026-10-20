@@ -1,0 +1,38 @@
+# =============================================================================
+# Sobrescrita para DESENVOLVIMENTO (hot reload no front e no back):
+#     docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build
+# O código-fonte é montado como volume; node_modules fica dentro do container.
+# =============================================================================
+services:
+  db:
+    ports:
+      - "${DB_PORT:-5432}:5432"
+
+  api:
+    build:
+      target: dev
+    environment:
+      NODE_ENV: development
+      UPLOAD_DIR: /app/uploads
+    volumes:
+      - ./api:/app
+      - /app/node_modules
+      - uploads:/app/uploads
+    # Os containers dev rodam como root para escrever nos volumes montados do host.
+    user: root
+
+  web:
+    build:
+      target: dev
+    environment:
+      API_PROXY_TARGET: http://api:3000
+      # Necessário para detectar alterações em volumes no Windows/macOS.
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./web:/app
+      - /app/node_modules
+    ports:
+      - "${WEB_PORT:-5173}:5173"
+    depends_on:
+      api:
+        condition: service_started

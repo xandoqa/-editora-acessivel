@@ -1,0 +1,200 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* -------------------------------------------------------------------------- */
+/* Tokens de cor (canais RGB). Contraste do texto principal ≥ 7:1 (WCAG AAA).  */
+/* -------------------------------------------------------------------------- */
+:root {
+  --c-bg: 17 19 24;
+  --c-surface: 25 28 34;
+  --c-surface-low: 21 23 29;
+  --c-surface-high: 32 36 43;
+  --c-surface-highest: 42 46 55;
+  --c-outline: 52 57 67;
+  --c-outline-strong: 96 104 118;
+  --c-ink: 230 233 239;
+  --c-ink-muted: 190 196 207;
+  --c-ink-subtle: 165 172 184;
+  --c-primary: 173 198 255;
+  --c-on-primary: 10 37 84;
+  --c-primary-container: 36 60 99;
+  --c-on-primary-container: 214 226 255;
+  --c-accent: 110 231 168;
+  --c-accent-container: 14 59 42;
+  --c-on-accent: 4 40 25;
+  --c-warn: 251 199 84;
+  --c-warn-container: 66 50 10;
+  --c-danger: 255 170 156;
+  --c-danger-container: 74 24 20;
+  --c-admin: 255 184 128;
+  --c-admin-container: 72 40 16;
+  --font-scale: 1;
+  color-scheme: dark;
+}
+
+/* Modo Alto Contraste (Amarelo/Preto), ativado pelo botão da barra superior. */
+:root.hc {
+  --c-bg: 0 0 0;
+  --c-surface: 0 0 0;
+  --c-surface-low: 0 0 0;
+  --c-surface-high: 12 12 12;
+  --c-surface-highest: 24 24 24;
+  --c-outline: 255 255 0;
+  --c-outline-strong: 255 255 0;
+  --c-ink: 255 255 0;
+  --c-ink-muted: 255 255 0;
+  --c-ink-subtle: 255 255 160;
+  --c-primary: 255 255 0;
+  --c-on-primary: 0 0 0;
+  --c-primary-container: 0 0 0;
+  --c-on-primary-container: 255 255 0;
+  --c-accent: 255 255 255;
+  --c-accent-container: 0 0 0;
+  --c-on-accent: 0 0 0;
+  --c-warn: 255 255 0;
+  --c-warn-container: 0 0 0;
+  --c-danger: 255 255 255;
+  --c-danger-container: 0 0 0;
+  --c-admin: 255 255 0;
+  --c-admin-container: 0 0 0;
+}
+:root.hc img.decorative-tint {
+  filter: grayscale(1) contrast(1.2);
+}
+:root.hc .btn-brand,
+:root.hc .brand-mark {
+  background: #ffff00 !important;
+  color: #000 !important;
+}
+:root.hc .hc-border {
+  border-color: rgb(var(--c-outline)) !important;
+}
+
+html {
+  font-size: calc(100% * var(--font-scale));
+  background-color: rgb(var(--c-bg));
+}
+
+body {
+  @apply bg-bg font-sans text-ink antialiased;
+  min-height: 100vh;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  @apply font-display;
+}
+
+/* Foco sempre visível para navegação por teclado (WCAG 2.4.7 / 2.4.13). */
+:focus-visible {
+  outline: 3px solid rgb(var(--c-primary));
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* Modo "Leitor Otimizado": links sublinhados, foco reforçado, sem animações, mais espaçamento. */
+:root.reader-optimized body {
+  line-height: 1.75;
+  letter-spacing: 0.01em;
+}
+:root.reader-optimized a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+:root.reader-optimized :focus-visible {
+  outline-width: 5px;
+  outline-offset: 3px;
+}
+:root.reader-optimized *,
+:root.reader-optimized *::before,
+:root.reader-optimized *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-outline/60 bg-surface;
+  }
+  .card-high {
+    @apply rounded-xl bg-surface-high;
+  }
+  .eyebrow {
+    @apply text-xs font-bold uppercase tracking-[0.14em];
+  }
+  .btn {
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply btn bg-primary text-primary-on hover:brightness-110;
+  }
+  .btn-secondary {
+    @apply btn bg-surface-highest text-ink hover:bg-outline;
+  }
+  .btn-tonal {
+    @apply btn bg-primary-container text-primary-onContainer hover:brightness-125;
+  }
+  .btn-accent {
+    @apply btn bg-accent-container text-accent hover:brightness-125;
+  }
+  .btn-danger {
+    @apply btn bg-danger-container text-danger hover:brightness-125;
+  }
+  /* Azul saturado da marca (botão "Entrar na Plataforma" e logotipo do protótipo). */
+  .btn-brand {
+    @apply btn bg-[#1d4ed8] text-white hover:bg-[#1e40af];
+  }
+  .brand-mark {
+    @apply bg-[#2563eb] text-white;
+  }
+  .btn-ghost {
+    @apply btn text-ink-muted hover:bg-surface-high hover:text-ink;
+  }
+  .icon-btn {
+    @apply inline-flex h-11 w-11 items-center justify-center rounded-xl text-ink-muted transition-colors hover:bg-surface-highest hover:text-ink;
+  }
+  .input {
+    @apply w-full rounded-xl border border-transparent bg-surface-high px-4 py-3 text-ink placeholder:text-ink-subtle focus:border-primary focus:outline-none focus-visible:outline-none;
+  }
+  .input[aria-invalid='true'] {
+    @apply border-danger;
+  }
+  .label {
+    @apply mb-2 block text-sm font-semibold text-ink;
+  }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold;
+  }
+}
+
+/* Utilitário para conteúdo somente para leitores de tela. */
+.sr-only-focusable:not(:focus):not(:focus-within) {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* Barra de rolagem discreta nos chips de filtro. */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}

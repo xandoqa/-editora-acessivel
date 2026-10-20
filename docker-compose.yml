@@ -1,0 +1,71 @@
+# =============================================================================
+# Editora Livrin — ambiente completo com um comando:
+#     cp .env.example .env      (uma única vez; ajuste as senhas)
+#     docker compose up --build
+# Acesse http://localhost:5173 (ou a porta definida em WEB_PORT).
+#
+# Serviços:  db (PostgreSQL 16) ← api (Node/Express) ← web (Nginx + React)
+# Para desenvolvimento com hot reload, veja docker-compose.dev.yml.
+# =============================================================================
+name: livrin
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-livrin_db}
+      POSTGRES_USER: ${POSTGRES_USER:-livrin_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env (copie de .env.example)}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: ./api
+      target: runtime
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      DATABASE_URL: postgres://${POSTGRES_USER:-livrin_user}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-livrin_db}
+      JWT_SECRET: ${JWT_SECRET:?Defina JWT_SECRET no arquivo .env (mínimo 32 caracteres)}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1d}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173}
+      UPLOAD_DIR: /app/uploads
+      MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-180}
+      TRUST_PROXY: "true"
+      ADMIN_NAME: ${ADMIN_NAME:-Administrador Livrin}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
+      DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-}
+    volumes:
+      - uploads:/app/uploads
+    ports:
+      - "${API_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./web
+      target: runtime
+      args:
+        VITE_MAX_UPLOAD_MB: ${MAX_UPLOAD_MB:-180}
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-5173}:80"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  uploads:

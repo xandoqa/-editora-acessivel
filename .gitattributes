@@ -1,0 +1,8 @@
+# Normaliza finais de linha (evita problemas entre Windows, Linux e macOS)
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.pdf binary
+*.cbz binary
+*.epub binary

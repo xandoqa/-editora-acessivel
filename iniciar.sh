@@ -24,11 +24,44 @@ if ! docker compose version >/dev/null 2>&1; then
   exit 1
 fi
 
-if ! docker info >/dev/null 2>&1; then
+# "Não consegui falar com o Docker" tem duas causas muito diferentes, e dizer
+# as duas de uma vez obriga quem está começando a adivinhar qual é a sua. O
+# próprio erro do Docker distingue: falta de permissão fala em "permission
+# denied", serviço parado fala em não achar o socket.
+if ! ERRO_DOCKER=$(docker info 2>&1 >/dev/null); then
+  USUARIO=${USER:-$(id -un)}
+  echo "" >&2
   echo "Não consegui falar com o Docker." >&2
-  echo "- O serviço está rodando? Linux: sudo systemctl start docker" >&2
-  echo "  Windows/macOS: abra o Docker Desktop e espere o status 'running'." >&2
-  echo "- Falta permissão? sudo usermod -aG docker \$USER e entre na sessão de novo." >&2
+  echo "" >&2
+  case "$ERRO_DOCKER" in
+    *[Pp]ermission\ denied*)
+      echo "Motivo: o serviço está rodando, mas o seu usuário não tem permissão" >&2
+      echo "para usá-lo. Rode estes dois comandos:" >&2
+      echo "" >&2
+      echo "    sudo usermod -aG docker $USUARIO" >&2
+      echo "    newgrp docker" >&2
+      echo "" >&2
+      echo "E então ./iniciar.sh de novo. O 'newgrp' vale só neste terminal;" >&2
+      echo "para valer em todos, saia da sessão e entre novamente." >&2
+      ;;
+    *)
+      echo "Motivo: o serviço do Docker não está rodando." >&2
+      echo "" >&2
+      echo "    sudo systemctl enable --now docker" >&2
+      echo "" >&2
+      echo "E então ./iniciar.sh de novo. (No Windows ou macOS: abra o Docker" >&2
+      echo "Desktop e espere o status 'running'.)" >&2
+      echo "" >&2
+      echo "Se o serviço já estava rodando, o que falta é permissão:" >&2
+      echo "    sudo usermod -aG docker $USUARIO" >&2
+      echo "    newgrp docker" >&2
+      ;;
+  esac
+  echo "" >&2
+  echo "Mensagem original do Docker, para referência:" >&2
+  echo "    $ERRO_DOCKER" >&2
+  echo "" >&2
+  echo "Passo a passo completo: docs/rodar-no-linux.md" >&2
   exit 1
 fi
 

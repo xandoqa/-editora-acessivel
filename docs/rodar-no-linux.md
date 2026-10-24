@@ -115,6 +115,8 @@ Se preferir não mexer em permissão nenhuma, `sh iniciar.sh` funciona em qualqu
 ./iniciar.sh
 ```
 
+> **Use o script, não `docker compose up` direto.** O `docker compose up` sozinho falha com `required variable JWT_SECRET is missing a value`, porque o `.env` ainda não existe — e o Compose não inventa senha nem segredo. É o `iniciar.sh` que cria esse arquivo.
+
 O script faz quatro conferências antes de tentar qualquer coisa (Docker instalado, plugin Compose v2, daemon acessível, pasta correta) e, se algo faltar, ele para e diz o que fazer. Depois cria o arquivo `.env` a partir do `.env.example` e gera um `JWT_SECRET` aleatório exclusivo da sua instalação — nenhum segredo vem pronto dentro do projeto.
 
 **A primeira execução demora.** Ela baixa e compila cerca de 1,5 GB entre imagens e dependências; dez minutos numa conexão comum é normal. Nas próximas vezes são segundos.

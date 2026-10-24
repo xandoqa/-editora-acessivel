@@ -26,8 +26,26 @@ A primeira subida baixa e compila cerca de 1,5 GB. `docker system df` mostra o q
 ### A primeira execução parece travada
 Ela não está: o `web` espera o `api` ficar `healthy`, que por sua vez espera o `db`. Entre o download das imagens, o `npm ci` e o build do front-end, dez minutos numa conexão comum são normais. `docker compose ps` em outro terminal mostra o progresso real de cada serviço.
 
-### `required variable POSTGRES_PASSWORD (ou JWT_SECRET) is missing a value`
-**Causa:** o arquivo `.env` não existe na raiz. **Solução:** `cp .env.example .env` (PowerShell: `Copy-Item .env.example .env`) e rode novamente.
+### `required variable JWT_SECRET is missing a value` / `POSTGRES_PASSWORD is missing a value`
+
+Acontece ao rodar `docker compose up` direto, sem ter criado o `.env`. O Compose não inventa valores para senha e segredo, e o projeto prefere falhar a subir com uma senha em branco.
+
+**Solução mais simples:** use o script, que cria o `.env` e gera o `JWT_SECRET` sozinho.
+
+```bash
+./iniciar.sh            # Linux/macOS — ou iniciar.bat no Windows
+```
+
+**Se preferir na mão:**
+
+```bash
+cp .env.example .env
+node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+# cole a saída na linha JWT_SECRET= do .env
+docker compose up --build
+```
+
+Sem Node instalado, serve `openssl rand -hex 48`.
 
 ### Docker não inicia / `Cannot connect to the Docker daemon`
 - Abra o Docker Desktop e espere o status "running".

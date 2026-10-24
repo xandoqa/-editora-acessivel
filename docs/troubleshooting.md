@@ -23,7 +23,7 @@ Tem que mostrar **exatamente** `app.ts` e `server.ts`, nada mais. Se aparecer `d
 ```bash
 cd ~/Documentos
 rm -rf livrin-novo
-git clone -b livrin-3.0.0 https://github.com/xandoqa/-editora-acessivel.git livrin-novo
+git clone https://github.com/xandoqa/-editora-acessivel.git livrin-novo
 cd livrin-novo
 ./iniciar.sh
 ```

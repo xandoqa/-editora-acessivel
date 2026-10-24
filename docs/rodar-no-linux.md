@@ -18,6 +18,15 @@ Se funcionou, pule para o [passo 5](#5-entre-no-sistema).
 
 Só isso precisa estar instalado. Node, PostgreSQL e todas as dependências do projeto ficam dentro dos contêineres — nada é instalado na sua máquina.
 
+**Você não precisa do Docker Desktop.** Ele existe para Windows e macOS, onde roda uma máquina virtual Linux por baixo; no Linux o motor é nativo. São duas peças, e as duas são necessárias:
+
+| Peça | O que faz |
+| --- | --- |
+| **Docker Engine** | o serviço que de fato roda os contêineres |
+| **Compose v2** | plugin do CLI que lê o `docker-compose.yml` e orquestra os três serviços |
+
+O Compose sozinho não roda nada: ele dá as ordens, o Engine executa.
+
 ```bash
 docker compose version
 ```
@@ -33,6 +42,13 @@ sudo systemctl enable --now docker
 ```
 
 Em Fedora: `sudo dnf install docker docker-compose-plugin`. Em Arch: `sudo pacman -S docker docker-compose`.
+
+Para confirmar que as duas peças estão no lugar:
+
+```bash
+docker compose version     # o plugin → "Docker Compose version v2.x"
+docker info                # o engine → erro aqui significa daemon parado ou falta de permissão
+```
 
 **Se responder `docker-compose version 1.x`** (com hífen, versão 1): essa versão foi descontinuada e **não** entende o arquivo deste projeto — ele usa `name:` no topo e `depends_on: condition: service_healthy`, recursos da Compose Spec. Instale o plugin novo: `sudo apt install docker-compose-plugin`. O comando passa a ser `docker compose`, com espaço.
 

@@ -60,7 +60,7 @@ A primeira execução demora: o script cria o `.env`, **gera um `JWT_SECRET` ale
 
 | Sistema | O que instalar | Como conferir |
 | --- | --- | --- |
-| Linux | `docker.io` + `docker-compose-plugin` | `docker compose version` |
+| Linux | `docker.io` + `docker-compose-plugin` — **o Docker Desktop não é necessário** | `docker compose version` e `docker info` |
 | Windows / macOS | Docker Desktop (espere o status "running") | `docker compose version` |
 
 `docker compose version` — com **espaço** — precisa responder `v2.x` ou maior. Se só existir `docker-compose` com hífen, é a v1, descontinuada, que **não** entende este `docker-compose.yml` (ele usa `name:` e `depends_on: condition: service_healthy`, da Compose Spec). Instale o plugin: `sudo apt install docker-compose-plugin` ou o equivalente da sua distribuição.

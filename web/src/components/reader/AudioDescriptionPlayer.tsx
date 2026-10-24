@@ -1,6 +1,6 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Headphones, Pause, Play, RotateCcw, RotateCw, X } from 'lucide-react';
-import { api } from '../../lib/api';
+import { api, errorMessage } from '../../lib/api';
 import { formatDuration } from '../../lib/format';
 import { speak, speechSupported, stopSpeaking } from '../../lib/speech';
 import type { AudioDescription, Work } from '../../types/api';
@@ -68,7 +68,13 @@ const AudioDescriptionPlayer = forwardRef<PlayerHandle, Props>(function AudioDes
         url = URL.createObjectURL(res.data);
         setAudioUrl(url);
       })
-      .catch(() => active && setAudioError('Não foi possível carregar a faixa de audiodescrição.'));
+      .catch(
+        (err: unknown) =>
+          active &&
+          // A API explica quando a faixa some do volume ou nunca existiu;
+          // trocar isso por uma frase fixa some com a única pista.
+          setAudioError(errorMessage(err, 'Não foi possível carregar a faixa de audiodescrição.')),
+      );
     return () => {
       active = false;
       if (url) URL.revokeObjectURL(url);

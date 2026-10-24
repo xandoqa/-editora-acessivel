@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import JSZip from 'jszip';
 import { PALETTES } from './readerPrefs';
+import { falhaAoAbrir } from './erroDeLeitura';
 import type { ViewerProps } from './types';
 import { Spinner } from '../ui';
 
@@ -29,7 +30,7 @@ export default function CbzViewer({ data, page, onPageCount, prefs, title, pageA
         setEntries(images);
         onPageCount(images.length);
       })
-      .catch(() => active && setError('Não foi possível abrir este arquivo CBZ.'));
+      .catch((err: unknown) => active && setError(falhaAoAbrir('CBZ', err)));
     return () => {
       active = false;
       urls.forEach((u) => URL.revokeObjectURL(u));
@@ -65,7 +66,13 @@ export default function CbzViewer({ data, page, onPageCount, prefs, title, pageA
     };
   }, [entries, page]);
 
-  if (error) return <p className="p-6 text-center text-danger">{error}</p>;
+  if (error) {
+    return (
+      <div className="mx-auto max-w-prose p-6 text-center" role="alert">
+        <p className="whitespace-pre-line text-sm text-danger">{error}</p>
+      </div>
+    );
+  }
   if (!url) return <div className="flex min-h-[300px] items-center justify-center"><Spinner label="Carregando prancha..." /></div>;
   return (
     <div className="w-full overflow-x-auto">

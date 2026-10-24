@@ -143,6 +143,24 @@ export function absolutePath(relativePath: string): string {
   return resolved;
 }
 
+/**
+ * O banco e o volume de uploads têm ciclos de vida independentes e podem sair
+ * de sincronia — trocar de `docker-compose.yml` para o de desenvolvimento, por
+ * exemplo, troca o volume e mantém o banco. Quando isso acontece, o registro
+ * continua apontando para um arquivo que não está mais lá.
+ *
+ * Sem esta conferência, quem pede o arquivo recebe o erro do `sendFile`, que
+ * não diz nada de útil e chega ao leitor como "não foi possível abrir". Com
+ * ela, a resposta nomeia o problema e diz o que fazer.
+ */
+export function storedFileExists(relativePath: string): boolean {
+  try {
+    return fs.existsSync(absolutePath(relativePath));
+  } catch {
+    return false; // caminho inválido (tentativa de sair do UPLOAD_DIR)
+  }
+}
+
 export async function removeFile(fileOrRelative: string | null | undefined, isAbsolute = false): Promise<void> {
   if (!fileOrRelative) return;
   try {

@@ -7,7 +7,7 @@ import { badRequest, conflict, forbidden, notFound, unprocessable } from '../uti
 import { paginated } from '../validators/common';
 import { listChecks } from './review.service';
 import type { catalogQuerySchema, WorkFields, WorkUpdate } from '../validators/works.schemas';
-import { absolutePath, commitUpload, removeFile, type StoredFile } from './storage.service';
+import { absolutePath, commitUpload, removeFile, storedFileExists, type StoredFile } from './storage.service';
 import {
   ADMIN_TRANSITIONS,
   AUTHOR_DELETABLE,
@@ -97,6 +97,14 @@ export async function getWorkFileInfo(id: number, viewer?: AuthUser) {
   const work = await findWork(id);
   if (!canView(work, viewer)) throw notFound('Obra não encontrada.');
   if (!work.filePath || !work.fileType) throw notFound('Esta obra ainda não possui arquivo enviado.');
+  if (!storedFileExists(work.filePath)) {
+    throw notFound(
+      'O arquivo desta obra está registrado no banco, mas não foi encontrado no volume de uploads. ' +
+        'Isso acontece quando o banco e o volume saem de sincronia — por exemplo, ao alternar entre o modo ' +
+        'de produção e o de desenvolvimento, que usam volumes diferentes. Reenvie o arquivo pela interface, ' +
+        'ou rode `npm run db:verify` na API para conferir todos os arquivos de uma vez.',
+    );
+  }
   const ext = work.fileType.toLowerCase();
   const safeTitle = work.title.normalize('NFD').replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-') || 'obra';
   return { absPath: absolutePath(work.filePath), fileType: work.fileType, downloadName: `${safeTitle}.${ext}` };
@@ -106,6 +114,9 @@ export async function getWorkAudioInfo(id: number, viewer?: AuthUser) {
   const work = await findWork(id);
   if (!canView(work, viewer)) throw notFound('Obra não encontrada.');
   if (!work.audioPath) throw notFound('Esta obra não possui faixa de audiodescrição.');
+  if (!storedFileExists(work.audioPath)) {
+    throw notFound('A faixa de audiodescrição está registrada no banco, mas não está no volume de uploads. Reenvie o arquivo.');
+  }
   return { absPath: absolutePath(work.audioPath) };
 }
 

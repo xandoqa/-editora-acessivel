@@ -9,6 +9,48 @@ import { Spinner } from '../ui';
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
 /**
+ * Traduz a falha do pdf.js para algo acionável.
+ *
+ * Antes, qualquer erro virava "Não foi possível abrir este PDF." — uma frase
+ * que não distingue arquivo sumido do volume, PDF com senha e arquivo
+ * corrompido, e que deixa quem lê (e quem mantém) sem o próximo passo. O
+ * pdf.js identifica cada caso pelo nome da exceção; quando o problema é de
+ * HTTP, a própria API manda a explicação no corpo da resposta, então vale
+ * buscá-la em vez de inventar uma.
+ */
+async function mensagemDeErro(err: unknown, url: string, authorization?: string): Promise<string> {
+  const nome = (err as { name?: string })?.name ?? '';
+
+  if (nome === 'PasswordException') {
+    return 'Este PDF está protegido por senha e não pode ser aberto no navegador. Baixe o arquivo para ler em um leitor de PDF, ou reenvie a obra sem proteção.';
+  }
+  if (nome === 'InvalidPDFException') {
+    return 'O arquivo enviado não é um PDF válido — pode ter sido renomeado ou corrompido no envio. Reenvie a obra.';
+  }
+
+  // MissingPDFException (404) e UnexpectedResponseException (outros status):
+  // a API explica o motivo no corpo. Pedimos só o primeiro byte, com Range,
+  // para não baixar a obra inteira só para ler uma mensagem de erro.
+  if (nome === 'MissingPDFException' || nome === 'UnexpectedResponseException') {
+    try {
+      const resposta = await fetch(url, {
+        headers: { ...(authorization ? { Authorization: authorization } : {}), Range: 'bytes=0-0' },
+      });
+      if (!resposta.ok) {
+        const corpo = (await resposta.json().catch(() => null)) as { error?: { message?: string } } | null;
+        if (corpo?.error?.message) return corpo.error.message;
+        return `O servidor recusou o arquivo desta obra (HTTP ${resposta.status}).`;
+      }
+    } catch {
+      return 'Não foi possível falar com o servidor para buscar o arquivo. Confira se a API está no ar.';
+    }
+    return 'O arquivo desta obra não foi encontrado no servidor. Reenvie a obra pela interface.';
+  }
+
+  return 'Não foi possível abrir este PDF.';
+}
+
+/**
  * Renderiza PDFs com pdf.js (canvas). Além da imagem da página, extrai a camada
  * de texto do PDF e a exibe em "Texto desta página" com a tipografia escolhida
  * pelo leitor (fonte para dislexia, espaçamento, escala) — o que também torna o
@@ -44,7 +86,10 @@ export default function PdfViewer({ url, authorization, page, onPageCount, prefs
         setDoc(d);
         onPageCount(d.numPages);
       })
-      .catch(() => active && setError('Não foi possível abrir este PDF.'));
+      .catch(async (err: unknown) => {
+        const texto = await mensagemDeErro(err, url, authorization);
+        if (active) setError(texto);
+      });
     return () => {
       active = false;
       void task.destroy();

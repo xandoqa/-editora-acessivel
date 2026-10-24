@@ -33,10 +33,15 @@ export default {
         opendyslexic: ['OpenDyslexic', 'Comic Sans MS', 'sans-serif'],
       },
       borderRadius: { xl: '0.875rem', '2xl': '1.125rem' },
-      /* Sombra dura deslocada: o recorte colado na página, não o cartão flutuante. */
+      /*
+       * Sombra dura deslocada — o recorte colado na página. Era aplicada em
+       * todo card, o que achatava a hierarquia: com tudo saltando, nada salta.
+       * Agora o card tem só um apoio quase imperceptível, e o traço forte fica
+       * para o botão principal e para o Selo Livrin.
+       */
       boxShadow: {
-        card: '5px 5px 0 var(--sombra-tinta)',
-        botao: '3px 3px 0 var(--sombra-tinta)',
+        card: '0 1px 2px rgb(23 22 26 / 0.05)',
+        botao: '2px 2px 0 var(--sombra-tinta)',
         adesivo: '2px 2px 0 var(--sombra-tinta)',
       },
       rotate: { '1.5': '1.5deg', '-1.5': '-1.5deg' },

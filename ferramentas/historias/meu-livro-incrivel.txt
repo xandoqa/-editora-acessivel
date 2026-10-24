@@ -1,0 +1,37 @@
+# Meu Livro Incrível
+@ Marina Bastos
+= Quadrinho · Volume 1: A Travessia das Vozes Silenciosas
+% A página 2 segue a audiodescrição já registrada no banco.
+
+## 1
+[CENA] Plano aberto. O interior escuro de um posto avançado. Uma única luz acesa sobre um console. Ana, de costas, com fones nos ouvidos.
+[LEGENDA] Ana sempre soube que o universo tinha som, mesmo onde os manuais diziam haver apenas silêncio.
+
+## 2
+[CENA] Página de abertura. Ana ajusta o capacete no último posto avançado da galáxia. Ao fundo, uma nebulosa verde e azul pulsa lentamente.
+[FALA] Ana: Vamos seguir a música.
+
+## 3
+[CENA] Close no rosto de Ana, olhos fechados, concentrada. Pequenas ondas desenhadas saem do canto do quadro.
+[LEGENDA] Primeiro veio o nada. Depois, por baixo do nada, um zumbido baixo, ritmado, quase uma canção.
+[FALA] Ana: Três curtos. Um longo. Pausa.
+
+## 4
+[CENA] Plano médio na sala de comando. O comandante Boaventura, de braços cruzados, não olha para Ana. Yara observa de lado.
+[FALA] Boaventura: Isso é padrão de gerador.
+[FALA] Ana: Geradores não fazem pausa.
+
+## 5
+[CENA] Detalhe de uma tela de análise cheia de linhas planas, e a mão de Yara apagando filtros um por um.
+[LEGENDA] O instrumento procura o que foi ensinado a procurar.
+[FALA] Yara: Tirei a supressão de ruído. Tirei tudo que alguém decidiu que não valia a pena escutar.
+
+## 6
+[CENA] A mesma tela, agora cheia de picos. Yara com a mão na boca.
+[FALA] Yara: Estava embaixo o tempo todo.
+[FALA] Ana: Estava. Vocês é que estavam filtrando.
+
+## 7
+[CENA] Plano final. Ana de pé diante da janela, a nebulosa inteira à frente, pequena no quadro. Ondas concêntricas vêm dos dois lados e se encontram.
+[LEGENDA] Responderam. Em catorze minutos veio de volta um padrão novo — não era eco, era alguém.
+[FALA] Ana: A gente escuta primeiro. Falar vem depois.

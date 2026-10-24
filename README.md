@@ -423,6 +423,12 @@ Lista completa em [docs/troubleshooting.md](docs/troubleshooting.md).
 
 Projeto acadêmico. As obras de demonstração são **conteúdo original criado para este projeto** ou de **domínio público** (caso de *Rimas*, de Bécquer). Nenhum PDF ou material protegido por direitos autorais foi incorporado.
 
+As **obras em si** também são originais: contos, poemas e roteiros de quadrinho escritos para este projeto, com texto-fonte em `ferramentas/historias/` e arquivos gerados por `ferramentas/gerar-obras.py`. Os PDFs têm **texto de verdade**, não imagem de texto — num projeto de acessibilidade, um PDF escaneado seria contradizer a própria proposta. O EPUB traz `lang="pt-BR"` e sumário navegável.
+
+```bash
+python3 ferramentas/gerar-obras.py api/seed-assets/works
+```
+
 As **capas** são composições geométricas originais, geradas por `ferramentas/gerar-capas.py` — campo de cor chapada, uma forma grande e um filete, no mesmo vocabulário editorial da interface. Não há texto nelas de propósito: o card do catálogo já escreve título e autoria por cima. O script fica no repositório como prova de autoria e para que novas capas sejam feitas no mesmo estilo:
 
 ```bash

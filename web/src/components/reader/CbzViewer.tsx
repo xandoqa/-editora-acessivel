@@ -5,6 +5,8 @@ import type { ViewerProps } from './types';
 import { Spinner } from '../ui';
 
 const IMAGE_RE = /\.(jpe?g|png|webp|gif|avif)$/i;
+/** Quantas páginas ficam decodificadas na memória ao mesmo tempo. */
+const MAX_CACHE = 6;
 const MIME: Record<string, string> = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', avif: 'image/avif' };
 
 /** Leitor de quadrinhos CBZ (ZIP de imagens), com ordenação natural das pranchas. */
@@ -48,6 +50,14 @@ export default function CbzViewer({ data, page, onPageCount, prefs, title, pageA
       const ext = entry.name.split('.').pop()!.toLowerCase();
       const objectUrl = URL.createObjectURL(new Blob([blob], { type: MIME[ext] ?? 'image/jpeg' }));
       cache.current.set(entry.name, objectUrl);
+      // Mantém só as páginas vizinhas na memória. Sem este limite, uma HQ longa
+      // acumulava o blob de TODAS as páginas visitadas até sair da tela.
+      while (cache.current.size > MAX_CACHE) {
+        const [oldestName, oldestUrl] = cache.current.entries().next().value as [string, string];
+        if (oldestName === entry.name) break;
+        URL.revokeObjectURL(oldestUrl);
+        cache.current.delete(oldestName);
+      }
       if (active) setUrl(objectUrl);
     });
     return () => {

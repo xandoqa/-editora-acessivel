@@ -47,7 +47,7 @@ export default function SubmitWork() {
         eyebrow="Submissão editorial"
         icon={<BookOpenCheck className="h-4 w-4" aria-hidden />}
         title="Publicar meu livro ou quadrinho"
-        description="Envie seu manuscrito ou graphic novel para verificação técnica de acessibilidade (WCAG 2.2 AAA). Nossa curadoria revisa diagramação, contraste e camadas descritivas."
+        description="Envie seu manuscrito ou graphic novel para a curadoria de acessibilidade. Conferimos diagramação, contraste e as camadas descritivas antes de publicar no catálogo."
         actions={
           <span className="card-high flex items-center gap-2 px-4 py-2 text-sm font-semibold text-ink">
             <ShieldCheck className="h-5 w-5 text-accent" aria-hidden />

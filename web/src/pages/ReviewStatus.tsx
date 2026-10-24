@@ -7,8 +7,7 @@ import { api, errorMessage } from '../lib/api';
 import { formatBytes, formatDate, formatDateTime, formatRelative } from '../lib/format';
 import { STATUS_LABEL } from '../lib/labels';
 import type { CheckStatus, ReviewCheck } from '../types/api';
-import { useWorkActions } from '../components/works/workActions';
-import { Avatar, ConfirmDialog, Cover, ErrorState, LoadingState, Modal, TextArea } from '../components/ui';
+import { Avatar, Cover, ErrorState, LoadingState, Modal, TextArea } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 
 const CHECK_ICON: Record<CheckStatus, JSX.Element> = {
@@ -50,10 +49,8 @@ export default function ReviewStatus() {
   const { data: work, isLoading, isError, error, refetch } = useWork(workId);
   const { data: review } = useReview(work ? workId : undefined);
   const { data: descriptions = [] } = useAudioDescriptions(work ? workId : undefined);
-  const { publish } = useWorkActions();
   const [chatOpen, setChatOpen] = useState(false);
   const [message, setMessage] = useState('');
-  const [confirmPublish, setConfirmPublish] = useState(false);
 
   const sendNote = useMutation({
     mutationFn: async () => api.post(`/works/${workId}/review/notes`, { content: message }),
@@ -70,14 +67,20 @@ export default function ReviewStatus() {
   if (isError || !work) return <ErrorState message={errorMessage(error, 'Obra não encontrada.')} onRetry={() => refetch()} />;
 
   const status = work.status;
-  const approved = status === 'APROVADO' || status === 'PUBLICADO';
+  const approved = status === 'APROVADO';
   const rejected = status === 'REJEITADO';
   const progress = review?.progress ?? 0;
   const checks = review?.checks ?? [];
   const notes = review?.notes ?? [];
   const stage = approved ? 3 : work.submittedAt ? 2 : 1;
 
-  const title = approved ? (status === 'PUBLICADO' ? 'Sua obra está publicada' : 'Seu livro foi aprovado!') : rejected ? 'Sua obra precisa de ajustes' : status === 'RASCUNHO' ? 'Sua obra ainda é um rascunho' : 'Seu livro em processo editorial';
+  const title = approved
+    ? 'Sua obra está no catálogo!'
+    : rejected
+      ? 'Sua obra precisa de ajustes'
+      : status === 'RASCUNHO'
+        ? 'Sua obra ainda é um rascunho'
+        : 'Seu livro em processo editorial';
 
   const onSend = (e: FormEvent) => {
     e.preventDefault();
@@ -107,7 +110,7 @@ export default function ReviewStatus() {
               ? 'Todas as etapas foram aprovadas pela curadoria de acessibilidade.'
               : rejected
                 ? work.rejectionReason ?? 'Revise as notas dos pareceristas, ajuste a obra e reenvie para análise.'
-                : 'Seu livro está sendo avaliado. O processo pode levar alguns dias dependendo do volume e qualidade do conteúdo e das diretrizes de acessibilidade (WCAG 2.2 AAA e compatibilidade com leitores de tela).'}
+                : 'Seu livro está sendo avaliado. O processo pode levar alguns dias, conforme o volume da fila e os testes de contraste, tipografia e leitura por leitores de tela.'}
           </p>
         </div>
         <span className="chip shrink-0 bg-accent-container text-accent">
@@ -154,7 +157,7 @@ export default function ReviewStatus() {
               </dl>
               <div className="card-high mt-3 p-3 text-sm">
                 <p className="flex justify-between font-semibold text-ink">
-                  Conformidade Estimada <span className="text-primary">WCAG 2.2 AAA</span>
+                  Checklist da curadoria <span className="text-primary">{approved ? 'concluído' : 'em andamento'}</span>
                 </p>
                 <div className="my-2 flex h-2 overflow-hidden rounded-full bg-surface-low" role="progressbar" aria-label="Conformidade estimada" aria-valuenow={approved ? 100 : progress} aria-valuemin={0} aria-valuemax={100}>
                   <div className="h-full bg-accent" style={{ width: `${approved ? 100 : progress}%` }} />
@@ -201,11 +204,13 @@ export default function ReviewStatus() {
                     )}
                   </div>
                   <p className="mt-1 text-sm text-ink-muted">
-                    Arquivos validados com sucesso. Integridade do formato e metadados de leitura universal conferidos sem falhas de renderização.
+                    {work.submittedAt
+                      ? 'Arquivo recebido e validado: extensão, tamanho e assinatura binária conferidos no envio.'
+                      : 'Envie o arquivo original da obra para iniciar a análise.'}
                   </p>
                   {work.file && (
                     <p className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-accent">
-                      <CheckCircle2 className="h-4 w-4" aria-hidden /> {formatBytes(work.file.sizeBytes)} processados · {work.pages} páginas catalogadas
+                      <CheckCircle2 className="h-4 w-4" aria-hidden /> {work.file.type} · {formatBytes(work.file.sizeBytes)} · {work.pages} páginas informadas
                     </p>
                   )}
                 </div>
@@ -273,15 +278,12 @@ export default function ReviewStatus() {
           <section className="card flex flex-col gap-4 p-5 sm:flex-row sm:items-center" aria-live="polite">
             <LockKeyhole className="h-7 w-7 shrink-0 text-ink-muted" aria-hidden />
             <div className="flex-1 text-sm">
-              {status === 'APROVADO' ? (
-                <>
-                  <p className="font-semibold text-ink">Publicação liberada</p>
-                  <p className="text-ink-muted">A Etapa 3 foi aprovada. Você já pode publicar sua obra no catálogo.</p>
-                </>
-              ) : status === 'PUBLICADO' ? (
+              {approved ? (
                 <>
                   <p className="font-semibold text-ink">Obra publicada</p>
-                  <p className="text-ink-muted">Sua obra está disponível para todos os leitores da Livrin.</p>
+                  <p className="text-ink-muted">
+                    A aprovação da curadoria já colocou sua obra no catálogo. Ela está disponível para todos os leitores da Livrin.
+                  </p>
                 </>
               ) : rejected ? (
                 <>
@@ -290,27 +292,21 @@ export default function ReviewStatus() {
                 </>
               ) : (
                 <>
-                  <p className="font-semibold text-ink">Ação bloqueada no momento</p>
-                  <p className="text-ink-muted">O botão de publicação será liberado automaticamente após a aprovação da Etapa 3.</p>
+                  <p className="font-semibold text-ink">Aguardando a curadoria</p>
+                  <p className="text-ink-muted">Assim que a curadoria aprovar, sua obra entra no catálogo automaticamente.</p>
                 </>
               )}
             </div>
-            {status === 'APROVADO' ? (
-              <button type="button" className="btn-primary px-6 py-3" onClick={() => setConfirmPublish(true)}>
-                <Upload className="h-5 w-5" aria-hidden /> Publicar agora
-              </button>
-            ) : status === 'PUBLICADO' ? (
+            {approved ? (
               <Link to={`/reader/${work.id}`} className="btn-primary px-6 py-3">
-                Ver no catálogo
+                <Upload className="h-5 w-5" aria-hidden /> Ver no catálogo
               </Link>
             ) : rejected || status === 'RASCUNHO' ? (
               <Link to={`/works/${work.id}/edit`} className="btn-tonal px-6 py-3">
                 Corrigir e reenviar
               </Link>
             ) : (
-              <button type="button" className="btn-secondary px-6 py-3" disabled>
-                <Upload className="h-5 w-5" aria-hidden /> Publicar (aguardando aprovação)
-              </button>
+              <span className="chip bg-warn-container px-4 py-2 text-warn">Em análise pela curadoria</span>
             )}
           </section>
         </div>
@@ -343,22 +339,6 @@ export default function ReviewStatus() {
           />
         </form>
       </Modal>
-      <ConfirmDialog
-        open={confirmPublish}
-        title="Publicar obra no catálogo"
-        message={`“${work.title}” ficará disponível publicamente no catálogo Livrin.`}
-        confirmLabel="Publicar agora"
-        busy={publish.isPending}
-        onConfirm={() =>
-          publish.mutate(work.id, {
-            onSettled: () => {
-              setConfirmPublish(false);
-              void qc.invalidateQueries({ queryKey: ['me', 'review', workId] });
-            },
-          })
-        }
-        onClose={() => setConfirmPublish(false)}
-      />
     </div>
   );
 }

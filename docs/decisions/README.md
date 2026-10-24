@@ -12,3 +12,7 @@ Cada arquivo responde: o que foi escolhido, por quê, quais alternativas existia
 | [006](006-docker.md) | Docker: imagens multi-stage, Nginx como proxy, migrations no start |
 | [007](007-validacao-erros-estrutura.md) | Validação com zod, erros padronizados e organização em camadas |
 | [008](008-mudancas-em-relacao-ao-prototipo.md) | O que mudou em relação ao código recebido e por quê |
+| [009](009-tres-perfis-de-usuario.md) | Três perfis de usuário e como as contas existentes foram migradas |
+| [010](010-aprovar-e-publicar.md) | Aprovar passa a publicar; `PUBLICADO` é aposentado |
+| [011](011-doacoes-provedor-simulado.md) | Doações com provedor de pagamento simulado |
+| [012](012-manuscrito-em-docx.md) | Manuscrito em `.docx` lido no navegador, sem conversão e sem dependência nova |

@@ -1,7 +1,7 @@
 /**
- * Paleta da identidade visual do protótipo Livrin (tema escuro azul/verde).
- * As cores são variáveis CSS (ver src/styles/global.css) para que o modo
- * "Alto Contraste" (amarelo/preto) troque toda a interface de uma vez.
+ * Identidade visual da Livrin: papel creme, traço de tinta e cor de cartaz.
+ * As cores são variáveis CSS (ver src/styles/global.css) para que os três
+ * temas — Papel, Noite e Alto Contraste — troquem a interface de uma vez.
  * @type {import('tailwindcss').Config}
  */
 const token = (name) => `rgb(var(--c-${name}) / <alpha-value>)`;
@@ -33,7 +33,13 @@ export default {
         opendyslexic: ['OpenDyslexic', 'Comic Sans MS', 'sans-serif'],
       },
       borderRadius: { xl: '0.875rem', '2xl': '1.125rem' },
-      boxShadow: { card: '0 8px 30px -12px rgb(0 0 0 / 0.55)' },
+      /* Sombra dura deslocada: o recorte colado na página, não o cartão flutuante. */
+      boxShadow: {
+        card: '5px 5px 0 var(--sombra-tinta)',
+        botao: '3px 3px 0 var(--sombra-tinta)',
+        adesivo: '2px 2px 0 var(--sombra-tinta)',
+      },
+      rotate: { '1.5': '1.5deg', '-1.5': '-1.5deg' },
     },
   },
   plugins: [],

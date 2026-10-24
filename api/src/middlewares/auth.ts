@@ -14,7 +14,7 @@ export interface AuthUser {
 }
 
 declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
+  // Aumenta a tipagem do Express para que `req.user` exista em toda a aplicação.
   namespace Express {
     interface Request {
       user?: AuthUser;
@@ -87,12 +87,42 @@ export async function optionalAuth(req: Request, _res: Response, next: NextFunct
   next();
 }
 
-/** Exige papel ADMIN. Deve ser usado após `authenticate`. */
-export function requireAdmin(req: Request, _res: Response, next: NextFunction): void {
-  if (!req.user) throw unauthorized();
-  if (req.user.role !== 'ADMIN') throw forbidden('Acesso restrito à administração da Livrin.');
-  next();
+/**
+ * Hierarquia dos três perfis (seção 7 da especificação): cada um pode tudo do
+ * anterior. O escritor é um leitor que também publica; o administrador é um
+ * escritor que também faz curadoria.
+ */
+const ROLE_RANK: Record<UserRole, number> = { LEITOR: 0, ESCRITOR: 1, ADMIN: 2 };
+
+const ROLE_DENIED: Record<UserRole, string> = {
+  LEITOR: 'Você precisa estar autenticado para continuar.',
+  ESCRITOR:
+    'Sua conta é de leitor e leitores não publicam obras. ' +
+    'Ative o perfil de escritor em "Meu perfil" para enviar suas próprias obras.',
+  ADMIN: 'Acesso restrito à administração da Livrin.',
+};
+
+/** O usuário tem este papel ou um acima dele? */
+export function hasAtLeast(user: AuthUser | undefined, role: UserRole): boolean {
+  return !!user && ROLE_RANK[user.role] >= ROLE_RANK[role];
 }
+
+/**
+ * Exige um papel mínimo. Deve ser usado após `authenticate`.
+ * A verificação é sempre do papel que está no banco, nunca do que veio no token.
+ */
+export function requireRole(role: UserRole) {
+  return function roleGuard(req: Request, _res: Response, next: NextFunction): void {
+    if (!req.user) throw unauthorized();
+    if (!hasAtLeast(req.user, role)) throw forbidden(ROLE_DENIED[role]);
+    next();
+  };
+}
+
+/** Exige papel ADMIN. */
+export const requireAdmin = requireRole('ADMIN');
+/** Exige papel ESCRITOR (ou ADMIN): quem pode cadastrar e enviar obras. */
+export const requireWriter = requireRole('ESCRITOR');
 
 /** Atalho tipado para controllers que rodam após `authenticate`. */
 export function currentUser(req: Request): AuthUser {

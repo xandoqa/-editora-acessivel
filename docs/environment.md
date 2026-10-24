@@ -17,18 +17,20 @@ Nunca versione arquivos `.env` (já estão no `.gitignore`). Os valores dos exem
 | `POSTGRES_DB` | não | `livrin_db` | nome do banco | container `db` e `DATABASE_URL` da API |
 | `POSTGRES_USER` | não | `livrin_user` | usuário do banco | idem |
 | `POSTGRES_PASSWORD` | **sim** | — | senha forte | idem (o compose falha com mensagem clara se faltar) |
-| `JWT_SECRET` | **sim** | — | ≥ 32 caracteres aleatórios | API — assinatura dos tokens |
+| `JWT_SECRET` | **sim** | — | ≥ 32 caracteres aleatórios | API — assinatura dos tokens. Gerado pelos scripts de inicialização; valores de exemplo, marcadores (`troque-por…`) e segredos de baixa entropia são **recusados** |
 | `JWT_EXPIRES_IN` | não | `1d` | `15m`, `12h`, `7d` | API — validade do login |
 | `CORS_ORIGINS` | não | `http://localhost:5173` | lista separada por vírgula | API — origens aceitas (com o proxy, é a URL do site) |
 | `MAX_UPLOAD_MB` | não | `180` | inteiro | API (limite de upload) e build do front (validação no formulário) |
 | `ADMIN_NAME` | não | `Administrador Livrin` | texto | seed |
 | `ADMIN_EMAIL` | recomendada | vazio | e-mail | seed — cria o admin inicial se não existir |
-| `ADMIN_PASSWORD` | recomendada | vazio | ≥ 8 caracteres | seed |
+| `ADMIN_PASSWORD` | recomendada | vazio | ≥ 8 caracteres, com letras e números | seed — mesma política de senha do resto do sistema |
 | `SEED_DEMO_DATA` | não | `false` (`.env.example`: `true`) | `true`/`false` | seed — dados do protótipo |
-| `DEMO_USER_PASSWORD` | se `SEED_DEMO_DATA=true` | vazio | ≥ 8 caracteres | senha das contas de demonstração |
+| `DEMO_USER_PASSWORD` | se `SEED_DEMO_DATA=true` | vazio | ≥ 8 caracteres, com letras e números | senha das contas de demonstração |
+| `PAYMENT_PROVIDER` | não | `simulado` | nome do provedor registrado | doações — `simulado` não movimenta dinheiro e avisa isso na interface |
 | `WEB_PORT` | não | `5173` | porta | porta do site no host |
 | `API_PORT` | não | `3000` | porta | porta da API no host (depuração) |
 | `DB_PORT` | não | `5432` | porta | só no `docker-compose.dev.yml` |
+| `TEST_DB_PORT` | não | `5433` | porta | só no `docker-compose.test.yml` |
 
 ## API (`api/.env`, sem Docker)
 
@@ -39,7 +41,7 @@ Validadas por `api/src/config/env.ts` (a API não inicia se algo obrigatório es
 | `NODE_ENV` | não | `development` | `development`, `test` ou `production` |
 | `PORT` | não | `3000` | porta HTTP |
 | `DATABASE_URL` | **sim** | — | `postgres://usuario:senha@host:5432/banco` |
-| `JWT_SECRET` | **sim** | — | ≥ 32 caracteres |
+| `JWT_SECRET` | **sim** | — | ≥ 32 caracteres; valores de exemplo são recusados |
 | `JWT_EXPIRES_IN` | não | `1d` | validade do token |
 | `CORS_ORIGINS` | não | `http://localhost:5173` | origens permitidas |
 | `UPLOAD_DIR` | não | `./uploads` | pasta dos arquivos enviados |

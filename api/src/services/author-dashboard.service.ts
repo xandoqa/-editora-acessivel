@@ -43,9 +43,10 @@ export async function getMySummary(authorId: number) {
   return {
     drafts: by.RASCUNHO ?? 0,
     inReview: by.EM_ANALISE ?? 0,
-    readyToLaunch: by.APROVADO ?? 0,
-    published: by.PUBLICADO ?? 0,
+    /** Obras no catálogo. Aprovar já publica, então APROVADO é o estado público. */
+    published: by.APROVADO ?? 0,
     rejected: by.REJEITADO ?? 0,
+    archived: by.ARQUIVADO ?? 0,
     total: rows.reduce((acc, r) => acc + r.total, 0),
   };
 }

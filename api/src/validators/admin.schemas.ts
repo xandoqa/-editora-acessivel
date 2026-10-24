@@ -22,7 +22,7 @@ export const adminCreateUserSchema = z.object({
   name: requiredText('Nome', 2, 120),
   email: emailSchema,
   password: passwordSchema,
-  role: z.enum(userRoleEnum.enumValues).default('USER'),
+  role: z.enum(userRoleEnum.enumValues).default('LEITOR'),
   headline: optionalText(160),
   isActive: z.boolean().default(true),
 });

@@ -24,7 +24,8 @@ export default function Login() {
     try {
       const { data } = await api.post<AuthResponse>('/auth/login', { email, password });
       login(data.token, data.user);
-      navigate(from && from !== '/login' ? from : data.user.role === 'ADMIN' ? '/admin' : '/dashboard', { replace: true });
+      const destino = data.user.role === 'ADMIN' ? '/admin' : data.user.role === 'ESCRITOR' ? '/dashboard' : '/';
+      navigate(from && from !== '/login' ? from : destino, { replace: true });
     } catch (err) {
       setError(errorMessage(err, 'E-mail ou senha incorretos.'));
     } finally {

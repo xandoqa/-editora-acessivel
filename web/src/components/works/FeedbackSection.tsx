@@ -15,7 +15,7 @@ export default function FeedbackSection({ work }: { work: Work }) {
   const { user } = useAuth();
   const toast = useToast();
   const qc = useQueryClient();
-  const published = work.status === 'PUBLICADO';
+  const published = work.status === 'APROVADO';
   const { data: feedbacks = [] } = useWorkFeedbacks(work.id, published);
   const canRate = !!user && published && user.id !== work.author.id;
   const { data: mine } = useQuery({

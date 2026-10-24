@@ -1,13 +1,14 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { ChevronDown, Contrast, LayoutDashboard, LogOut, Menu, Plus, Search, ShieldCheck, UserRound, Volume2, VolumeX } from 'lucide-react';
+import { ChevronDown, Contrast, LayoutDashboard, LogOut, Menu, Moon, Plus, Search, ShieldCheck, Sun, UserRound, Volume2, VolumeX } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext';
 import { FONT_MAX, FONT_MIN, usePreferences } from '../../preferences/PreferencesContext';
+import { ROLE_LABEL } from '../../lib/labels';
 import { speak, speechSupported, stopSpeaking } from '../../lib/speech';
 import { Avatar } from '../ui';
 
 function UserMenu() {
-  const { user, isAdmin, logout } = useAuth();
+  const { user, isAdmin, isWriter, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -53,11 +54,14 @@ function UserMenu() {
           <div className="border-b border-outline/50 px-3 pb-2 pt-1">
             <p className="truncate text-sm font-semibold text-ink">{user.name}</p>
             <p className="truncate text-xs text-ink-subtle">{user.email}</p>
+            <p className="mt-1 text-xs font-semibold text-accent">{ROLE_LABEL[user.role]}</p>
           </div>
           <div className="pt-2">
-            <Link role="menuitem" to="/dashboard" className={item} onClick={() => setOpen(false)}>
-              <LayoutDashboard className="h-4 w-4" aria-hidden /> Meu painel
-            </Link>
+            {isWriter && (
+              <Link role="menuitem" to="/dashboard" className={item} onClick={() => setOpen(false)}>
+                <LayoutDashboard className="h-4 w-4" aria-hidden /> Meu painel
+              </Link>
+            )}
             <Link role="menuitem" to="/profile" className={item} onClick={() => setOpen(false)}>
               <UserRound className="h-4 w-4" aria-hidden /> Meu perfil
             </Link>
@@ -87,6 +91,7 @@ function UserMenu() {
 
 export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
   const prefs = usePreferences();
+  const { isWriter } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [params] = useSearchParams();
@@ -123,12 +128,12 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
   const tool = 'inline-flex h-10 min-w-[40px] items-center justify-center rounded-lg px-2 text-sm font-bold text-ink-muted hover:bg-surface-highest hover:text-ink disabled:opacity-40';
 
   return (
-    <header className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b border-outline/40 bg-bg/95 px-4 backdrop-blur md:px-6">
+    <header className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b-2 border-outline bg-bg/95 px-4 backdrop-blur md:px-6">
       <button type="button" className="icon-btn lg:hidden" onClick={onOpenMenu} aria-label="Abrir menu de navegação">
         <Menu className="h-6 w-6" aria-hidden />
       </button>
 
-      <form role="search" onSubmit={onSearch} className="flex min-w-0 flex-1 items-center gap-2 rounded-xl bg-surface-high px-3 md:max-w-xl">
+      <form role="search" onSubmit={onSearch} className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border-2 border-outline bg-surface px-3 md:max-w-xl">
         <Search className="h-5 w-5 shrink-0 text-ink-muted" aria-hidden />
         <label htmlFor="global-search" className="sr-only">
           Buscar obras
@@ -143,7 +148,17 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         />
       </form>
 
-      <div className="hidden items-center gap-0.5 rounded-xl bg-surface-high p-1 sm:flex" role="group" aria-label="Recursos de acessibilidade">
+      <div className="hidden items-center gap-0.5 rounded-xl border-2 border-outline bg-surface-high p-1 sm:flex" role="group" aria-label="Recursos de acessibilidade">
+        <button
+          type="button"
+          className={tool}
+          onClick={prefs.toggleTheme}
+          aria-pressed={prefs.theme === 'noite'}
+          title={prefs.theme === 'noite' ? 'Voltar ao tema Papel (claro)' : 'Mudar para o tema Noite (escuro)'}
+        >
+          {prefs.theme === 'noite' ? <Sun className="h-5 w-5" aria-hidden /> : <Moon className="h-5 w-5" aria-hidden />}
+          <span className="sr-only">{prefs.theme === 'noite' ? 'Tema Papel' : 'Tema Noite'}</span>
+        </button>
         <button type="button" className={tool} onClick={prefs.toggleHighContrast} aria-pressed={prefs.highContrast} title="Alto contraste (amarelo/preto)">
           <Contrast className="h-5 w-5" aria-hidden />
           <span className="sr-only">Alto contraste</span>
@@ -167,9 +182,11 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         </button>
       </div>
 
-      <Link to="/submit" className="btn-primary hidden md:inline-flex">
-        <Plus className="h-4 w-4" aria-hidden /> Publique sua obra
-      </Link>
+      {isWriter && (
+        <Link to="/submit" className="btn-primary hidden md:inline-flex">
+          <Plus className="h-4 w-4" aria-hidden /> Publique sua obra
+        </Link>
+      )}
       <div className="mx-1 hidden h-8 w-px bg-outline/60 md:block" aria-hidden />
       <UserMenu />
     </header>

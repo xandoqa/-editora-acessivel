@@ -11,12 +11,10 @@ import {
   FilePen,
   Globe,
   Info,
-  Keyboard,
   PersonStanding,
   Rocket,
   ShieldCheck,
   SlidersHorizontal,
-  Upload,
   Users,
   Volume2,
 } from 'lucide-react';
@@ -25,8 +23,7 @@ import { useMyDashboard } from '../hooks/queries';
 import { errorMessage } from '../lib/api';
 import { formatMonthYear, formatNumber } from '../lib/format';
 import type { MyWork } from '../types/api';
-import { useWorkActions } from '../components/works/workActions';
-import { Avatar, ConfirmDialog, Cover, EmptyState, ErrorState, LoadingState, Modal, Stars, StatusBadge } from '../components/ui';
+import { Avatar, Cover, EmptyState, ErrorState, LoadingState, Modal, Stars, StatusBadge } from '../components/ui';
 
 function StatCard({ label, icon, value, suffix, accent }: { label: string; icon: React.ReactNode; value: React.ReactNode; suffix?: React.ReactNode; accent?: boolean }) {
   return (
@@ -46,14 +43,17 @@ function StatCard({ label, icon, value, suffix, accent }: { label: string; icon:
   );
 }
 
-function workAction(work: MyWork, onPublish: (w: MyWork) => void, onStats: (w: MyWork) => void) {
+function workAction(work: MyWork, onStats: (w: MyWork) => void) {
   switch (work.status) {
-    case 'PUBLICADO':
+    case 'APROVADO':
       return (
         <>
           <button type="button" className="btn-secondary" onClick={() => onStats(work)}>
             <BarChart3 className="h-4 w-4" aria-hidden /> Estatísticas
           </button>
+          <Link to={`/reader/${work.id}`} className="btn-secondary">
+            <Eye className="h-4 w-4" aria-hidden /> Ver no catálogo
+          </Link>
           <Link to={`/works/${work.id}/edit`} className="btn-secondary">
             <SlidersHorizontal className="h-4 w-4" aria-hidden /> Gerenciar
           </Link>
@@ -77,12 +77,6 @@ function workAction(work: MyWork, onPublish: (w: MyWork) => void, onStats: (w: M
           Acompanhar análise <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
       );
-    case 'APROVADO':
-      return (
-        <button type="button" className="btn-primary" onClick={() => onPublish(work)}>
-          <Upload className="h-4 w-4" aria-hidden /> Lançar Agora
-        </button>
-      );
     default:
       return <span className="text-sm text-ink-subtle">Arquivada pela curadoria</span>;
   }
@@ -92,21 +86,14 @@ export default function Dashboard() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { data, isLoading, isError, error, refetch } = useMyDashboard();
-  const { publish } = useWorkActions();
-  const [toPublish, setToPublish] = useState<MyWork | null>(null);
   const [stats, setStats] = useState<MyWork | null>(null);
 
   if (isLoading) return <LoadingState label="Carregando seu painel..." />;
   if (isError || !data) return <ErrorState message={errorMessage(error)} onRetry={() => refetch()} />;
 
   const { summary, highlight, engagement } = data;
-  const editTarget = highlight ?? data.works.find((w) => w.status === 'PUBLICADO') ?? data.works.find((w) => ['RASCUNHO', 'REJEITADO'].includes(w.status));
+  const editTarget = highlight ?? data.works.find((w) => ['RASCUNHO', 'REJEITADO'].includes(w.status));
   const indexValue = data.accessibilityIndex.count ? data.accessibilityIndex.average.toFixed(1) : '—';
-
-  const confirmPublish = () => {
-    if (!toPublish) return;
-    publish.mutate(toPublish.id, { onSettled: () => setToPublish(null) });
-  };
 
   return (
     <div>
@@ -117,8 +104,8 @@ export default function Dashboard() {
           </p>
           <h1 className="text-4xl font-bold tracking-tight text-ink">Olá, {user?.name}</h1>
           <p className="mt-3 text-lg text-ink-muted">
-            Acompanhe o impacto social, o ciclo de homologação de acessibilidade WCAG 2.2 e a distribuição das suas histórias em quadrinhos
-            inclusivas.
+            Acompanhe o alcance das suas obras, o andamento da curadoria de acessibilidade e o uso real dos recursos assistivos
+            pelos leitores.
           </p>
         </div>
         <div className="flex flex-wrap gap-3 lg:max-w-[360px] lg:justify-end">
@@ -136,10 +123,10 @@ export default function Dashboard() {
 
       <section className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Resumo">
         <StatCard
-          label="Obras Ativas"
+          label="Obras no catálogo"
           icon={<BookOpenCheck className="h-5 w-5" />}
           value={summary.published}
-          suffix={summary.readyToLaunch > 0 && <span className="text-sm font-semibold text-accent">+{summary.readyToLaunch} em lançamento</span>}
+          suffix={summary.inReview > 0 && <span className="text-sm font-semibold text-warn">+{summary.inReview} em análise</span>}
         />
         <StatCard
           label="Leitores Totais"
@@ -156,7 +143,7 @@ export default function Dashboard() {
             <>
               <span className="text-ink-muted">/5</span>
               {data.accessibilityIndex.average >= 4.5 ? (
-                <span className="chip bg-accent-container text-accent">AAA Máximo</span>
+                <span className="chip bg-accent-container text-accent">Muito bem avaliada</span>
               ) : (
                 <span className="text-xs text-ink-muted">{data.accessibilityIndex.count} avaliações</span>
               )}
@@ -164,10 +151,10 @@ export default function Dashboard() {
           }
         />
         <StatCard
-          label="Pronta para Lançar"
+          label="Em análise"
           icon={<Rocket className="h-5 w-5" />}
-          value={summary.readyToLaunch}
-          suffix={<span className="text-sm text-ink-muted">{summary.readyToLaunch ? 'Aprovação recente' : 'Nenhuma aguardando'}</span>}
+          value={summary.inReview}
+          suffix={<span className="text-sm text-ink-muted">{summary.inReview ? 'Aguardando a curadoria' : 'Nada na fila'}</span>}
         />
       </section>
 
@@ -176,7 +163,7 @@ export default function Dashboard() {
           <div className="grid gap-8 md:grid-cols-[260px_1fr]">
             <div className="relative overflow-hidden rounded-xl bg-surface-high">
               <span className="chip absolute left-3 top-3 z-10 bg-black/75 text-accent">
-                <CheckCircle2 className="h-4 w-4" aria-hidden /> WCAG AAA Validado
+                <CheckCircle2 className="h-4 w-4" aria-hidden /> No catálogo
               </span>
               <Cover url={highlight.coverUrl} title={highlight.title} className="aspect-[3/4] w-full" />
               <p className="bg-black/80 px-3 py-2 font-mono text-xs uppercase tracking-wider text-white">
@@ -185,48 +172,48 @@ export default function Dashboard() {
             </div>
             <div>
               <p className="chip mb-4 bg-accent-container py-1.5 text-accent">
-                <span className="h-2 w-2 rounded-full bg-current" aria-hidden /> Aprovado pelo comitê editorial e revisores de acessibilidade!
+                <span className="h-2 w-2 rounded-full bg-current" aria-hidden /> Aprovada pela curadoria e publicada no catálogo
               </p>
               <h2 id="highlight-title" className="text-4xl font-bold text-ink">
                 {highlight.title}
               </h2>
               {highlight.subtitle && <p className="mt-1 text-lg text-primary">{highlight.subtitle}</p>}
               <p className="mt-4 leading-relaxed text-ink-muted">
-                Parabéns! Sua obra concluiu todas as etapas da esteira editorial: a audiodescrição quadro a quadro foi revisada, a tipografia em
-                modo ampliado/disléxico foi validada e a navegação por teclado foi aprovada pelos nossos consultores com deficiência. Sua história
-                está pronta para ser disponibilizada ao mundo.
+                A curadoria concluiu a análise e sua obra já está disponível para os leitores da Livrin
+                {highlight.publishedAt ? ` desde ${formatMonthYear(highlight.publishedAt)}` : ''}. Você ainda pode
+                atualizar subtítulo, sinopse, notas, tags e capa quando quiser.
               </p>
               <ul className="mt-5 grid gap-3 sm:grid-cols-3">
                 <li className="card-high flex items-center gap-3 p-3">
                   <Volume2 className="h-5 w-5 shrink-0 text-accent" aria-hidden />
                   <span className="text-sm">
                     <span className="block font-semibold text-ink">Audiodescrição</span>
-                    <span className="text-accent">{highlight.hasAudioDesc ? '100% Concluída' : 'Não declarada'}</span>
+                    <span className="text-ink-muted">{highlight.hasAudioDesc ? 'Declarada pela autoria' : 'Não declarada'}</span>
                   </span>
                 </li>
                 <li className="card-high flex items-center gap-3 p-3">
                   <Contrast className="h-5 w-5 shrink-0 text-accent" aria-hidden />
                   <span className="text-sm">
-                    <span className="block font-semibold text-ink">Camadas Contraste</span>
-                    <span className="text-accent">{highlight.hasAltoContraste ? '7:1 Aferido' : 'Padrão AA'}</span>
+                    <span className="block font-semibold text-ink">Alto contraste</span>
+                    <span className="text-ink-muted">{highlight.hasAltoContraste ? 'Declarado pela autoria' : 'Não declarado'}</span>
                   </span>
                 </li>
                 <li className="card-high flex items-center gap-3 p-3">
-                  <Keyboard className="h-5 w-5 shrink-0 text-accent" aria-hidden />
+                  <CheckCircle2 className="h-5 w-5 shrink-0 text-accent" aria-hidden />
                   <span className="text-sm">
-                    <span className="block font-semibold text-ink">Navegação Motora</span>
-                    <span className="text-accent">Aprovado pelo Comitê</span>
+                    <span className="block font-semibold text-ink">Checklist da curadoria</span>
+                    <span className="text-accent">{highlight.reviewProgress}% aprovado</span>
                   </span>
                 </li>
               </ul>
               <div className="mt-6 flex flex-wrap items-center gap-3">
-                <button type="button" className="btn-primary px-6 py-3" onClick={() => setToPublish(highlight)}>
-                  <Globe className="h-5 w-5" aria-hidden /> Publicar Definitivamente Agora
-                </button>
-                <Link to={`/reader/${highlight.id}`} className="btn-secondary px-6 py-3">
-                  <Eye className="h-5 w-5" aria-hidden /> Prévia no Leitor Web
+                <Link to={`/reader/${highlight.id}`} className="btn-primary px-6 py-3">
+                  <Globe className="h-5 w-5" aria-hidden /> Ver no catálogo
                 </Link>
-                <p className="text-sm text-ink-muted">Distribuição gratuita imediata no catálogo Livrin</p>
+                <Link to={`/works/${highlight.id}/edit`} className="btn-secondary px-6 py-3">
+                  <Eye className="h-5 w-5" aria-hidden /> Editar metadados
+                </Link>
+                <p className="text-sm text-ink-muted">Distribuição gratuita no catálogo Livrin</p>
               </div>
             </div>
           </div>
@@ -270,7 +257,7 @@ export default function Dashboard() {
                         {w.publishedAt ? ` · Publicado em ${formatMonthYear(w.publishedAt)}` : ''}
                       </p>
                       <p className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm">
-                        {w.status === 'PUBLICADO' && (
+                        {w.status === 'APROVADO' && (
                           <span className="flex items-center gap-1.5 text-ink">
                             <Eye className="h-4 w-4 text-ink-muted" aria-hidden /> <strong>{formatNumber(w.readsCount)}</strong> leituras
                           </span>
@@ -292,7 +279,7 @@ export default function Dashboard() {
                         </p>
                       )}
                     </div>
-                    <div className="flex flex-wrap gap-2 sm:justify-end">{workAction(w, setToPublish, setStats)}</div>
+                    <div className="flex flex-wrap gap-2 sm:justify-end">{workAction(w, setStats)}</div>
                   </li>
                 ))}
               </ul>
@@ -370,20 +357,6 @@ export default function Dashboard() {
         </aside>
       </div>
 
-      <ConfirmDialog
-        open={!!toPublish}
-        title="Publicar obra no catálogo"
-        message={
-          <>
-            <strong className="text-ink">{toPublish?.title}</strong> ficará disponível publicamente no catálogo Livrin, com o selo de acessibilidade.
-            Deseja publicar agora?
-          </>
-        }
-        confirmLabel="Publicar agora"
-        busy={publish.isPending}
-        onConfirm={confirmPublish}
-        onClose={() => setToPublish(null)}
-      />
       <Modal open={!!stats} title={`Estatísticas — ${stats?.title ?? ''}`} onClose={() => setStats(null)}>
         {stats && (
           <dl className="grid grid-cols-2 gap-3 text-sm">

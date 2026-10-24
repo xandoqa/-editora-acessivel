@@ -2,7 +2,7 @@
 
 ## Preparando o ambiente
 
-Opção A — tudo em Docker com hot reload:
+Opção A — tudo em Docker com hot reload (requer Compose **v2**: `docker compose version` precisa responder `v2.x`):
 ```bash
 cp .env.example .env
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build

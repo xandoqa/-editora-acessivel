@@ -1,8 +1,80 @@
-1) Abra o Docker Desktop e espere ficar "Engine running".
-2) De dois cliques em iniciar.bat (a 1a vez demora alguns minutos).
+EDITORA LIVRIN — COMO RODAR EM 4 PASSOS
+=======================================
+
+1) Tenha o Docker rodando.
+   Windows / macOS .. abra o Docker Desktop e espere "Engine running".
+   Linux ............ sudo systemctl start docker
+
+2) WINDOWS
+      De dois cliques em iniciar.bat
+
+   LINUX / macOS
+      Abra o terminal na pasta do projeto e rode:
+
+         cd ~/Documentos/livrin        (ou ~/Documents/livrin)
+         chmod +x iniciar.sh parar.sh
+         ./iniciar.sh
+
+      O chmod e necessario porque o .zip perde a permissao de execucao.
+      Quem clonou pelo Git pode pular essa linha.
+
+   A primeira vez demora: baixa e compila cerca de 1,5 GB, entao dez
+   minutos e normal. O arquivo .env e um segredo exclusivo da sua
+   instalacao sao criados automaticamente.
+
+   Passo a passo completo do Linux, com cada erro possivel:
+      docs/rodar-no-linux.md
+
 3) Abra http://localhost:5173
-4) Entre com:
-   E-mail: admin@livrin.local
-   Senha:  Admin12345
-Para parar: parar.bat (ou Ctrl+C na janela).
-Para trocar e-mail/senha: edite ADMIN_EMAIL e ADMIN_PASSWORD no arquivo .env e rode iniciar.bat de novo.
+
+4) Entre com uma das contas de demonstracao:
+
+   ADMINISTRADOR  admin@livrin.local      Livrin.Dev2026
+   ESCRITORA      marina@livrin.com       Demo.Livrin2026
+   LEITOR         lucas@livrin.com        Demo.Livrin2026
+
+   Sao CREDENCIAIS DE DESENVOLVIMENTO, criadas de proposito para que o
+   sistema possa ser avaliado logo apos a instalacao. Troque todas antes
+   de colocar o projeto em producao (ver docs/deployment.md).
+
+SE DER ERRO NO LINUX (os tres mais comuns)
+
+   "Permission denied" ao rodar ./iniciar.sh
+      O descompactador perdeu a permissao de execucao.
+        chmod +x iniciar.sh parar.sh
+      Ou rode assim, que funciona sem permissao:  sh iniciar.sh
+
+   "permission denied ... docker daemon socket"
+      Seu usuario nao esta no grupo docker:
+        sudo usermod -aG docker $USER
+      Saia e entre na sessao de novo. (Da para usar sudo ./iniciar.sh,
+      mas ai o .env fica pertencendo ao root.)
+
+   "port is already allocated"
+      Outra coisa usa a 5173 ou a 3000. Veja quem:
+        ss -ltnp | grep -E ':(5173|3000)'
+      Ou mude no .env: WEB_PORT=8080 e API_PORT=3001 -- e ajuste
+      CORS_ORIGINS para a mesma porta do WEB_PORT.
+
+   O script confere essas coisas sozinho e avisa o que fazer.
+
+PARA PARAR
+   Windows ......... parar.bat
+   Linux / macOS ... ./parar.sh
+   (ou Ctrl+C na janela que ficou aberta)
+
+PARA TROCAR AS SENHAS
+   Edite ADMIN_PASSWORD e DEMO_USER_PASSWORD no arquivo .env e rode de novo.
+   Para trocar a senha de um administrador que ja existe, use:
+     docker compose exec api node dist/scripts/create-admin.js \
+       --email admin@livrin.local --password "SuaNovaSenha123"
+
+SE JA RODOU UMA VERSAO ANTERIOR NESTE COMPUTADOR
+   A senha do banco mudou nesta versao. Ou mantenha a senha antiga no seu
+   .env, ou apague os dados e comece do zero:
+     docker compose down -v
+   Em seguida rode iniciar.bat / ./iniciar.sh novamente.
+
+PROBLEMAS?
+   Linux, passo a passo ..... docs/rodar-no-linux.md
+   Por sintoma .............. docs/troubleshooting.md

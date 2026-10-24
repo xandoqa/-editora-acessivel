@@ -4,7 +4,7 @@ import { createApp } from '../src/app';
 import { db } from '../src/db/client';
 import { runMigrations } from '../src/db/migrate';
 import { runSeed } from '../src/db/seed';
-import { users } from '../src/db/schema';
+import { users, type UserRole } from '../src/db/schema';
 import { hashPassword } from '../src/utils/password';
 
 export const app = createApp();
@@ -20,7 +20,7 @@ export async function resetDatabase() {
   await runSeed();
 }
 
-export async function createUser(email: string, role: 'USER' | 'ADMIN' = 'USER', password = 'Senha12345') {
+export async function createUser(email: string, role: UserRole = 'LEITOR', password = 'Senha12345') {
   const [u] = await db
     .insert(users)
     .values({ name: email.split('@')[0], email, role, passwordHash: await hashPassword(password) })

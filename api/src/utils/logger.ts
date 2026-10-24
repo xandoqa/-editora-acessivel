@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 /**
  * Logger mínimo com timestamp e nível. Mantido simples de propósito: a saída vai
  * para stdout/stderr, que o Docker já coleta (`docker compose logs api`).

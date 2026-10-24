@@ -1,0 +1,94 @@
+# Integração contínua: a cada push e pull request, o projeto precisa compilar
+# e os testes da API precisam passar contra um PostgreSQL de verdade.
+#
+# Nada aqui usa segredo do repositório: o banco é efêmero e o JWT_SECRET é
+# gerado na hora, só para a execução dos testes.
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  api:
+    name: API — tipos e testes
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: livrin_test
+          POSTGRES_USER: livrin_test
+          POSTGRES_PASSWORD: livrin_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U livrin_test -d livrin_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    defaults:
+      run:
+        working-directory: api
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: api/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Conferir tipos
+        run: npm run typecheck
+
+      - name: Compilar
+        run: npm run build
+
+      - name: Rodar os testes
+        run: npm test
+        env:
+          TEST_DATABASE_URL: postgres://livrin_test:livrin_test@localhost:5432/livrin_test
+
+  web:
+    name: Front-end — tipos e build
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: web
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Compilar (inclui a checagem de tipos)
+        run: npm run build
+
+  docker:
+    name: Docker — as imagens constroem
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Construir a imagem da API
+        run: docker build --target runtime ./api
+
+      - name: Construir a imagem do front-end
+        run: docker build --target runtime ./web

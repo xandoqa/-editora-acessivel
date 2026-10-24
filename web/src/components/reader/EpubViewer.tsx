@@ -61,7 +61,8 @@ export default function EpubViewer({ data, page, onPageCount, onPageChange, pref
       rendition.destroy();
       book.destroy();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Dependência intencionalmente só em `data`: o livro é remontado ao trocar de arquivo,
+    // não a cada mudança de preferência (isso é tratado no efeito seguinte).
   }, [data]);
 
   // Navegação externa (setas / "Pág X de Y").

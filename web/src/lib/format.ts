@@ -54,3 +54,19 @@ export function initials(name: string): string {
 }
 
 export const pad2 = (n: number) => String(n).padStart(2, '0');
+
+const brlFmt = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+
+/**
+ * Valores em dinheiro trafegam em CENTAVOS (inteiro) entre a API e a interface.
+ * Ponto flutuante não representa 0,10 exatamente, e somar centavos como número
+ * quebrado produz totais errados — por isso a conversão acontece só na exibição.
+ */
+export const formatCents = (cents: number) => brlFmt.format(cents / 100);
+
+/** "12,50" ou "12" digitado pela pessoa → 1250 centavos. */
+export function parseCents(input: string): number | null {
+  const limpo = input.replace(/\s|R\$/g, '').replace(/\./g, '').replace(',', '.');
+  if (!/^\d+(\.\d{1,2})?$/.test(limpo)) return null;
+  return Math.round(Number(limpo) * 100);
+}

@@ -1,6 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { closeDb } from '../src/db/client';
 import { PDF_BYTES, api, bearer, createUser, login, resetDatabase, workFields } from './helpers';
+import { DOCX_BYTES } from './fixtures/docx';
 
 let author: string;
 let reader: string;
@@ -14,14 +15,48 @@ function multipart(req: ReturnType<ReturnType<typeof api>['post']>, fields: Reco
 
 beforeAll(async () => {
   await resetDatabase();
-  await createUser('autora@teste.com');
-  await createUser('leitor@teste.com');
+  await createUser('autora@teste.com', 'ESCRITOR');
+  await createUser('leitor@teste.com', 'LEITOR');
   await createUser('curadoria@teste.com', 'ADMIN');
   author = await login('autora@teste.com');
   reader = await login('leitor@teste.com');
   admin = await login('curadoria@teste.com');
 });
 afterAll(closeDb);
+
+describe('Três perfis de usuário', () => {
+  it('leitor não cadastra obra; escritor cadastra', async () => {
+    const negado = await multipart(api().post('/api/works').set(bearer(reader)), { ...workFields, action: 'draft' });
+    expect(negado.status).toBe(403);
+    expect(negado.body.error.code).toBe('FORBIDDEN');
+
+    const permitido = await multipart(api().post('/api/works').set(bearer(author)), { ...workFields, action: 'draft' });
+    expect(permitido.status).toBe(201);
+  });
+
+  it('leitor ativa o perfil de escritor e passa a poder cadastrar', async () => {
+    await createUser('curiosa@teste.com', 'LEITOR');
+    const token = await login('curiosa@teste.com');
+
+    expect((await multipart(api().post('/api/works').set(bearer(token)), workFields)).status).toBe(403);
+
+    const upgrade = await api().post('/api/auth/me/writer').set(bearer(token));
+    expect(upgrade.status).toBe(200);
+    expect(upgrade.body.user.role).toBe('ESCRITOR');
+
+    // Mesmo token de antes: o papel é lido do banco a cada requisição.
+    const depois = await multipart(api().post('/api/works').set(bearer(token)), { ...workFields, action: 'draft' });
+    expect(depois.status).toBe(201);
+
+    // Ativar duas vezes não faz sentido.
+    expect((await api().post('/api/auth/me/writer').set(bearer(token))).status).toBe(409);
+  });
+
+  it('escritor não alcança a área administrativa', async () => {
+    expect((await api().get('/api/admin/stats').set(bearer(author))).status).toBe(403);
+    expect((await api().get('/api/admin/stats').set(bearer(admin))).status).toBe(200);
+  });
+});
 
 describe('Ciclo editorial completo', () => {
   it('salva rascunho sem arquivo, mas exige arquivo para enviar à análise', async () => {
@@ -66,9 +101,10 @@ describe('Ciclo editorial completo', () => {
     expect(catalog.body.data.map((w: { id: number }) => w.id)).not.toContain(workId);
   });
 
-  it('bloqueia edição pelo autor enquanto está em análise e o autor não publica sem aprovação', async () => {
+  it('bloqueia edição pelo autor enquanto está em análise', async () => {
     expect((await api().patch(`/api/works/${workId}`).set(bearer(author)).field('title', 'Novo')).status).toBe(403);
-    expect((await api().post(`/api/works/${workId}/publish`).set(bearer(author))).status).toBe(409);
+    // O autor não tem ação de publicar: a rota deixou de existir.
+    expect((await api().post(`/api/works/${workId}/publish`).set(bearer(author))).status).toBe(404);
   });
 
   it('curadoria registra nota, valida transições e aprova', async () => {
@@ -82,17 +118,14 @@ describe('Ciclo editorial completo', () => {
     const approve = await api().patch(`/api/admin/works/${workId}/status`).set(bearer(admin)).send({ status: 'APROVADO' });
     expect(approve.status).toBe(200);
     expect(approve.body.status).toBe('APROVADO');
+    // Aprovar É publicar: a data de publicação sai na mesma ação (seção 8).
+    expect(approve.body.publishedAt).toBeTruthy();
     const review = await api().get(`/api/works/${workId}/review`).set(bearer(author));
     expect(review.body.progress).toBe(100);
     expect(review.body.notes[0].content).toBe('Ótimo contraste!');
   });
 
-  it('autor publica a obra aprovada e ela entra no catálogo público', async () => {
-    const pub = await api().post(`/api/works/${workId}/publish`).set(bearer(author));
-    expect(pub.status).toBe(200);
-    expect(pub.body.status).toBe('PUBLICADO');
-    expect(pub.body.publishedAt).toBeTruthy();
-
+  it('a obra aprovada aparece no catálogo público sem nenhuma ação do autor', async () => {
     const catalog = await api().get('/api/works').query({ q: 'obra de teste' });
     expect(catalog.body.data.map((w: { id: number }) => w.id)).toContain(workId);
     expect(catalog.body.catalogTotal).toBe(1);
@@ -105,6 +138,31 @@ describe('Ciclo editorial completo', () => {
     expect((await api().patch(`/api/works/${workId}`).set(bearer(author)).field('title', 'Outro')).status).toBe(403);
     const meta = await api().patch(`/api/works/${workId}`).set(bearer(author)).field('synopsis', 'Sinopse atualizada com detalhes suficientes para validar.');
     expect(meta.status).toBe(200);
+  });
+
+  it('a obra aprovada recebe o Selo Livrin, com responsável e itens verificados', async () => {
+    // Na listagem o selo vem resumido: concedido, data e quem assinou.
+    const catalog = await api().get('/api/works').query({ q: 'obra de teste' });
+    const naLista = catalog.body.data.find((w: { id: number }) => w.id === workId);
+    expect(naLista.seal.granted).toBe(true);
+    expect(naLista.seal.grantedAt).not.toBeNull();
+    expect(naLista.seal.reviewer).toBe('curadoria');
+    // A lista de itens não trafega no catálogo inteiro, só no detalhe.
+    expect(naLista.seal.checks).toBeUndefined();
+
+    // No detalhe, o critério é público: o leitor vê no que está confiando.
+    const detalhe = await api().get(`/api/works/${workId}`);
+    expect(detalhe.body.seal.granted).toBe(true);
+    expect(detalhe.body.seal.checks).toHaveLength(4);
+    expect(detalhe.body.seal.checks.every((c: { status: string }) => c.status === 'APROVADO')).toBe(true);
+  });
+
+  it('obra fora do catálogo não tem selo', async () => {
+    const rascunho = await multipart(api().post('/api/works').set(bearer(author)), { ...workFields, title: 'Sem Selo', action: 'draft' });
+    expect(rascunho.status).toBe(201);
+    expect(rascunho.body.seal.granted).toBe(false);
+    expect(rascunho.body.seal.grantedAt).toBeNull();
+    expect(rascunho.body.seal.reviewer).toBeNull();
   });
 
   it('leitores avaliam (uma vez, atualizável); autor não avalia a própria obra', async () => {
@@ -122,7 +180,21 @@ describe('Ciclo editorial completo', () => {
   it('registra sessões de leitura que alimentam o painel do autor', async () => {
     const session = await api().post(`/api/works/${workId}/sessions`);
     expect(session.status).toBe(201);
-    const patch = await api().patch(`/api/sessions/${session.body.id}`).send({ lastPage: 2, usedAudioDesc: true });
+    expect(session.body.token).toBeTypeOf('string');
+
+    // Sem o token assinado, qualquer um inflaria as métricas das obras.
+    const semToken = await api().patch(`/api/sessions/${session.body.id}`).send({ lastPage: 2 });
+    expect(semToken.status).toBe(403);
+    const tokenErrado = await api()
+      .patch(`/api/sessions/${session.body.id}`)
+      .set('X-Session-Token', 'nao-e-o-token')
+      .send({ lastPage: 2 });
+    expect(tokenErrado.status).toBe(403);
+
+    const patch = await api()
+      .patch(`/api/sessions/${session.body.id}`)
+      .set('X-Session-Token', session.body.token)
+      .send({ lastPage: 2, usedAudioDesc: true });
     expect(patch.status).toBe(204);
     expect((await api().patch('/api/sessions/nao-e-uuid').send({ lastPage: 2 })).status).toBe(400);
 
@@ -142,7 +214,7 @@ describe('Ciclo editorial completo', () => {
     expect(created.status).toBe(201);
     const dup = await api().post(`/api/works/${workId}/audio-descriptions`).set(bearer(admin)).send({ pageNumber: 1, description: 'Duplicada' });
     expect(dup.status).toBe(409);
-    // Autor não altera audiodescrição de obra publicada (só a curadoria).
+    // Autor não altera audiodescrição de obra já no catálogo (só a curadoria).
     expect((await api().post(`/api/works/${workId}/audio-descriptions`).set(bearer(author)).send({ pageNumber: 2, description: 'x' })).status).toBe(403);
     const list = await api().get(`/api/works/${workId}/audio-descriptions`);
     expect(list.body).toHaveLength(1);
@@ -160,5 +232,26 @@ describe('Ciclo editorial completo', () => {
     expect((await api().get(`/api/works/${workId}`)).status).toBe(404);
     const stats = await api().get('/api/admin/stats').set(bearer(admin));
     expect(stats.body.works.byStatus.ARQUIVADO).toBe(1);
+  });
+});
+
+describe('Manuscrito em .docx', () => {
+  // É o formato em que quem escreve entrega o texto. Aceitá-lo é o que baixa a
+  // barreira para publicar — e, no leitor, é o formato mais acessível de todos,
+  // porque o texto reflui em vez de ser uma página fixa.
+  it('aceita o arquivo e registra o tipo DOCX', async () => {
+    const res = await multipart(api().post('/api/works').set(bearer(author)), workFields).attach('file', DOCX_BYTES, 'manuscrito.docx');
+    expect(res.status).toBe(201);
+    expect(res.body.file.type).toBe('DOCX');
+
+    const baixado = await api().get(`/api/works/${res.body.id}/file`).set(bearer(author));
+    expect(baixado.status).toBe(200);
+    expect(baixado.headers['content-type']).toContain('wordprocessingml.document');
+  });
+
+  it('recusa .docx que não é um ZIP de verdade', async () => {
+    // Renomear um .exe para .docx não deve passar: a extensão não é prova.
+    const res = await multipart(api().post('/api/works').set(bearer(author)), workFields).attach('file', Buffer.from('MZ não sou um zip'), 'falso.docx');
+    expect(res.status).toBe(400);
   });
 });

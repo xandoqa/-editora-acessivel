@@ -33,7 +33,7 @@ export default function EditWork() {
   if (work.author.id !== user?.id) return <ErrorState message="Apenas o autor pode editar esta obra." />;
 
   const fullEdit = work.status === 'RASCUNHO' || work.status === 'REJEITADO';
-  const metadataOnly = work.status === 'APROVADO' || work.status === 'PUBLICADO';
+  const metadataOnly = work.status === 'APROVADO';
   const adEditable = ['RASCUNHO', 'REJEITADO', 'EM_ANALISE'].includes(work.status);
 
   if (!fullEdit && !metadataOnly) {

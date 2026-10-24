@@ -19,25 +19,21 @@ const TRANSITIONS: Record<WorkStatus, { to: WorkStatus; label: string; tone: str
     { to: 'ARQUIVADO', label: 'Arquivar', tone: 'btn-secondary' },
   ],
   EM_ANALISE: [
-    { to: 'APROVADO', label: 'Aprovar (Etapa 3)', tone: 'btn-primary' },
+    { to: 'APROVADO', label: 'Aprovar e publicar', tone: 'btn-primary' },
     { to: 'REJEITADO', label: 'Solicitar ajustes / Rejeitar', tone: 'btn-danger' },
     { to: 'RASCUNHO', label: 'Devolver como rascunho', tone: 'btn-secondary' },
   ],
   APROVADO: [
-    { to: 'PUBLICADO', label: 'Publicar no catálogo', tone: 'btn-primary' },
-    { to: 'EM_ANALISE', label: 'Reabrir análise', tone: 'btn-secondary' },
-    { to: 'REJEITADO', label: 'Rejeitar', tone: 'btn-danger' },
-  ],
-  PUBLICADO: [
     { to: 'ARQUIVADO', label: 'Despublicar (arquivar)', tone: 'btn-danger' },
     { to: 'EM_ANALISE', label: 'Reabrir análise', tone: 'btn-secondary' },
+    { to: 'REJEITADO', label: 'Rejeitar', tone: 'btn-danger' },
   ],
   REJEITADO: [
     { to: 'EM_ANALISE', label: 'Reabrir análise', tone: 'btn-tonal' },
     { to: 'ARQUIVADO', label: 'Arquivar', tone: 'btn-secondary' },
   ],
   ARQUIVADO: [
-    { to: 'PUBLICADO', label: 'Republicar', tone: 'btn-primary' },
+    { to: 'APROVADO', label: 'Republicar no catálogo', tone: 'btn-primary' },
     { to: 'RASCUNHO', label: 'Reabrir como rascunho', tone: 'btn-secondary' },
   ],
 };
@@ -102,8 +98,8 @@ export function AdminWorkCreate() {
                 </option>
               ))}
             </SelectInput>
-            <SelectInput label="Status inicial" value={status} onChange={(e) => setStatus(e.target.value as WorkStatus)} hint="Aprovado/Publicado exigem arquivo da obra.">
-              {(['RASCUNHO', 'EM_ANALISE', 'APROVADO', 'PUBLICADO'] as WorkStatus[]).map((s) => (
+            <SelectInput label="Status inicial" value={status} onChange={(e) => setStatus(e.target.value as WorkStatus)} hint="“No catálogo” exige o arquivo da obra.">
+              {(['RASCUNHO', 'EM_ANALISE', 'APROVADO'] as WorkStatus[]).map((s) => (
                 <option key={s} value={s}>
                   {STATUS_LABEL[s]}
                 </option>
@@ -390,8 +386,12 @@ export default function AdminWorkDetail() {
         }
       >
         <div className="space-y-4 text-sm text-ink-muted">
-          {target === 'APROVADO' && <p>Todos os itens do checklist serão marcados como aprovados e o autor poderá publicar a obra.</p>}
-          {target === 'PUBLICADO' && <p>A obra passará a aparecer no catálogo público imediatamente.</p>}
+          {target === 'APROVADO' && (
+            <p>
+              Todos os itens do checklist passam a aprovados e <strong className="text-ink">a obra entra no catálogo público
+              imediatamente</strong>.
+            </p>
+          )}
           {target === 'ARQUIVADO' && <p>A obra deixará de aparecer no catálogo (pode ser republicada depois). Nada é apagado.</p>}
           {target === 'EM_ANALISE' && <p>A obra volta para a fila de curadoria; itens não aprovados do checklist voltam a “Pendente”.</p>}
           {(target === 'REJEITADO' || target === 'RASCUNHO' || target === 'ARQUIVADO') && (

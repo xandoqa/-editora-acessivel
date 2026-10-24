@@ -67,7 +67,7 @@ export async function getWork(req: Request, res: Response) {
   res.json(await adminWorks.getWorkAdmin(id(req), currentUser(req)));
 }
 export async function createWork(req: Request, res: Response) {
-  res.status(201).json(await worksService.createWorkAsAdmin(parse(adminCreateWorkSchema, req.body), filesFrom(req)));
+  res.status(201).json(await worksService.createWorkAsAdmin(parse(adminCreateWorkSchema, req.body), filesFrom(req), currentUser(req)));
 }
 export async function updateWork(req: Request, res: Response) {
   const patch = parse(updateWorkSchema.extend({ authorId: idParam.optional() }), req.body);
@@ -75,7 +75,7 @@ export async function updateWork(req: Request, res: Response) {
 }
 export async function changeStatus(req: Request, res: Response) {
   const { status, reason } = parse(adminStatusSchema, req.body);
-  res.json(await worksService.changeStatusAsAdmin(id(req), status, reason));
+  res.json(await worksService.changeStatusAsAdmin(id(req), status, reason, currentUser(req)));
 }
 export async function deleteWork(req: Request, res: Response) {
   await worksService.deleteWork(id(req), currentUser(req));

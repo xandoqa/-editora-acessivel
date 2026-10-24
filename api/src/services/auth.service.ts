@@ -4,6 +4,7 @@ import { db } from '../db/client';
 import { users, type User } from '../db/schema';
 import { signToken } from '../middlewares/auth';
 import { conflict, notFound, unauthorized, badRequest } from '../utils/http-error';
+import { logger } from '../utils/logger';
 import { DUMMY_HASH, hashPassword, verifyPassword } from '../utils/password';
 import type { changePasswordSchema, loginSchema, registerSchema, updateProfileSchema } from '../validators/auth.schemas';
 
@@ -36,10 +37,27 @@ export async function register(input: z.infer<typeof registerSchema>) {
       email: input.email,
       passwordHash: await hashPassword(input.password),
       headline: input.headline ?? null,
-      role: 'USER', // cadastro público nunca cria administradores
+      // A pessoa escolhe entre ler e publicar; ADMIN nunca vem do cadastro público.
+      role: input.role,
     })
     .returning();
   return { token: signToken(user), user: toPublicUser(user) };
+}
+
+/**
+ * Leitor passa a poder publicar as próprias obras.
+ *
+ * É a mesma escolha oferecida no cadastro, feita depois. Não dá acesso a nada
+ * da administração: ESCRITOR só acrescenta o direito de cadastrar e enviar as
+ * próprias obras. A administração pode reverter em Administração → Usuários.
+ */
+export async function enableWriterRole(userId: number): Promise<PublicUser> {
+  const [user] = await db.select().from(users).where(eq(users.id, userId));
+  if (!user) throw notFound('Usuário não encontrado.');
+  if (user.role !== 'LEITOR') throw conflict('Sua conta já pode publicar obras.');
+  const [updated] = await db.update(users).set({ role: 'ESCRITOR' }).where(eq(users.id, userId)).returning();
+  logger.info(`Perfil de escritor ativado para ${updated.email} (id ${updated.id}).`);
+  return toPublicUser(updated);
 }
 
 export async function login(input: z.infer<typeof loginSchema>) {

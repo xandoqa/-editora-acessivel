@@ -18,6 +18,7 @@ const EditWork = lazy(() => import('./pages/EditWork'));
 const ReviewList = lazy(() => import('./pages/ReviewList'));
 const ReviewStatus = lazy(() => import('./pages/ReviewStatus'));
 const Profile = lazy(() => import('./pages/Profile'));
+const Apoiar = lazy(() => import('./pages/Apoiar'));
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminWorks = lazy(() => import('./pages/admin/AdminWorks'));
@@ -26,6 +27,7 @@ const AdminWorkCreate = lazy(() => import('./pages/admin/AdminWorkDetail').then(
 const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
 const AdminGenres = lazy(() => import('./pages/admin/AdminGenres'));
 const AdminFeedbacks = lazy(() => import('./pages/admin/AdminFeedbacks'));
+const AdminDonations = lazy(() => import('./pages/admin/AdminDonations'));
 
 /** Compatibilidade com o link antigo /obras/:id. */
 function LegacyWorkRedirect() {
@@ -35,8 +37,9 @@ function LegacyWorkRedirect() {
 
 /**
  * Mapa de rotas do front-end:
- *  Públicas ......... /, /reader/:id, /leitor, /login, /register, /forgot-password
- *  Autenticadas ..... /dashboard, /submit, /works/:id/edit, /review, /review/:id, /profile
+ *  Públicas ......... /, /reader/:id, /leitor, /apoiar, /login, /register, /forgot-password
+ *  Autenticadas ..... /profile
+ *  Escritor ......... /dashboard, /submit, /works/:id/edit, /review, /review/:id
  *  Administrativas .. /admin/* (RequireAuth role=ADMIN; a API também exige ADMIN)
  */
 export default function App() {
@@ -53,13 +56,19 @@ export default function App() {
             <Route path="/reader/:id" element={<Reader />} />
             <Route path="/obras/:id" element={<LegacyWorkRedirect />} />
             <Route path="/leitor" element={<ReaderHome />} />
+            {/* Apoio voluntário: aberto a visitantes, inclusive sem conta (seção 17). */}
+            <Route path="/apoiar" element={<Apoiar />} />
+            {/* Qualquer conta autenticada */}
             <Route element={<RequireAuth />}>
+              <Route path="/profile" element={<Profile />} />
+            </Route>
+            {/* Área do escritor: leitor é redirecionado para "Meu perfil" */}
+            <Route element={<RequireAuth role="ESCRITOR" />}>
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/submit" element={<SubmitWork />} />
               <Route path="/works/:id/edit" element={<EditWork />} />
               <Route path="/review" element={<ReviewList />} />
               <Route path="/review/:id" element={<ReviewStatus />} />
-              <Route path="/profile" element={<Profile />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Route>
@@ -73,6 +82,7 @@ export default function App() {
               <Route path="users" element={<AdminUsers />} />
               <Route path="genres" element={<AdminGenres />} />
               <Route path="feedbacks" element={<AdminFeedbacks />} />
+              <Route path="donations" element={<AdminDonations />} />
             </Route>
           </Route>
         </Routes>

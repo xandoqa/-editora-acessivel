@@ -11,7 +11,8 @@ export default function ReviewList() {
   if (isLoading) return <LoadingState />;
   if (isError || !data) return <ErrorState message={errorMessage(error)} onRetry={() => refetch()} />;
 
-  const inFlow = data.filter((w) => ['EM_ANALISE', 'APROVADO', 'REJEITADO'].includes(w.status));
+  // Obras ainda no fluxo: aprovadas já estão no catálogo e saem desta lista.
+  const inFlow = data.filter((w) => ['EM_ANALISE', 'REJEITADO'].includes(w.status));
   const inReview = inFlow.filter((w) => w.status === 'EM_ANALISE');
   if (inFlow.length === 1 && inReview.length === 1) return <Navigate to={`/review/${inReview[0].id}`} replace />;
 

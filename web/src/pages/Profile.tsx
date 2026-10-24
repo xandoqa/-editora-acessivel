@@ -1,20 +1,41 @@
 import { useState, type FormEvent } from 'react';
-import { UserRound } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Loader2, SquarePen, UserRound } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { api, errorMessage, fieldErrors } from '../lib/api';
+import { ROLE_DESCRIPTION, ROLE_LABEL } from '../lib/labels';
 import type { User } from '../types/api';
-import { PageHeader, TextInput } from '../components/ui';
+import { Badge, PageHeader, TextInput } from '../components/ui';
 import { useToast } from '../components/ui/Toast';
 
 /** Perfil do usuário: nome, apresentação e troca de senha. */
 export default function Profile() {
   const { user, updateUser } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const toast = useToast();
   const [name, setName] = useState(user?.name ?? '');
   const [headline, setHeadline] = useState(user?.headline ?? '');
   const [pwd, setPwd] = useState({ currentPassword: '', newPassword: '', confirm: '' });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [busy, setBusy] = useState<'profile' | 'password' | null>(null);
+  const [busy, setBusy] = useState<'profile' | 'password' | 'role' | null>(null);
+
+  // Quem chegou aqui tentando abrir uma página de escritor.
+  const redirecionado = (location.state as { deniedRole?: string } | null)?.deniedRole === 'ESCRITOR';
+
+  const enableWriter = async () => {
+    setBusy('role');
+    try {
+      const { data } = await api.post<{ user: User }>('/auth/me/writer');
+      updateUser(data.user);
+      toast.success('Perfil de escritor ativado. Agora você pode publicar suas obras.');
+      navigate('/submit');
+    } catch (err) {
+      toast.error(errorMessage(err));
+    } finally {
+      setBusy(null);
+    }
+  };
 
   const saveProfile = async (e: FormEvent) => {
     e.preventDefault();
@@ -56,6 +77,33 @@ export default function Profile() {
     <div className="mx-auto max-w-3xl">
       <PageHeader eyebrow="Minha conta" icon={<UserRound className="h-4 w-4" aria-hidden />} title="Meu perfil" description={user?.email} />
       <div className="space-y-6">
+        <section className="card p-6" aria-labelledby="perfil-title">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <h2 id="perfil-title" className="text-xl font-semibold text-ink">
+              Seu perfil na plataforma
+            </h2>
+            {user && <Badge tone={user.role === 'ADMIN' ? 'admin' : 'accent'}>{ROLE_LABEL[user.role]}</Badge>}
+          </div>
+          {user && <p className="mt-2 text-sm text-ink-muted">{ROLE_DESCRIPTION[user.role]}</p>}
+
+          {user?.role === 'LEITOR' && (
+            <div className="mt-5 rounded-xl border border-primary/40 bg-primary-container/40 p-4">
+              {redirecionado && (
+                <p className="mb-2 text-sm font-semibold text-ink">
+                  Essa página é da área de escritor. Ative o perfil abaixo para entrar nela.
+                </p>
+              )}
+              <p className="text-sm text-ink">
+                Quer publicar suas próprias obras? Ative o perfil de escritor. Você continua lendo e avaliando
+                normalmente; só ganha a possibilidade de cadastrar e enviar obras para a curadoria.
+              </p>
+              <button type="button" className="btn-primary mt-4" onClick={enableWriter} disabled={busy === 'role'}>
+                {busy === 'role' ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> : <SquarePen className="h-5 w-5" aria-hidden />}
+                Ativar perfil de escritor
+              </button>
+            </div>
+          )}
+        </section>
         <form onSubmit={saveProfile} className="card space-y-5 p-6">
           <h2 className="text-xl font-semibold text-ink">Dados públicos</h2>
           <TextInput label="Nome" required value={name} onChange={(e) => setName(e.target.value)} error={errors.name} maxLength={120} />

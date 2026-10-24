@@ -1,5 +1,7 @@
 # 005 — Leitor no navegador e audiodescrição
 
+> A 3.0.0 acrescentou um quarto formato, o `.docx`, com leitor próprio e sem dependência nova: ver [012](012-manuscrito-em-docx.md).
+
 **Decisão.** Renderizar no navegador: **pdf.js** (canvas + extração da camada de texto), **epub.js** (iframe sem scripts, com temas para cor, fonte, espaçamento e tamanho) e **JSZip** para CBZ. A audiodescrição é estruturada no banco por página (descrição + falas) e narrada por: (a) faixa de áudio enviada pelo autor, quando existe; ou (b) **Web Speech API** (voz sintetizada do navegador), sincronizando a troca de páginas.
 
 **Alternativas.** Converter no servidor (PDF → imagens/HTML) — mais pesado, exige bibliotecas nativas e fila de processamento; TTS em nuvem (Polly, Azure, Google) — qualidade maior, mas exige chave paga e envio de conteúdo a terceiros.

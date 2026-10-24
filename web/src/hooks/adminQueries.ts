@@ -1,6 +1,17 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { api } from '../lib/api';
-import type { AdminStats, AdminUser, AdminUserDetail, AdminWorkDetail, Feedback, Genre, Paginated, Work } from '../types/api';
+import type {
+  AdminDonation,
+  AdminDonationStats,
+  AdminStats,
+  AdminUser,
+  AdminUserDetail,
+  AdminWorkDetail,
+  Feedback,
+  Genre,
+  Paginated,
+  Work,
+} from '../types/api';
 
 /** Consultas da área administrativa (todas exigem ADMIN na API). */
 
@@ -46,4 +57,17 @@ export const useAdminFeedbacks = (params: Params) =>
     queryKey: ['admin', 'feedbacks', params],
     queryFn: async () => (await api.get<Paginated<Feedback>>('/admin/feedbacks', { params: clean(params) })).data,
     placeholderData: keepPreviousData,
+  });
+
+export const useAdminDonations = (params: Params) =>
+  useQuery({
+    queryKey: ['admin', 'donations', params],
+    queryFn: async () => (await api.get<Paginated<AdminDonation>>('/admin/donations', { params: clean(params) })).data,
+    placeholderData: keepPreviousData,
+  });
+
+export const useAdminDonationStats = () =>
+  useQuery({
+    queryKey: ['admin', 'donation-stats'],
+    queryFn: async () => (await api.get<AdminDonationStats>('/admin/donations/stats')).data,
   });

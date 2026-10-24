@@ -3,7 +3,13 @@ import { api, errorMessage } from '../../lib/api';
 import type { Work } from '../../types/api';
 import { useToast } from '../ui/Toast';
 
-/** Ações do autor sobre a obra (publicar, enviar para análise, excluir) com atualização dos painéis. */
+/**
+ * Ações do autor sobre a obra (enviar para análise, excluir) com atualização
+ * dos painéis.
+ *
+ * Não há mais ação de publicar: a aprovação da curadoria já coloca a obra no
+ * catálogo (seção 8 da especificação).
+ */
 export function useWorkActions() {
   const qc = useQueryClient();
   const toast = useToast();
@@ -12,15 +18,6 @@ export function useWorkActions() {
     void qc.invalidateQueries({ queryKey: ['catalog'] });
     if (id) void qc.invalidateQueries({ queryKey: ['work', id] });
   };
-
-  const publish = useMutation({
-    mutationFn: async (id: number) => (await api.post<Work>(`/works/${id}/publish`)).data,
-    onSuccess: (w) => {
-      toast.success(`“${w.title}” foi publicada e já está no catálogo Livrin!`);
-      refresh(w.id);
-    },
-    onError: (e) => toast.error(errorMessage(e)),
-  });
 
   const submit = useMutation({
     mutationFn: async (id: number) => (await api.post<Work>(`/works/${id}/submit`)).data,
@@ -40,5 +37,5 @@ export function useWorkActions() {
     onError: (e) => toast.error(errorMessage(e)),
   });
 
-  return { publish, submit, remove };
+  return { submit, remove };
 }

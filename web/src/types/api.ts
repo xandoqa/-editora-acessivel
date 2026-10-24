@@ -1,9 +1,14 @@
 /** Tipos das respostas da API (espelham os DTOs de api/src/services). */
 
-export type Role = 'USER' | 'ADMIN';
-export type WorkStatus = 'RASCUNHO' | 'EM_ANALISE' | 'APROVADO' | 'PUBLICADO' | 'REJEITADO' | 'ARQUIVADO';
+/**
+ * Três perfis (seção 7 da especificação), em ordem de permissão crescente:
+ * LEITOR lê e avalia; ESCRITOR também publica; ADMIN também faz curadoria.
+ */
+export type Role = 'LEITOR' | 'ESCRITOR' | 'ADMIN';
+/** APROVADO é o estado visível no catálogo: aprovar já publica (seção 8). */
+export type WorkStatus = 'RASCUNHO' | 'EM_ANALISE' | 'APROVADO' | 'REJEITADO' | 'ARQUIVADO';
 export type WorkFormat = 'QUADRINHO' | 'LIVRO' | 'MANGA_WEBCOMIC' | 'ZINE';
-export type FileType = 'PDF' | 'EPUB' | 'CBZ' | 'CBR';
+export type FileType = 'PDF' | 'DOCX' | 'EPUB' | 'CBZ' | 'CBR';
 export type CheckStatus = 'PENDENTE' | 'EM_ANDAMENTO' | 'APROVADO' | 'REPROVADO';
 
 export interface User {
@@ -61,6 +66,16 @@ export interface Work extends Record<FeatureFlag, boolean> {
   genre: { id: number; name: string };
   rating: { average: number; count: number };
   readsCount: number;
+  /**
+   * Selo de Qualidade Livrin: o resumo do que a curadoria verificou.
+   * `checks` só vem no detalhe da obra (GET /works/:id), não na listagem.
+   */
+  seal: {
+    granted: boolean;
+    grantedAt: string | null;
+    reviewer: string | null;
+    checks?: ReviewCheck[];
+  };
 }
 
 export interface MyWork extends Work {
@@ -132,8 +147,9 @@ export interface Feedback {
 export interface MySummary {
   drafts: number;
   inReview: number;
-  readyToLaunch: number;
+  /** Obras no catálogo (status APROVADO). */
   published: number;
+  archived: number;
   rejected: number;
   total: number;
 }
@@ -184,4 +200,61 @@ export interface AdminWorkDetail extends Work {
 
 export interface ApiErrorBody {
   error: { code: string; message: string; details?: { field: string; message: string }[] | unknown };
+}
+
+/* --------------------------------- Apoio --------------------------------- */
+
+export type PaymentMethod = 'PIX' | 'CARTAO' | 'BOLETO';
+export type DonationStatus = 'PENDENTE' | 'CONFIRMADA' | 'FALHOU' | 'CANCELADA';
+
+/** O que a API informa antes de montar o formulário de apoio. */
+export interface DonationOptions {
+  provider: string;
+  label: string;
+  /** false quando nenhum dinheiro de verdade é movimentado. */
+  isReal: boolean;
+  methods: PaymentMethod[];
+  minCents: number;
+  maxCents: number;
+  currency: string;
+}
+
+export interface Donation {
+  id: number;
+  amountCents: number;
+  currency: string;
+  method: PaymentMethod;
+  status: DonationStatus;
+  provider: string;
+  donorName: string | null;
+  message: string | null;
+  workId: number | null;
+  createdAt: string;
+  confirmedAt: string | null;
+}
+
+/** Resposta de `POST /donations`: o registro e o que fazer em seguida. */
+export interface DonationCheckout {
+  donation: Donation;
+  checkout: {
+    checkoutUrl?: string;
+    code?: string;
+    instruction?: string;
+    isReal: boolean;
+  };
+}
+
+/** Linha da listagem administrativa: inclui quem apoiou e a obra, quando houver. */
+export interface AdminDonation extends Omit<Donation, 'workId'> {
+  user: { id: number; name: string; email: string } | null;
+  work: { id: number; title: string } | null;
+}
+
+export interface AdminDonationStats {
+  total: number;
+  confirmadas: number;
+  centavosConfirmados: number;
+  apoiadores: number;
+  provider: string;
+  isReal: boolean;
 }

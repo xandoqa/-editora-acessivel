@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Plus } from 'lucide-react';
-import { useAdminWorks } from '../../hooks/adminQueries';
-import { useGenres } from '../../hooks/queries';
+import { useAdminGenres, useAdminWorks } from '../../hooks/adminQueries';
 import { useDebounced } from '../../hooks/useDebounced';
 import { errorMessage } from '../../lib/api';
 import { formatDate } from '../../lib/format';
@@ -21,7 +20,8 @@ export default function AdminWorks() {
   const sort = params.get('sort') ?? 'updatedAt';
   const order = (params.get('order') as 'asc' | 'desc') ?? 'desc';
   const page = Number(params.get('page')) || 1;
-  const { data: genres = [] } = useGenres();
+  // A administração precisa ver também os gêneros desativados, que a rota pública omite.
+  const { data: genres = [] } = useAdminGenres();
   const { data, isLoading, isError, error, refetch, isFetching } = useAdminWorks({ q: debouncedQ, status, genreId, sort, order, page, pageSize: 20 });
 
   const update = (changes: Record<string, string>) => {
@@ -59,6 +59,7 @@ export default function AdminWorks() {
           {genres.map((g) => (
             <option key={g.id} value={g.id}>
               {g.name}
+              {g.isActive ? '' : ' (desativado)'}
             </option>
           ))}
         </select>

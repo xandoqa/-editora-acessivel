@@ -43,6 +43,8 @@ const AudioDescriptionPlayer = forwardRef<PlayerHandle, Props>(function AudioDes
   const audioRef = useRef<HTMLAudioElement>(null);
   const [audioUrl, setAudioUrl] = useState('');
   const [audioError, setAudioError] = useState('');
+  /** Pedido de reprodução feito antes de a faixa terminar de baixar. */
+  const playWhenReady = useRef(false);
   const [playing, setPlaying] = useState(false);
   const [time, setTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -120,7 +122,10 @@ const AudioDescriptionPlayer = forwardRef<PlayerHandle, Props>(function AudioDes
   const play = useCallback(() => {
     onUse();
     if (mode === 'audio') {
-      void audioRef.current?.play();
+      if (audioRef.current) void audioRef.current.play();
+      // A faixa ainda está baixando: toca sozinha assim que estiver pronta,
+      // em vez de o clique simplesmente não fazer nada.
+      else playWhenReady.current = true;
       return;
     }
     if (!items.length || !speechSupported) return;
@@ -194,6 +199,10 @@ const AudioDescriptionPlayer = forwardRef<PlayerHandle, Props>(function AudioDes
         {unavailable ? (
           <p className="text-sm text-ink-muted" role="status">
             {unavailable}
+          </p>
+        ) : mode === 'audio' && !audioUrl ? (
+          <p className="text-sm text-ink-muted" role="status">
+            Carregando a faixa de audiodescrição...
           </p>
         ) : (
           <>
@@ -277,6 +286,11 @@ const AudioDescriptionPlayer = forwardRef<PlayerHandle, Props>(function AudioDes
           ref={audioRef}
           src={audioUrl}
           preload="metadata"
+          onCanPlay={(e) => {
+            if (!playWhenReady.current) return;
+            playWhenReady.current = false;
+            void e.currentTarget.play();
+          }}
           onPlay={() => setPlaying(true)}
           onPause={() => setPlaying(false)}
           onEnded={() => setPlaying(false)}

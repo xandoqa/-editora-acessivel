@@ -18,7 +18,7 @@ FROM deps AS dev
 ENV NODE_ENV=development
 COPY . .
 EXPOSE 3000
-CMD ["sh", "-c", "npm run db:migrate && npm run db:seed && npm run dev"]
+CMD ["sh", "-c", "npm run db:migrate && npm run db:seed && npm run db:verify && npm run dev"]
 
 # Compilação TypeScript → JavaScript
 FROM deps AS build
@@ -39,5 +39,6 @@ USER node
 EXPOSE 3000
 HEALTHCHECK --interval=10s --timeout=5s --start-period=30s --retries=5 \
   CMD wget -qO- http://127.0.0.1:3000/health || exit 1
-# Aplica migrations, executa o seed idempotente e inicia o servidor
+# Aplica migrations, executa o seed idempotente, confere a integridade dos
+# arquivos do volume de uploads e só então inicia o servidor
 CMD ["npm", "run", "start:prod"]

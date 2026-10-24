@@ -38,7 +38,7 @@ export const rowClass = 'border-b border-outline/30 last:border-0 hover:bg-surfa
 
 export function SearchBox({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
   return (
-    <div className="flex min-w-[240px] flex-1 items-center gap-2 rounded-xl border-2 border-outline bg-surface px-3">
+    <div className="flex min-w-[240px] flex-1 items-center gap-2 rounded-xl border border-outline bg-surface px-3">
       <Search className="h-4 w-4 text-ink-muted" aria-hidden />
       <input
         type="search"

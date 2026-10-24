@@ -2,6 +2,41 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.1.0] — 2026-10-24
+
+Rodada de ajustes a partir do uso real: dois defeitos que impediam ler uma obra
+enviada, e uma revisão visual pedida depois de ver o sistema no ar.
+
+### Corrigido
+
+- **O leitor dizia "Não foi possível abrir este PDF" para qualquer falha.** A
+  mesma frase cobria arquivo sumido do volume, PDF com senha, arquivo
+  corrompido e API fora do ar — quatro problemas com soluções diferentes e
+  nenhuma pista de qual era. Agora cada caso tem sua mensagem e, quando a
+  falha é de HTTP, o leitor busca a explicação que a própria API devolveu.
+- **A API servia um arquivo sem conferir se ele existia.** O registro no banco
+  e os bytes no volume têm ciclos de vida independentes: trocar entre o
+  `docker-compose.yml` e o de desenvolvimento troca o volume de uploads e
+  mantém o banco, e o registro passa a apontar para o nada. O `sendFile`
+  falhava com um erro que não dizia nada. Agora a resposta nomeia o problema e
+  diz o que fazer. Vale também para a faixa de audiodescrição.
+
+### Alterado
+
+- **Peso visual.** Todo card tinha traço de 2px e sombra dura de 5px; com tudo
+  em destaque, nada ficava em destaque. O traço caiu para 1px **mantendo a mesma
+  cor** — o contraste do critério 1.4.11 é idêntico —, a sombra dura saiu dos
+  cards e ficou para o botão principal e o Selo, os raios de canto diminuíram e
+  o grão do papel ficou mais discreto. A paleta clareou e dessaturou.
+- **Tipografia mais calma:** títulos de peso 800 para 700, entrelinha de corpo
+  mais generosa, parágrafos limitados a 72 caracteres e micro-rótulos em
+  versalete mais largo.
+- **Capas de demonstração refeitas.** As anteriores eram imagens geradas por IA.
+  No lugar entraram composições geométricas originais — cor chapada, uma forma,
+  um filete —, sem texto, porque o card já escreve título e autoria por cima.
+  São 10 a 60 vezes mais leves e o gerador (`ferramentas/gerar-capas.py`) fica
+  no repositório como prova de autoria.
+
 ## [3.0.0] — 2026-10-22
 
 Auditoria completa do projeto e correção dos problemas encontrados, na ordem de

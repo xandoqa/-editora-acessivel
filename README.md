@@ -422,3 +422,11 @@ Lista completa em [docs/troubleshooting.md](docs/troubleshooting.md).
 ## Licença e conteúdo de demonstração
 
 Projeto acadêmico. As obras de demonstração são **conteúdo original criado para este projeto** ou de **domínio público** (caso de *Rimas*, de Bécquer). Nenhum PDF ou material protegido por direitos autorais foi incorporado.
+
+As **capas** são composições geométricas originais, geradas por `ferramentas/gerar-capas.py` — campo de cor chapada, uma forma grande e um filete, no mesmo vocabulário editorial da interface. Não há texto nelas de propósito: o card do catálogo já escreve título e autoria por cima. O script fica no repositório como prova de autoria e para que novas capas sejam feitas no mesmo estilo:
+
+```bash
+python3 ferramentas/gerar-capas.py api/seed-assets/covers
+```
+
+Requer apenas Pillow (`pip install pillow`).

@@ -177,7 +177,7 @@ export function Modal({ open, title, onClose, children, footer, wide }: ModalPro
         e.preventDefault();
         onClose();
       }}
-      className="m-auto border-2 border-outline bg-surface p-0 text-ink shadow-card backdrop:bg-black/70"
+      className="m-auto border border-outline bg-surface p-0 text-ink shadow-card backdrop:bg-black/70"
       style={{ width: `min(94vw, ${wide ? 760 : 520}px)` }}
     >
       {open && (

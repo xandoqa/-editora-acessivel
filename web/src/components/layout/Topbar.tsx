@@ -133,7 +133,7 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         <Menu className="h-6 w-6" aria-hidden />
       </button>
 
-      <form role="search" onSubmit={onSearch} className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border-2 border-outline bg-surface px-3 md:max-w-xl">
+      <form role="search" onSubmit={onSearch} className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-outline bg-surface px-3 md:max-w-xl">
         <Search className="h-5 w-5 shrink-0 text-ink-muted" aria-hidden />
         <label htmlFor="global-search" className="sr-only">
           Buscar obras
@@ -148,7 +148,7 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         />
       </form>
 
-      <div className="hidden items-center gap-0.5 rounded-xl border-2 border-outline bg-surface-high p-1 sm:flex" role="group" aria-label="Recursos de acessibilidade">
+      <div className="hidden items-center gap-0.5 rounded-xl border border-outline bg-surface-high p-1 sm:flex" role="group" aria-label="Recursos de acessibilidade">
         <button
           type="button"
           className={tool}

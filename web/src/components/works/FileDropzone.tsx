@@ -80,7 +80,7 @@ export default function FileDropzone({
         }}
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
-        className={`rounded-2xl border-2 border-dashed text-center transition-colors ${compact ? 'p-5' : 'p-8 md:p-10'} ${
+        className={`rounded-2xl border border-dashed text-center transition-colors ${compact ? 'p-5' : 'p-8 md:p-10'} ${
           dragging ? 'border-primary bg-primary-container/30' : shownError ? 'border-danger' : 'border-outline-strong/60'
         } ${disabled ? 'opacity-50' : ''}`}
       >

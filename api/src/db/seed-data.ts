@@ -305,9 +305,10 @@ export const DEMO_WORKS: DemoWork[] = [
     ageRating: 'L',
     synopsis:
       'Crônicas curtas sobre uma rua, uma janela e as coisas miúdas que sustentam o dia. Escritas em frases curtas, para serem lidas em voz alta por quem está aprendendo a ler ou por quem lê para outra pessoa.',
-    authorNotes: 'Mandei o manuscrito em Word mesmo, que é como eu escrevo. A capa ainda está sendo feita.',
+    authorNotes: 'Mandei o manuscrito em Word mesmo, que é como eu escrevo.',
     tags: ['LeituraFacil', 'Cronicas', 'VozAlta'],
     flags: { hasFacilLeitura: true, hasLeitorTela: true },
+    cover: 'o-alfabeto-das-coisas-pequenas.webp',
     file: 'o-alfabeto-das-coisas-pequenas.docx',
     submittedDaysAgo: 1,
   },

@@ -249,6 +249,15 @@ describe('Manuscrito em .docx', () => {
     expect(baixado.headers['content-type']).toContain('wordprocessingml.document');
   });
 
+  it('recusa PDF truncado, antes de a obra entrar no catálogo', async () => {
+    // A assinatura "%PDF-" continua no começo de um arquivo cortado no meio do
+    // envio: sem conferir o fim, ele só falharia lá na frente, no leitor.
+    const cortado = PDF_BYTES.subarray(0, PDF_BYTES.length - 8);
+    const res = await multipart(api().post('/api/works').set(bearer(author)), workFields).attach('file', cortado, 'cortado.pdf');
+    expect(res.status).toBe(400);
+    expect(res.body.error.message).toMatch(/incompleto/i);
+  });
+
   it('recusa .docx que não é um ZIP de verdade', async () => {
     // Renomear um .exe para .docx não deve passar: a extensão não é prova.
     const res = await multipart(api().post('/api/works').set(bearer(author)), workFields).attach('file', Buffer.from('MZ não sou um zip'), 'falso.docx');

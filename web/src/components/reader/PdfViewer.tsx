@@ -47,7 +47,20 @@ async function mensagemDeErro(err: unknown, url: string, authorization?: string)
     return 'O arquivo desta obra não foi encontrado no servidor. Reenvie a obra pela interface.';
   }
 
-  return 'Não foi possível abrir este PDF.';
+  // Resto: PDFs que existem, chegam inteiros e ainda assim o pdf.js recusa —
+  // xref quebrado, estrutura de um gerador exótico, cifra que o navegador não
+  // abre. Não dá para prever a lista, e esconder o motivo atrás de uma frase
+  // genérica é pior do que mostrá-lo: sem o nome da exceção ninguém, nem quem
+  // usa nem quem mantém, tem por onde começar.
+  const detalhe = [(err as { name?: string })?.name, (err as { message?: string })?.message]
+    .filter(Boolean)
+    .join(': ');
+  return (
+    'Este PDF existe no servidor e chegou inteiro, mas o leitor do navegador não conseguiu interpretá-lo. ' +
+    'Costuma ser um arquivo gerado por um programa que escreve a estrutura fora do padrão, ou protegido por cifra. ' +
+    'Use o botão de baixar para ler em um leitor de PDF do computador.' +
+    (detalhe ? `\n\nDetalhe técnico: ${detalhe}` : '')
+  );
 }
 
 /**
@@ -72,27 +85,55 @@ export default function PdfViewer({ url, authorization, page, onPageCount, prefs
   const [width, setWidth] = useState(0);
 
   useEffect(() => {
-    const task = pdfjsLib.getDocument({
-      url,
-      httpHeaders: authorization ? { Authorization: authorization } : undefined,
-      isEvalSupported: false,
-      // Pedaços de 256 KB: o servidor responde Range (Express `sendFile`).
-      rangeChunkSize: 256 * 1024,
-    });
-    let active = true;
-    task.promise
-      .then((d) => {
-        if (!active) return;
+    let ativo = true;
+    let tarefa: ReturnType<typeof pdfjsLib.getDocument> | null = null;
+
+    const abrir = (semPedacos: boolean) => {
+      tarefa = pdfjsLib.getDocument({
+        url,
+        httpHeaders: authorization ? { Authorization: authorization } : undefined,
+        isEvalSupported: false,
+        // Pedaços de 256 KB: o servidor responde Range (Express `sendFile`).
+        rangeChunkSize: 256 * 1024,
+        disableRange: semPedacos,
+        disableStream: semPedacos,
+      });
+      return tarefa.promise;
+    };
+
+    void (async () => {
+      try {
+        const d = await abrir(false);
+        if (!ativo) return;
         setDoc(d);
         onPageCount(d.numPages);
-      })
-      .catch(async (err: unknown) => {
-        const texto = await mensagemDeErro(err, url, authorization);
-        if (active) setError(texto);
-      });
+      } catch (primeiroErro) {
+        if (!ativo) return;
+        /*
+         * Segunda tentativa, baixando o arquivo inteiro.
+         *
+         * Boa parte dos "não abre" não é do arquivo, é do transporte: um proxy
+         * que não repassa requisições Range, uma resposta sem `Content-Range`,
+         * um intermediário que recomprime. Nesses casos o pdf.js falha na
+         * leitura por pedaços e funciona perfeitamente com o arquivo completo.
+         * Custa uma espera maior, e só acontece quando a primeira via falhou —
+         * é melhor do que desistir e mandar a pessoa embora.
+         */
+        try {
+          const d = await abrir(true);
+          if (!ativo) return;
+          setDoc(d);
+          onPageCount(d.numPages);
+        } catch (segundoErro) {
+          const texto = await mensagemDeErro(segundoErro, url, authorization);
+          if (ativo) setError(texto);
+        }
+      }
+    })();
+
     return () => {
-      active = false;
-      void task.destroy();
+      ativo = false;
+      void tarefa?.destroy();
     };
   }, [url, authorization, onPageCount]);
 
@@ -142,7 +183,13 @@ export default function PdfViewer({ url, authorization, page, onPageCount, prefs
     };
   }, [doc, page, width, prefs.scale]);
 
-  if (error) return <p className="p-6 text-center text-danger">{error}</p>;
+  if (error) {
+    return (
+      <div className="mx-auto max-w-prose p-6 text-center" role="alert">
+        <p className="whitespace-pre-line text-sm text-danger">{error}</p>
+      </div>
+    );
+  }
   const palette = PALETTES[prefs.palette];
   return (
     <div>

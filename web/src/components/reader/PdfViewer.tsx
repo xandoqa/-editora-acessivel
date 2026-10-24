@@ -55,9 +55,10 @@ async function mensagemDeErro(err: unknown, url: string, authorization?: string)
   // usa nem quem mantém, tem por onde começar.
   const detalhe = detalheTecnico(err);
   return (
-    'Este PDF existe no servidor e chegou inteiro, mas o leitor do navegador não conseguiu interpretá-lo. ' +
-    'Costuma ser um arquivo gerado por um programa que escreve a estrutura fora do padrão, ou protegido por cifra. ' +
-    'Use o botão de baixar para ler em um leitor de PDF do computador.' +
+    'Este PDF existe no servidor e chegou inteiro, mas nenhum leitor do navegador conseguiu interpretá-lo. ' +
+    'No Firefox, vale tentar no Chrome: ele usa outro motor, mais tolerante com arquivos fora do padrão. ' +
+    'Se o arquivo foi enviado antes desta versão, reenviá-lo também costuma resolver, porque agora os PDFs são ' +
+    'normalizados no envio. Em último caso, use o botão de baixar para ler no computador.' +
     (detalhe ? `\n\nDetalhe técnico: ${detalhe}` : '')
   );
 }
@@ -222,7 +223,9 @@ export default function PdfViewer({ url, authorization, page, onPageCount, prefs
         <p className="rounded-xl border border-outline bg-surface-high px-4 py-3 text-sm text-ink-muted" role="status">
           Este PDF não abriu no leitor acessível do Livrin, então está sendo exibido pelo leitor do seu navegador. A
           navegação por páginas do Livrin e o recurso &quot;Texto desta página&quot; não funcionam neste modo — para a
-          melhor experiência de leitura, peça à autoria um arquivo em DOCX ou EPUB.
+          melhor experiência de leitura, peça à autoria um arquivo em DOCX ou EPUB. Se aqui também não aparecer nada,
+          vale tentar no Chrome: o Firefox usa o mesmo motor de leitura do Livrin, e o Chrome usa outro, mais tolerante
+          com arquivos fora do padrão.
         </p>
         <object data={urlNativa} type="application/pdf" className="h-[75vh] w-full rounded-xl border border-outline" aria-label={`Leitura de ${title}`}>
           <p className="p-6 text-center text-sm text-ink-muted">

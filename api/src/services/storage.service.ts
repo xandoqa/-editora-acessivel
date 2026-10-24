@@ -1,3 +1,4 @@
+import { execFile as execFileCb } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -5,7 +6,10 @@ import path from 'node:path';
 import { env } from '../config/env';
 import type { FileType } from '../db/schema';
 import { badRequest } from '../utils/http-error';
+import { promisify } from 'node:util';
 import { logger } from '../utils/logger';
+
+const execFile = promisify(execFileCb);
 
 /**
  * Armazenamento de arquivos em disco local (volume Docker `uploads`).
@@ -97,6 +101,52 @@ export interface StoredFile {
   fileType?: FileType;
 }
 
+/**
+ * Normaliza um PDF com o qpdf.
+ *
+ * O pdf.js é uma implementação em JavaScript e recusa arquivos que leitores
+ * nativos abrem sem reclamar: tabela de referências cruzadas quebrada, cifra
+ * só de permissão, objetos empacotados de um jeito que ele não espera. Isso é
+ * a regra, não a exceção, em digitalização antiga — e o projeto existe para a
+ * pessoa conseguir ler.
+ *
+ * O qpdf reescreve a estrutura preservando o conteúdo: tira a cifra que não
+ * tem senha de abertura, reconstrói o xref e desfaz os object streams. O
+ * arquivo continua sendo o mesmo PDF; só para de ser recusado.
+ *
+ * Nada aqui é obrigatório. Se o qpdf não estiver instalado (rodando fora do
+ * Docker, por exemplo) ou se ele falhar, o original segue para o storage
+ * exatamente como chegou — normalizar é um ganho, não um requisito.
+ */
+async function normalizarPdf(origem: string): Promise<string | null> {
+  const destino = `${origem}.normalizado.pdf`;
+  try {
+    await execFile('qpdf', [
+      '--decrypt',               // remove cifra sem senha de abertura
+      '--object-streams=disable', // estrutura que o pdf.js lê melhor
+      '--stream-data=preserve',  // não recomprime o conteúdo
+      origem,
+      destino,
+    ]);
+  } catch (err) {
+    // O qpdf sai com código 3 em "warnings" e ainda assim gera o arquivo bom.
+    const saida = (err as { code?: number }).code;
+    if (saida !== 3) {
+      await removeFile(destino, true);
+      if (saida !== undefined) logger.warn(`qpdf não normalizou ${path.basename(origem)} (código ${saida}).`);
+      return null;
+    }
+  }
+  try {
+    const { size } = await fsp.stat(destino);
+    if (size > 0) return destino;
+  } catch {
+    /* o qpdf não gerou nada */
+  }
+  await removeFile(destino, true);
+  return null;
+}
+
 /** O PDF termina com a marca "%%EOF"? Olha só o último KB, não o arquivo todo. */
 async function terminaComEOF(caminho: string, tamanho: number): Promise<boolean> {
   const janela = Math.min(1024, tamanho);
@@ -151,10 +201,22 @@ export async function commitUpload(file: Express.Multer.File, kind: UploadKind):
     }
 
     const relativePath = path.posix.join(DIRS[kind], `${randomUUID()}.${ext}`);
-    await fsp.rename(file.path, path.join(env.uploadDir, relativePath));
+    const destinoFinal = path.join(env.uploadDir, relativePath);
+
+    let origem = file.path;
+    let tamanho = file.size;
+    if (ext === 'pdf') {
+      const normalizado = await normalizarPdf(file.path);
+      if (normalizado) {
+        await removeFile(file.path, true);
+        origem = normalizado;
+        tamanho = (await fsp.stat(normalizado)).size;
+      }
+    }
+    await fsp.rename(origem, destinoFinal);
     return {
       relativePath,
-      sizeBytes: file.size,
+      sizeBytes: tamanho,
       originalName: file.originalname.slice(0, 255),
       fileType: kind === 'work' ? (ext.toUpperCase() as FileType) : undefined,
     };

@@ -2,6 +2,24 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.1.5] — 2026-10-24
+
+### Corrigido
+
+- **PDF enviado passa pelo qpdf antes de ir para o acervo.** O pdf.js recusa
+  arquivos que leitores nativos abrem sem reclamar: tabela de referências
+  cruzadas quebrada, cifra de permissão, objetos empacotados de um jeito que
+  ele não espera — o que é a regra, não a exceção, em digitalização antiga.
+  Agora o `qpdf` reescreve a estrutura preservando o conteúdo: tira a cifra que
+  não tem senha de abertura, reconstrói o xref e desfaz os object streams.
+  Conferido com um PDF cifrado em AES-256 (abriu, texto intacto) e com um de
+  xref destruído (reconstruído, texto recuperado). Se o `qpdf` não estiver
+  instalado ou falhar, o original segue intacto — normalizar é ganho, não
+  requisito.
+- A mensagem do leitor passou a dizer que o Firefox usa o **mesmo** motor do
+  Livrin, e que no Chrome vale tentar de novo porque o motor é outro. Omitir
+  isso fazia a terceira via parecer uma saída que, no Firefox, ela não é.
+
 ## [3.1.4] — 2026-10-24
 
 ### Corrigido

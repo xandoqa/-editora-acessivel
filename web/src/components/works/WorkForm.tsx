@@ -31,7 +31,7 @@ interface Props {
 }
 
 const METADATA_FIELDS = new Set(['subtitle', 'synopsis', 'authorNotes', 'tags', 'editionLabel']);
-const WORK_EXTS = ['pdf', 'epub', 'cbz', 'cbr'];
+const WORK_EXTS = ['pdf', 'docx', 'epub', 'cbz', 'cbr'];
 const MAX_MB = Number(import.meta.env.VITE_MAX_UPLOAD_MB) || 180;
 
 type FormState = {
@@ -140,16 +140,16 @@ export default function WorkForm({ initial, metadataOnly, errors, busy, uploadPr
         <FileDropzone
           label="Arquivo Original da Obra"
           required={!initial?.hasFile}
-          accept=".pdf,.epub,.cbz,.cbr,application/pdf,application/epub+zip"
+          accept=".pdf,.docx,.epub,.cbz,.cbr,application/pdf,application/epub+zip,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
           extensions={WORK_EXTS}
           maxMb={MAX_MB}
           file={file}
           onChange={setFile}
           error={allErrors.file}
           disabled={metadataOnly || busy}
-          title="Arraste o PDF ou CBZ aqui ou escolha o arquivo"
-          description="Suporte nativo a formatos: PDF, EPUB, CBZ ou CBR acessível"
-          badges={['PDF/UA', 'CBZ com metadata', 'EPUB 3']}
+          title="Arraste o arquivo da obra aqui ou escolha no computador"
+          description="Aceita PDF, DOCX (Word), EPUB, CBZ ou CBR. O DOCX é o mais acessível: o texto reflui e obedece à tipografia de quem lê."
+          badges={['DOCX com texto que reflui', 'PDF/UA', 'EPUB 3', 'CBZ com metadata']}
           current={initial?.file ? `Arquivo atual: ${initial.file.originalName} (${formatBytes(initial.file.sizeBytes)})` : undefined}
         />
         {uploadProgress !== undefined && busy && (
@@ -209,7 +209,7 @@ export default function WorkForm({ initial, metadataOnly, errors, busy, uploadPr
           <PersonStanding className="h-6 w-6 text-accent" aria-hidden /> Recursos de Acessibilidade Pré-existentes
         </h2>
         <p className="mt-1 text-sm text-ink-muted">
-          Identifique os recursos já incorporados no seu arquivo para acelerar a aprovação e obter o selo Leitor Acessível AAA.
+          Identifique os recursos já incorporados no seu arquivo. A curadoria confere cada um antes de publicar.
         </p>
         <div className="mt-5 grid gap-3 md:grid-cols-3">
           {FEATURES.map((f) => (

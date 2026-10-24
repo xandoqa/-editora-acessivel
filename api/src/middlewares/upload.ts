@@ -7,7 +7,7 @@ import { HttpError, badRequest } from '../utils/http-error';
 
 /**
  * Upload multipart/form-data das obras. Campos aceitos:
- *   - file  → arquivo original da obra (PDF, EPUB, CBZ, CBR)
+ *   - file  → arquivo original da obra (PDF, DOCX, EPUB, CBZ, CBR)
  *   - cover → capa (JPG, PNG, WEBP)
  *   - audio → faixa de audiodescrição (MP3, OGG, M4A)
  * Os arquivos vão para UPLOAD_DIR/tmp e só são movidos para o destino final após

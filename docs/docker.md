@@ -1,5 +1,19 @@
 # Docker
 
+## Requisitos
+
+**Docker Engine + plugin Compose v2.** `docker compose version` (com espaço) precisa responder `v2.x` ou maior; o `docker-compose` v1, com hífen, **não** serve: este `docker-compose.yml` segue a Compose Spec (`name:` no topo, `depends_on` com `condition: service_healthy`), que a v1 não interpreta.
+
+| Sistema | Instalação | Observação |
+| --- | --- | --- |
+| Linux | `docker-ce` + `docker-compose-plugin` dos repositórios oficiais da Docker | para usar sem `sudo`: `sudo usermod -aG docker $USER` e reabrir a sessão |
+| Windows | Docker Desktop com backend WSL2 | o plugin Compose já vem junto |
+| macOS | Docker Desktop | idem |
+
+Nada mais precisa estar instalado: Node 22, PostgreSQL 16 e todas as dependências vivem dentro das imagens. A primeira subida baixa e compila cerca de 1,5 GB.
+
+O `iniciar.sh` confere as três coisas (binário, plugin v2, daemon acessível) antes de tentar subir, e diz o que fazer em cada caso em vez de deixar o Docker devolver o erro cru.
+
 ## Containers
 
 | Serviço | Imagem | Função | Porta no host | Volume |

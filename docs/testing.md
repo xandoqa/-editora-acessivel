@@ -1,55 +1,112 @@
 # Testes
 
-## 1. Integração da API (`api/tests`)
+Duas suítes: **integração da API** (Vitest + Supertest contra um PostgreSQL de verdade) e **ponta a ponta** (Playwright, no navegador, contra o sistema inteiro no ar).
 
-Ferramentas: **Vitest** + **Supertest**, contra um **PostgreSQL real** (não há mocks do banco — as regras dependem de constraints e transações reais).
+Nenhuma delas usa banco fingido. Um teste que passa contra um banco simulado não diz nada sobre migrations, restrições, índices e transações — que é onde mora metade dos defeitos.
 
-- Banco: `TEST_DATABASE_URL` (padrão `postgres://livrin_user:livrin_dev_password@localhost:5432/livrin_test`). **Ele é apagado e recriado** no início de cada arquivo de teste; por segurança, o nome precisa conter "test".
-- Uploads vão para uma pasta temporária do sistema.
+---
+
+## API
+
+### Banco de teste
+
+O schema é **apagado e recriado** no início de cada arquivo de teste. Por segurança, o nome do banco precisa conter `test`, e a suíte se recusa a rodar se não contiver.
+
+Use o compose dedicado — ele sobe um PostgreSQL efêmero, em memória, na porta 5433:
 
 ```bash
+docker compose -f docker-compose.test.yml up -d db-test
+
 cd api
-npm test            # execução única
-npm run test:watch  # modo observação
+TEST_DATABASE_URL=postgres://livrin_test:livrin_test@localhost:5433/livrin_test npm test
+
+docker compose -f docker-compose.test.yml down -v
 ```
 
-Com Docker (modo dev), crie o banco de testes e rode dentro do container:
-```bash
-docker compose -f docker-compose.yml -f docker-compose.dev.yml exec db createdb -U livrin_user livrin_test
-docker compose -f docker-compose.yml -f docker-compose.dev.yml exec \
-  -e TEST_DATABASE_URL=postgres://livrin_user:<senha>@db:5432/livrin_test api npm test
-```
+Modo observador: `npm run test:watch` com a mesma variável.
 
-Cobertura atual (22 testes):
+Sem Docker: aponte `TEST_DATABASE_URL` para qualquer PostgreSQL seu cujo banco tenha `test` no nome.
 
-| Arquivo | Cenários |
+### O que cada arquivo cobre
+
+47 testes, em quatro arquivos.
+
+| Arquivo | Cobre |
 | --- | --- |
-| `auth.test.ts` | cadastro sempre `USER` (rejeita `role`), e-mail normalizado, duplicado (409), senha fraca (400), login/`me`, mensagem genérica para credenciais inválidas, token inválido (401), troca de senha; `/admin` → 401/403; desativação invalida token imediatamente; proteção contra remover o próprio admin; redefinição de senha; ID inválido (400) e busca com caracteres de SQL tratada como texto. |
-| `works.test.ts` | rascunho sem arquivo; envio exige arquivo (422); arquivo falso rejeitado pela assinatura (400); envio com PDF cria checklist; obra não publicada invisível para visitantes/terceiros (404); edição bloqueada em análise (403); publicação antes da aprovação (409); nota da curadoria; transição inválida (409); rejeição sem motivo (400); aprovação conclui checklist; publicação; catálogo e download; edição só de metadados após publicar; avaliação única e atualizável; autor não avalia a própria obra; sessões de leitura e métricas do painel; audiodescrição (duplicada → 409, autor bloqueado em obra publicada → 403); exclusão bloqueada de gênero/usuário em uso (409); arquivamento remove do catálogo. |
+| `auth.test.ts` | Cadastro como `LEITOR` por padrão e recusa de `role=ADMIN` vindo do cliente; escolha do perfil de escritor no cadastro; e-mail duplicado (`409`); senha fraca (`400`); login e `/auth/me`; mensagem genérica para credenciais inválidas; token inválido ou ausente (`401`); troca de senha exigindo a atual; `/admin` → `401` para visitante e `403` para conta comum; desativação invalidando o token na hora; proteção contra remover o próprio acesso administrativo; redefinição de senha; ID de rota inválido (`400`) |
+| `works.test.ts` | Leitor não cadastra obra e escritor cadastra; leitor ativa o próprio perfil de escritor; escritor não alcança a administração; rascunho sem arquivo; recusa de arquivo cuja assinatura binária não bate com a extensão; envio para análise criando o checklist; obra não aprovada invisível a visitantes e a terceiros; bloqueio de edição durante a análise; nota da curadoria, validação de transições e aprovação; **a obra aprovada aparece no catálogo sem nenhuma ação do autor**; avaliações (uma por pessoa, atualizável, autor não avalia a própria obra); sessões de leitura alimentando o painel; audiodescrição por página; proteção de gênero em uso e de usuário com obras; arquivamento tirando a obra do catálogo; manuscrito em `.docx` aceito com o tipo e o `Content-Type` corretos, e `.docx` falso (que não é ZIP) recusado |
+| `catalog.test.ts` | Só obras `APROVADO` aparecem; rascunho, em análise e arquivada não vazam nem para visitante nem para outro usuário; filtro por formato; filtro por recurso de acessibilidade; busca por título e por tag; curinga de SQL tratado como texto; paginação e recusa de parâmetros inválidos; arquivar tira do catálogo e reaprovar devolve |
+| `donations.test.ts` | Meios aceitos e aviso de provedor simulado; apoio anônimo com código de pagamento; valores fora da faixa e método inexistente; obra inexistente; apoio vinculado a obra e conta, com confirmação idempotente; ninguém confirma o apoio de outra pessoa; estatísticas somando só os confirmados; listagem administrativa bloqueada para não-administrador; **ler uma obra continua não exigindo apoio nenhum** |
 
-## 2. Ponta a ponta no navegador (`e2e/`)
+Os dois testes em negrito existem por causa de defeitos reais corrigidos na 3.0.0: a obra que ficava presa entre a aprovação e o catálogo, e a garantia de que a doação não virou um pedágio.
 
-**Playwright** contra o sistema em execução (Docker ou dev), com dados de demonstração.
+---
+
+## Ponta a ponta (Playwright)
+
+Rodam contra um ambiente **já no ar**, com `SEED_DEMO_DATA=true`.
 
 ```bash
+# 1. deixe o sistema rodando em outro terminal
+./iniciar.sh                 # ou iniciar.bat
+
+# 2. instale e rode
 cd e2e
 npm install
-npx playwright install chromium     # primeira vez
-ADMIN_PASSWORD=<senha do admin> DEMO_USER_PASSWORD=<senha demo> npm test
-# BASE_URL=http://localhost:5173 (padrão)
+npm run install-browsers
+npm test
 ```
 
-Cenários: cadastro → submissão com upload (e validação de arquivo obrigatório) → visitante não vê obra em análise → admin aprova → autor publica → busca no catálogo → leitura do PDF com paginação por botão e teclado → avaliação por leitor → usuário comum bloqueado em `/admin` (front e API 403) → leitores EPUB e CBZ.
+As credenciais saem do `.env` da raiz — o mesmo arquivo que o `docker compose` usa. Não há valores duplicados dentro dos testes; se o `.env` não existir, a suíte falha com uma mensagem dizendo o que fazer.
 
-Cada execução cria um usuário e uma obra novos (nomes com carimbo de tempo).
+> Até a 2.0.0 cada credencial tinha um padrão escrito no próprio teste, e esses padrões não batiam com nenhum arquivo do projeto: rodar `npx playwright test` sem exportar variáveis quebrava no login do administrador.
 
-## 3. Verificações estáticas
+Para apontar para outro endereço: `BASE_URL=http://localhost:8080 npm test`.
 
-```bash
-cd api && npm run typecheck && npm run build
-cd web && npm run typecheck && npm run build
-```
+### O que os testes de navegador cobrem
 
-## O que foi verificado manualmente
+1. Escritora se cadastra escolhendo o perfil, preenche o formulário, tem o envio recusado sem arquivo, anexa o PDF e envia para análise.
+2. Leitor tenta abrir a área de publicação e é mandado para "Meu perfil".
+3. Visitante não vê a obra em análise.
+4. A curadoria aprova e **a obra já está no catálogo** — sem nenhuma ação do autor entre uma coisa e outra.
+5. A obra aparece na busca do catálogo e abre no leitor, com navegação por botão e por teclado.
+6. Leitor avalia a obra.
+7. Escritora não acessa a administração, nem pela interface nem chamando a API direto.
+8. Apoiar funciona pelo rodapé, avisa que a cobrança é de demonstração e confirma.
+9. Os leitores de EPUB e de CBZ renderizam as obras de demonstração.
 
-Telas comparadas com o protótipo (login, catálogo, leitor, painel, análise, submissão), alto contraste, A-/A+, layout mobile com gaveta, edição de rascunho com audiodescrição, rejeição com motivo, CRUD de usuários e gêneros, moderação de avaliações. Ver o relatório final para o que **não** pôde ser verificado (build das imagens Docker no ambiente de desenvolvimento usado).
+### O que ainda é conferido à mão
+
+O **leitor de `.docx`** roda só no navegador (`DOMParser` + JSZip), e a suíte da API não tem como exercitá-lo: ela não abre o arquivo. O que a API cobre é a entrada — aceitar `.docx`, gravar o tipo `DOCX`, servir o `Content-Type` certo e recusar um `.docx` que não é ZIP. A renderização em si se confere assim: entre como `caua@livrin.com`, abra *O Alfabeto das Coisas Pequenas* e troque tipografia, escala e paleta — o texto deve refluir, com títulos, lista e itálico preservados.
+
+Um teste automatizado desse leitor exigiria `vitest` + `jsdom` no front-end, que hoje não tem suíte própria. Para criá-la: `cd web && npm i -D vitest jsdom @testing-library/react` e um `web/vitest.config.ts` com `environment: 'jsdom'`. O alvo natural é `web/src/components/reader/docxParser.ts`, que é função pura — entra XML, saem blocos.
+
+---
+
+## Integração contínua
+
+`.github/workflows/ci.yml`, a cada push e pull request:
+
+| Job | O que faz |
+| --- | --- |
+| `api` | `npm ci`, `npm run typecheck`, `npm run build` e `npm test` contra um PostgreSQL de serviço |
+| `web` | `npm ci` e `npm run build` (que inclui a checagem de tipos) |
+| `docker` | Constrói as duas imagens de produção |
+
+Nenhum segredo do repositório é usado: o banco é efêmero e o `JWT_SECRET` dos testes é gerado na hora.
+
+---
+
+## O que não está automatizado
+
+Honestidade sobre a cobertura:
+
+- **Leitores de tela.** NVDA, VoiceOver e TalkBack exigem verificação manual. Os atributos ARIA e a ordem de foco são conferidos no código, não por robô.
+- **Síntese de voz.** Depende de vozes instaladas no sistema operacional.
+- **Contraste.** Calculado a partir dos tokens, não medido na tela renderizada.
+- **Linter.** O projeto não traz ESLint instalado: adicioná-lo exige regenerar os `package-lock.json`, o que precisa de acesso ao registro npm. Para habilitar:
+  ```bash
+  cd api && npm i -D eslint @eslint/js typescript-eslint
+  cd ../web && npm i -D eslint @eslint/js typescript-eslint eslint-plugin-react-hooks
+  ```
+  A checagem de tipos do TypeScript (`noUnusedLocals`, `noUnusedParameters`, `strict`) roda em todo build e cobre boa parte do que um linter pegaria.

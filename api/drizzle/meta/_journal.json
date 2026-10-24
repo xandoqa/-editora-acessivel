@@ -8,6 +8,41 @@
       "when": 1792370441855,
       "tag": "0000_initial_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792635711507,
+      "tag": "0001_tres_papeis",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792636152432,
+      "tag": "0002_aprovado_publica",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1792637573862,
+      "tag": "0003_doacoes",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1792710270224,
+      "tag": "0004_selo_curadoria",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1792710451847,
+      "tag": "0005_docx",
+      "breakpoints": true
     }
   ]
 }

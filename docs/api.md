@@ -1,217 +1,278 @@
-# API REST
+# API
 
-- **Base URL:** `/api` (via Nginx/Vite) ou `http://localhost:3000/api` (direto).
-- **Formato:** JSON (`Content-Type: application/json`), exceto criação/edição de obras, que usam `multipart/form-data` (upload).
-- **Autenticação:** `Authorization: Bearer <token>` (token obtido em `/auth/login` ou `/auth/register`, válido por `JWT_EXPIRES_IN`).
-- **Níveis de acesso:** 🌐 público · 👤 opcional (reconhece o usuário se houver token) · 🔒 autenticado · 🛡️ ADMIN.
-- **Limites:** 600 req/min por IP na API; 20 tentativas/15 min em login e cadastro (`429`).
+Base: `/api`. Todas as respostas são JSON, exceto os downloads de arquivo.
 
-## Formato de erro
+**Legenda de acesso**
+
+| Símbolo | Significado |
+| --- | --- |
+| 🌐 | Público — qualquer visitante |
+| 👁 | Público, mas reconhece quem está logado (o autor vê o próprio rascunho) |
+| 🔒 | Exige token válido |
+| ✍️ | Exige perfil `ESCRITOR` (ou `ADMIN`) |
+| 🛡 | Exige perfil `ADMIN` |
+
+Autenticação por cabeçalho: `Authorization: Bearer <token>`.
+
+---
+
+## Formato dos erros
+
+Toda falha devolve a mesma forma, sem pilha de execução, SQL ou caminho de arquivo — esses detalhes ficam no log do servidor.
 
 ```json
 { "error": { "code": "VALIDATION_ERROR", "message": "Dados inválidos. Verifique os campos destacados.",
-             "details": [{ "field": "email", "message": "Informe um e-mail válido" }] } }
+             "details": [{ "field": "synopsis", "message": "Sinopse: mínimo de 20 caracteres" }] } }
 ```
 
-| Status | `code` | Quando |
+| Código HTTP | `code` | Quando |
 | --- | --- | --- |
-| 400 | `VALIDATION_ERROR` / `BAD_REQUEST` | Campos inválidos, ID não numérico, arquivo inválido, JSON malformado |
-| 401 | `UNAUTHORIZED` | Sem token, token inválido/expirado, conta desativada, login incorreto |
-| 403 | `FORBIDDEN` | Sem permissão (ex.: usuário comum em `/admin`, autor editando obra em análise) |
-| 404 | `NOT_FOUND` | Recurso inexistente **ou não visível** para quem pede (obras não publicadas) |
-| 409 | `CONFLICT` | E-mail duplicado, transição de status inválida, exclusão bloqueada por vínculo |
-| 413 | `PAYLOAD_TOO_LARGE` | Corpo JSON acima de 1 MB |
-| 422 | `UNPROCESSABLE` | Regra de negócio (ex.: enviar para análise sem arquivo) |
+| 400 | `BAD_REQUEST` / `VALIDATION_ERROR` | Dados inválidos; `details` traz campo a campo |
+| 401 | `UNAUTHORIZED` | Sem token, token inválido/expirado, ou conta desativada |
+| 403 | `FORBIDDEN` | Autenticado, mas o perfil não permite |
+| 404 | `NOT_FOUND` | Não existe — ou existe e você não pode vê-lo |
+| 409 | `CONFLICT` | Conflito de estado (e-mail duplicado, transição inválida) |
+| 413 | `PAYLOAD_TOO_LARGE` | Corpo ou arquivo acima do limite |
+| 422 | `UNPROCESSABLE` | Requisição válida, regra de negócio impede (falta o arquivo da obra) |
 | 429 | `TOO_MANY_REQUESTS` | Limite de requisições |
-| 500 | `INTERNAL_ERROR` | Erro inesperado (detalhes apenas no log do servidor) |
+| 500 | `INTERNAL_ERROR` | Erro inesperado |
 
-## Objeto `Work` (resposta)
+**404 em vez de 403, de propósito:** uma obra não aprovada responde `404` para quem não é o autor nem administrador. Responder `403` confirmaria que ela existe.
 
-```json
-{
-  "id": 1, "title": "Além das Estrelas", "subtitle": "Crônicas do Espaço", "status": "PUBLICADO",
-  "format": "QUADRINHO", "pages": 148, "synopsis": "No ano estelar de 2384...", "editionLabel": "Webcomic serial",
-  "isbn": "978-65-8912-04-1", "ageRating": "12", "authorNotes": "...", "tags": ["EspaçoProfundo"],
-  "hasAudioDesc": true, "hasLeitorTela": true, "hasTextoAlt": true, "hasLibras": true, "hasFacilLeitura": false, "hasAltoContraste": true,
-  "audioDescriber": "Thiago Alencar", "audioNarrator": "Sarah Menezes", "audioReviewer": "Instituto Acessibilidade Aberta",
-  "coverUrl": "/uploads/covers/2f6c...webp", "hasFile": true,
-  "file": { "type": "PDF", "sizeBytes": 430424, "originalName": "alem-das-estrelas.pdf" }, "hasAudio": false,
-  "rejectionReason": null, "submittedAt": "...", "reviewedAt": "...", "publishedAt": "...", "createdAt": "...", "updatedAt": "...",
-  "author": { "id": 3, "name": "Lorena Campolina", "headline": "Roteiro e Ilustrações Originais" },
-  "genre": { "id": 1, "name": "Ficção Científica" },
-  "rating": { "average": 4.5, "count": 2 }, "readsCount": 110
-}
-```
-
-Listagens paginadas retornam `{ "data": [...], "meta": { "page", "pageSize", "total", "totalPages" } }`.
+Limites: 20 tentativas por IP a cada 15 minutos em login, cadastro e abertura de apoio; 600 requisições por minuto no restante.
 
 ---
 
-## Authentication
+## Autenticação
 
 ### `POST /auth/register` 🌐
-Cria uma conta **sempre com papel `USER`** (o campo `role` não é aceito).
 
-Body: `{ "name": "Ana", "email": "ana@exemplo.com", "password": "Senha12345", "headline": "opcional" }`
-Senha: 8–72 caracteres, com letras e números.
+Cria a conta e já devolve o token.
 
-`201` → `{ "token": "eyJ...", "user": { "id": 12, "name": "Ana", "email": "ana@exemplo.com", "role": "USER", "headline": null, "isActive": true, "createdAt": "..." } }`
-Erros: `400` validação, `409` e-mail já cadastrado, `429`.
+- **Entrada:** `{ name, email, password, role?, headline? }` — `role` só aceita `LEITOR` (padrão) ou `ESCRITOR`. `ADMIN` **nunca** é aceito do cliente.
+- **Senha:** mínimo de 8 caracteres, com letras e números.
+- **Saída:** `201` `{ token, user }`
+- **Erros:** `400` dados inválidos · `409` e-mail já cadastrado
 
 ### `POST /auth/login` 🌐
-Body: `{ "email": "marina@livrin.com", "password": "..." }` → `200` `{ token, user }`.
-Erros: `401` "E-mail ou senha incorretos." (mesma mensagem para e-mail inexistente) ou conta desativada.
+
+- **Entrada:** `{ email, password }`
+- **Saída:** `200` `{ token, user }`
+- **Erros:** `401` "E-mail ou senha incorretos." — a mesma mensagem para e-mail inexistente e senha errada, e com o mesmo tempo de resposta · `401` conta desativada
 
 ```bash
-curl -X POST http://localhost:3000/api/auth/login -H 'Content-Type: application/json' \
-  -d '{"email":"admin@livrin.local","password":"TroqueEstaSenha123"}'
+curl -X POST http://localhost:3000/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"admin@livrin.local","password":"<ADMIN_PASSWORD do seu .env>"}'
 ```
 
-### `GET /auth/me` 🔒 → `{ "user": {...} }`
-### `PATCH /auth/me` 🔒 — body `{ "name"?, "headline"? }` → `{ "user" }`
-### `POST /auth/me/password` 🔒 — body `{ "currentPassword", "newPassword" }` → `204`; `400` se a senha atual estiver errada.
+### `GET /auth/me` 🔒 — `{ user }` com os dados atuais do banco
+
+### `PATCH /auth/me` 🔒 — `{ name?, headline? }` → `{ user }`
+
+### `POST /auth/me/password` 🔒
+
+- **Entrada:** `{ currentPassword, newPassword }` → `204`
+- **Erros:** `400` senha atual incorreta ou nova senha fora da política
+
+### `POST /auth/me/writer` 🔒
+
+Leitor ativa o próprio perfil de escritor.
+
+- **Saída:** `200` `{ user }` com `role: "ESCRITOR"`
+- **Erros:** `409` a conta já podia publicar
 
 ---
 
-## Gêneros
+## Catálogo e obras
 
-### `GET /genres` 🌐 → `[{ "id", "name", "slug", "isActive", "worksCount" }]` (somente ativos)
+### `GET /works` 🌐 — catálogo público
 
----
+Devolve **somente obras `APROVADO`**.
 
-## Obras
+- **Parâmetros:** `q` (título, subtítulo, autoria, gênero, tags) · `format` (`QUADRINHO`, `LIVRO`, `MANGA_WEBCOMIC`, `ZINE`) · `feature` (`audiodescricao`, `leitor-tela`, `texto-alt`, `libras`, `facil-leitura`, `alto-contraste`) · `genreId` · `sort` (`recent`, `title`, `rating`) · `page` · `pageSize` (máx. 100)
+- **Saída:** `{ data: Work[], meta: { page, pageSize, total, totalPages }, catalogTotal }`
+- **Erros:** `400` parâmetro fora dos valores aceitos
 
-### `GET /works` 🌐 — catálogo (somente `PUBLICADO`)
-Query: `q` (título, subtítulo, autor, gênero, tags), `format` (`QUADRINHO|LIVRO|MANGA_WEBCOMIC|ZINE`), `feature` (`audiodescricao|leitor-tela|texto-alt|libras|facil-leitura|alto-contraste`), `genreId`, `sort` (`recent|title|rating`), `page` (1), `pageSize` (12, máx. 100).
-`200` → `{ data: Work[], meta, catalogTotal }` (`catalogTotal` = total publicado, usado no "N títulos inclusivos").
+Caracteres de curinga digitados na busca (`%`, `_`) são escapados e tratados como texto literal.
 
-### `GET /works/:id` 👤
-Obra publicada: qualquer pessoa. Não publicada: apenas o autor e ADMIN (os demais recebem `404`).
+### `GET /works/:id` 👁
 
-### `POST /works` 🔒 multipart
-Campos: `title`*, `genreId`*, `pages`*, `synopsis`* (20–2000), `format`, `subtitle`, `editionLabel`, `isbn`, `ageRating` (`L|10|12|14|16|18`), `authorNotes`, `tags` (JSON `["a","b"]` ou `"a, b"`), `hasAudioDesc|hasLeitorTela|hasTextoAlt|hasLibras|hasFacilLeitura|hasAltoContraste` (`true/false`), `audioDescriber`, `audioNarrator`, `audioReviewer`, `action` (`draft` | `submit`, padrão `submit`).
-Arquivos: `file` (PDF/EPUB/CBZ/CBR, até `MAX_UPLOAD_MB`), `cover` (JPG/PNG/WEBP, 5 MB), `audio` (MP3/OGG/M4A).
-`action=submit` exige `file` (`422` caso contrário) e coloca a obra em `EM_ANALISE` com o checklist padrão.
+- **Saída:** `200` a obra. Não aprovada: só o autor e a administração veem; os demais recebem `404`.
 
-```bash
-curl -X POST http://localhost:3000/api/works -H "Authorization: Bearer $TOKEN" \
-  -F title='Minha HQ' -F genreId=1 -F pages=24 -F format=QUADRINHO \
-  -F synopsis='Uma história acessível sobre...' -F hasAudioDesc=true \
-  -F file=@minha-hq.pdf -F cover=@capa.jpg
-```
-`201` → `Work`. Erros: `400` (campos/arquivo inválido), `422` (sem arquivo no envio).
+### `POST /works` 🔒 ✍️
 
-### `PATCH /works/:id` 🔒 multipart (autor)
-Campos opcionais iguais aos da criação + `removeCover`, `removeAudio`. Regras por status (ver [business-rules.md](business-rules.md)): `RASCUNHO`/`REJEITADO` editam tudo; `APROVADO`/`PUBLICADO` só `subtitle`, `synopsis`, `authorNotes`, `tags`, `editionLabel` e capa; `EM_ANALISE`/`ARQUIVADO` → `403`.
+- **Entrada** (`multipart/form-data`): `title`, `synopsis` (mín. 20), `genreId`, `format`, `pages`, `ageRating?`, `subtitle?`, `isbn?`, `editionLabel?`, `authorNotes?`, `tags?`, as flags `hasAudioDesc`…`hasAltoContraste`, créditos de audiodescrição, `action` (`draft` | `submit`, padrão `submit`), e os arquivos `file`, `cover`, `audio`.
+- **Saída:** `201` a obra criada — `RASCUNHO` com `action=draft`, `EM_ANALISE` com `action=submit`
+- **Erros:** `400` dados ou arquivo inválido · `403` perfil `LEITOR` · `413` arquivo grande demais · `422` `action=submit` sem arquivo
 
-### `POST /works/:id/submit` 🔒 — rascunho/rejeitada → `EM_ANALISE` (`409` em outro status, `422` sem arquivo)
-### `POST /works/:id/publish` 🔒 — `APROVADO` → `PUBLICADO` (`409` antes da aprovação)
-### `DELETE /works/:id` 🔒 — autor: apenas `RASCUNHO`/`REJEITADO` (`409` nos demais); ADMIN: qualquer obra. `204`.
+Arquivos: obra em PDF/DOCX/EPUB/CBZ/CBR até `MAX_UPLOAD_MB`; capa em JPG/PNG/WEBP até 5 MB; áudio em MP3/OGG/M4A. A **assinatura binária** é conferida — renomear um executável para `.pdf` ou para `.docx` é recusado. DOCX, EPUB e CBZ são arquivos ZIP e compartilham a mesma assinatura (`PK\x03\x04`); o que os distingue é a extensão declarada.
 
-### `GET /works/:id/file` 👤
-Envia o arquivo original (`application/pdf`, `application/epub+zip`, ...). `?download=1` força download com nome amigável. Mesma visibilidade de `GET /works/:id`.
+### `PATCH /works/:id` 🔒
 
-### `GET /works/:id/audio` 👤 — faixa de audiodescrição (suporta `Range`).
+Mesmos campos, todos opcionais, mais `removeCover` e `removeAudio`. O que pode ser alterado depende do status — ver [business-rules.md](business-rules.md).
+
+- **Erros:** `403` status não permite · `404` não é sua
+
+### `DELETE /works/:id` 🔒 — `204`. Autor: só `RASCUNHO`/`REJEITADO`. Admin: qualquer.
+
+### `POST /works/:id/submit` 🔒 — envia para análise
+
+- **Saída:** `200` a obra em `EM_ANALISE`
+- **Erros:** `409` o status atual não permite enviar · `422` sem arquivo
+
+> `POST /works/:id/publish` **não existe mais**. Aprovar é publicar; a ação é da curadoria, em `PATCH /admin/works/:id/status`.
+
+### `GET /works/:id/file` 👁 — arquivo da obra
+
+`?download=1` força o download com nome amigável. Aceita `Range`. Obra não aprovada: `404` para quem não é autor nem admin.
+
+### `GET /works/:id/audio` 👁 — faixa de audiodescrição
 
 ---
 
 ## Audiodescrição
 
-### `GET /works/:id/audio-descriptions` 👤 → lista ordenada por página
-```json
-[{ "id": 1, "workId": 1, "pageNumber": 1, "chapterLabel": "Capítulo 1", "chapterTitle": "O Limiar da Nebulosa Carina",
-   "panelLabel": "Painel 1 • Plano Aberto", "description": "A nave Alvorada desliza...",
-   "dialogues": [{ "speaker": "Comandante Yara", "tone": "Voz firme", "text": "Mantenham os sensores..." }] }]
-```
-### `POST /works/:id/audio-descriptions` 🔒 · `PUT /works/:id/audio-descriptions/:adId` 🔒 · `DELETE ...` 🔒
-Body: `{ pageNumber*, description*, chapterLabel?, chapterTitle?, panelLabel?, dialogues?: [{ speaker*, tone?, text* }] (máx. 12) }`.
-Autor: somente em `RASCUNHO`, `REJEITADO` ou `EM_ANALISE` (`403` nos demais); ADMIN: sempre. `409` se a página já tiver audiodescrição.
+| Método e URL | Acesso | Observação |
+| --- | --- | --- |
+| `GET /works/:id/audio-descriptions` | 👁 | Mesma visibilidade da obra |
+| `POST /works/:id/audio-descriptions` | 🔒 | `201`; autor em `RASCUNHO`/`REJEITADO`/`EM_ANALISE`, admin sempre |
+| `PUT /works/:id/audio-descriptions/:adId` | 🔒 | idem |
+| `DELETE /works/:id/audio-descriptions/:adId` | 🔒 | `204` |
+
+Corpo: `{ pageNumber, description, chapterLabel?, chapterTitle?, panelLabel?, dialogues: [{ speaker, tone?, text }] }` — até 12 falas por página. Uma audiodescrição por página e obra.
 
 ---
 
-## Curadoria (lado do autor)
+## Curadoria vista pelo autor
 
-### `GET /works/:id/review` 🔒 (autor ou ADMIN)
-```json
-{ "workId": 8, "status": "EM_ANALISE", "stage": 2, "protocol": "LVR-88208", "progress": 50,
-  "checks": [{ "id": 1, "label": "Contraste de balões & onomatopeias", "status": "APROVADO", "position": 0, "updatedAt": "..." }],
-  "notes": [{ "id": 1, "content": "...", "createdAt": "...", "user": { "id": 10, "name": "Camila Fontes", "role": "ADMIN", "headline": "..." } }] }
-```
-### `POST /works/:id/review/notes` 🔒 — body `{ "content" }` (mensagem do autor/"Abrir Chat") → `201` nota.
+| Método e URL | Acesso | Saída |
+| --- | --- | --- |
+| `GET /works/:id/review` | 🔒 | Etapa atual, protocolo, progresso, checklist e notas |
+| `POST /works/:id/review/notes` | 🔒 | `201` — mensagem do autor para a curadoria |
+
+Só o autor e a administração; os demais recebem `404`.
 
 ---
 
 ## Avaliações
 
-### `GET /works/:id/feedbacks` 🌐 — avaliações visíveis de obra publicada (máx. 50)
-### `GET /works/:id/feedbacks/mine` 🔒 — avaliação do próprio usuário ou `null`
-### `POST /works/:id/feedbacks` 🔒
-Body `{ "rating": 1-5, "content": "10-1500 caracteres", "aspect": "opcional" }`. Uma por usuário e obra (reenviar atualiza). Somente obras publicadas; o autor não avalia a própria obra (`409`).
+| Método e URL | Acesso | Observação |
+| --- | --- | --- |
+| `GET /works/:id/feedbacks` | 🌐 | Avaliações visíveis; obra não aprovada devolve lista vazia |
+| `GET /works/:id/feedbacks/mine` | 🔒 | A sua, ou `null` |
+| `POST /works/:id/feedbacks` | 🔒 | `{ rating: 1–5, content (mín. 10), aspect? }` → `201`; reenviar atualiza |
+
+**Erros:** `404` obra não aprovada · `409` autor avaliando a própria obra
 
 ---
 
-## Sessões de leitura (métricas)
+## Sessões de leitura
 
-### `POST /works/:id/sessions` 👤 → `201 { "id": "<uuid>" }` (somente obras publicadas)
-### `PATCH /sessions/:sessionId` 🌐
-Body (todos opcionais): `{ "lastPage": 3, "usedAudioDesc": true, "usedHighContrast": true, "usedDyslexicFont": true, "usedZoom": true }` → `204`. As flags só "ligam".
+| Método e URL | Acesso | Observação |
+| --- | --- | --- |
+| `POST /works/:id/sessions` | 👁 | `201` `{ id, token }`. Só para obras aprovadas. Limite por IP |
+| `PATCH /sessions/:sessionId` | — | Exige o cabeçalho `X-Session-Token` devolvido na criação |
+
+Corpo do `PATCH`: `{ lastPage?, usedAudioDesc?, usedHighContrast?, usedDyslexicFont?, usedZoom? }` → `204`. As flags só ligam.
+
+---
+
+## Apoio
+
+### `GET /donations/options` 🌐
+
+- **Saída:** `{ provider, label, isReal, methods, minCents, maxCents, currency }`
+
+`isReal: false` significa que nenhum dinheiro é movimentado — a interface é obrigada a dizer isso ao usuário.
+
+### `POST /donations` 👁
+
+Apoio anônimo é permitido.
+
+- **Entrada:** `{ amountCents, method: "PIX" | "CARTAO" | "BOLETO", workId?, donorName?, message? }`
+- **Saída:** `201` `{ donation, checkout: { checkoutUrl?, code?, instruction?, isReal } }`
+- **Erros:** `400` valor fora da faixa (R$ 5,00 a R$ 5.000,00) ou método indisponível · `404` obra inexistente
+
+O valor é **em centavos, inteiro**: dinheiro não trafega como número de ponto flutuante.
+
+### `POST /donations/:id/confirm` 👁
+
+- **Saída:** `200` a doação atualizada. Confirmar de novo é inofensivo.
+- **Erros:** `404` não é sua · `409` já não está aguardando pagamento
+
+### `GET /me/donations` 🔒 — seus apoios, mais recentes primeiro
 
 ---
 
 ## Área do autor
 
-| Endpoint | Resposta |
-| --- | --- |
-| `GET /me/summary` 🔒 | `{ drafts, inReview, readyToLaunch, published, rejected, total }` |
-| `GET /me/works` 🔒 | `Work[]` com `reviewProgress` (% do checklist aprovado) |
-| `GET /me/dashboard` 🔒 | `{ summary, totalReads, worksWithReads, accessibilityIndex: { average, count }, engagement: { sessions, audioDesc, highContrast, dyslexiaZoom }, highlight, feedbacks, works }` |
+| Método e URL | Acesso | Saída |
+| --- | --- | --- |
+| `GET /me/works` | 🔒 | Suas obras com o progresso do checklist |
+| `GET /me/summary` | 🔒 | Contadores por status |
+| `GET /me/dashboard` | 🔒 | Métricas reais de leitura, avaliações recebidas e obras |
+| `GET /genres` | 🌐 | Gêneros ativos, com a contagem de obras |
 
 ---
 
-## Administração 🛡️ (`/api/admin/*`)
+## Administração 🛡
 
-Todas exigem token de um usuário **ativo** com papel `ADMIN` (`401` sem token, `403` para `USER`).
+Todas sob `/api/admin`. Visitante recebe `401`; conta sem perfil `ADMIN` recebe `403`.
 
-### Dashboard
-`GET /admin/stats` → `{ users: { total, active, admins, newLast30 }, works: { total, byStatus, byFormat }, feedbacks: { total, hidden, average }, sessions: { total, last30, audioDesc }, genres: { total, active }, pendingQueue: Work[], recentUsers }`
+### Visão geral
 
-### Usuários
-| Método e rota | Descrição |
+| Método e URL | Observação |
 | --- | --- |
-| `GET /admin/users?q=&role=&active=&sort=createdAt\|name\|email\|lastLoginAt&order=asc\|desc&page=&pageSize=` | Lista paginada com `worksCount` |
-| `GET /admin/users/:id` | Detalhe + atividade (avaliações, sessões, notas) + obras |
-| `POST /admin/users` | `{ name, email, password, role?, headline?, isActive? }` → `201` |
-| `PATCH /admin/users/:id` | `{ name?, email?, role?, headline?, isActive? }` — não permite remover o próprio acesso (`400`) nem deixar o sistema sem admin ativo (`409`) |
-| `POST /admin/users/:id/reset-password` | `{ password }` → `204` |
-| `DELETE /admin/users/:id` | `204`; `409` se o usuário tiver obras (desative-o); `400` para a própria conta |
+| `GET /admin/stats` | Usuários, obras por status e formato, avaliações, sessões, gêneros, fila de curadoria |
 
 ### Obras
-| Método e rota | Descrição |
+
+| Método e URL | Entrada / observação |
 | --- | --- |
-| `GET /admin/works?q=&status=&format=&genreId=&authorId=&sort=createdAt\|updatedAt\|title\|submittedAt\|status&order=&page=&pageSize=` | Todas as obras, qualquer status |
-| `GET /admin/works/:id` | `Work` + `checks` + `notes` + `audioDescriptions` |
-| `POST /admin/works` (multipart) | Campos da obra + `authorId`* + `status` inicial (`RASCUNHO`, `EM_ANALISE`, `APROVADO`, `PUBLICADO`...) |
-| `PATCH /admin/works/:id` (multipart) | Edita qualquer campo/arquivo, inclusive `authorId` |
-| `PATCH /admin/works/:id/status` | `{ status, reason? }` — `reason` obrigatório para `REJEITADO`. Transições inválidas → `409` com `details.allowed` |
-| `DELETE /admin/works/:id` | Exclusão definitiva (arquivos inclusos) |
-| `POST /admin/works/:id/checks` | `{ label }` novo item do checklist |
-| `PATCH /admin/works/:id/checks/:checkId` | `{ status?, label? }` |
-| `DELETE /admin/works/:id/checks/:checkId` | Remove item |
-| `POST /admin/works/:id/notes` | `{ content }` nota do parecerista (visível ao autor) |
-| `DELETE /admin/notes/:id` | Remove nota |
+| `GET /admin/works` | `q`, `status`, `format`, `genreId`, `authorId`, `sort`, `order`, paginação. Todos os status |
+| `POST /admin/works` | Campos da obra + `authorId` + `status` inicial (`RASCUNHO`, `EM_ANALISE`, `APROVADO`…) |
+| `GET /admin/works/:id` | Obra + checklist + notas + audiodescrição |
+| `PATCH /admin/works/:id` | Qualquer campo, em qualquer status; aceita `authorId` |
+| `PATCH /admin/works/:id/status` | `{ status, reason? }`. **`reason` é obrigatório ao rejeitar.** `409` se a transição não for permitida, com a lista do que é |
+| `DELETE /admin/works/:id` | `204`; remove também os arquivos do volume |
+
+Aprovar aqui é o que coloca a obra no catálogo.
+
+### Checklist e notas da curadoria
+
+`POST /admin/works/:id/checks` · `PATCH /admin/works/:id/checks/:checkId` · `DELETE /admin/works/:id/checks/:checkId` · `POST /admin/works/:id/notes` · `DELETE /admin/notes/:id`
+
+### Usuários
+
+| Método e URL | Entrada / observação |
+| --- | --- |
+| `GET /admin/users` | `q`, `role`, `active`, `sort`, `order`, paginação |
+| `POST /admin/users` | `{ name, email, password, role?, headline?, isActive? }` → `201` |
+| `GET /admin/users/:id` | Detalhe + atividade + obras |
+| `PATCH /admin/users/:id` | `{ name?, email?, role?, headline?, isActive? }` |
+| `POST /admin/users/:id/reset-password` | `{ password }` → `204` |
+| `DELETE /admin/users/:id` | `204`; `409` se a conta tiver obras |
+
+Proteções: não dá para remover o próprio acesso administrativo, desativar a própria conta, nem deixar o sistema sem administrador ativo.
 
 ### Gêneros
-`GET /admin/genres` (inclui inativos e `worksCount`) · `POST /admin/genres` `{ name, isActive? }` · `PATCH /admin/genres/:id` `{ name?, isActive? }` · `DELETE /admin/genres/:id` (`409` se houver obras).
+
+`GET /admin/genres` (inclui os desativados) · `POST` · `PATCH /:id` · `DELETE /:id` — `409` se o gênero estiver em uso.
 
 ### Avaliações
-`GET /admin/feedbacks?q=&visible=true|false&workId=&rating=&order=&page=` · `PATCH /admin/feedbacks/:id` `{ isVisible }` · `DELETE /admin/feedbacks/:id`.
+
+`GET /admin/feedbacks` · `PATCH /admin/feedbacks/:id` (`{ isVisible }`) · `DELETE /admin/feedbacks/:id`
+
+### Apoios
+
+| Método e URL | Observação |
+| --- | --- |
+| `GET /admin/donations` | `status`, `method`, paginação; traz quem apoiou e a obra |
+| `GET /admin/donations/stats` | Total, confirmados, centavos confirmados, apoiadores, provedor |
 
 ---
 
 ## Saúde
 
-`GET /health` (ou `/api/health`) → `200 { "status": "ok", "database": "ok" }` ou `503` se o banco estiver indisponível. Usado pelo healthcheck do Docker.
-
-## Arquivos estáticos
-
-`GET /uploads/covers/<uuid>.<ext>` 🌐 — capas (cache de 7 dias). Nenhum outro diretório de upload é servido diretamente.
+`GET /health` e `GET /api/health` 🌐 — `{ status: "ok", database: "ok" }`, ou `503` com `database: "unavailable"`. É o que o Docker usa no `healthcheck`.

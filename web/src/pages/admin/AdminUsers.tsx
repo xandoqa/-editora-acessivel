@@ -7,6 +7,7 @@ import { useAdminUser, useAdminUsers } from '../../hooks/adminQueries';
 import { useDebounced } from '../../hooks/useDebounced';
 import { api, errorMessage, fieldErrors } from '../../lib/api';
 import { formatDate, formatDateTime } from '../../lib/format';
+import { ROLE_DESCRIPTION, ROLE_LABEL } from '../../lib/labels';
 import type { AdminUser, Role } from '../../types/api';
 import { SearchBox, SortHeader, TableShell, Th, rowClass, theadClass } from '../../components/admin/AdminTable';
 import { Badge, ConfirmDialog, ErrorState, LoadingState, Modal, PageHeader, Pagination, SelectInput, StatusBadge, TextInput } from '../../components/ui';
@@ -33,7 +34,7 @@ function UserDetailModal({ id, onClose }: { id: number | null; onClose: () => vo
           <dl className="grid gap-3 sm:grid-cols-3">
             {[
               ['E-mail', data.email],
-              ['Papel', data.role === 'ADMIN' ? 'Administrador' : 'Usuário'],
+              ['Papel', ROLE_LABEL[data.role]],
               ['Situação', data.isActive ? 'Ativo' : 'Desativado'],
               ['Cadastro', formatDate(data.createdAt)],
               ['Último acesso', formatDateTime(data.lastLoginAt)],
@@ -165,7 +166,7 @@ export default function AdminUsers() {
         title="Usuários"
         description="Autores, leitores e administradores. Contas com obras não podem ser excluídas: desative-as para bloquear o acesso."
         actions={
-          <button type="button" className="btn-primary" onClick={() => setDraft({ name: '', email: '', role: 'USER', headline: '', isActive: true, password: '' })}>
+          <button type="button" className="btn-primary" onClick={() => setDraft({ name: '', email: '', role: 'LEITOR', headline: '', isActive: true, password: '' })}>
             <Plus className="h-4 w-4" aria-hidden /> Novo usuário
           </button>
         }
@@ -174,7 +175,8 @@ export default function AdminUsers() {
         <SearchBox value={q} onChange={setQ} placeholder="Buscar por nome ou e-mail" />
         <select className="input w-auto" aria-label="Filtrar por papel" value={role} onChange={(e) => update({ role: e.target.value })}>
           <option value="">Todos os papéis</option>
-          <option value="USER">Usuários</option>
+          <option value="LEITOR">Leitores</option>
+          <option value="ESCRITOR">Escritores</option>
           <option value="ADMIN">Administradores</option>
         </select>
         <select className="input w-auto" aria-label="Filtrar por situação" value={active} onChange={(e) => update({ active: e.target.value })}>
@@ -211,7 +213,9 @@ export default function AdminUsers() {
                     {!u.isActive && <Badge tone="danger">Desativado</Badge>}
                   </td>
                   <td className="px-4 py-3 text-ink-muted">{u.email}</td>
-                  <td className="px-4 py-3">{u.role === 'ADMIN' ? <Badge tone="admin">Admin</Badge> : <Badge>Usuário</Badge>}</td>
+                  <td className="px-4 py-3">
+                    <Badge tone={u.role === 'ADMIN' ? 'admin' : u.role === 'ESCRITOR' ? 'accent' : 'muted'}>{ROLE_LABEL[u.role]}</Badge>
+                  </td>
                   <td className="px-4 py-3 text-ink-muted">{u.worksCount}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-ink-muted">{formatDate(u.lastLoginAt)}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-ink-muted">{formatDate(u.createdAt)}</td>
@@ -294,9 +298,10 @@ export default function AdminUsers() {
                 hint="Mínimo de 8 caracteres, com letras e números."
               />
             )}
-            <SelectInput label="Papel" value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value as Role })} disabled={draft.id === me?.id} hint={draft.id === me?.id ? 'Você não pode alterar o próprio papel.' : undefined}>
-              <option value="USER">Usuário (autor/leitor)</option>
-              <option value="ADMIN">Administrador (curadoria)</option>
+            <SelectInput label="Papel" value={draft.role} onChange={(e) => setDraft({ ...draft, role: e.target.value as Role })} disabled={draft.id === me?.id} hint={draft.id === me?.id ? 'Você não pode alterar o próprio papel.' : ROLE_DESCRIPTION[draft.role]}>
+              <option value="LEITOR">Leitor</option>
+              <option value="ESCRITOR">Escritor</option>
+              <option value="ADMIN">Administrador</option>
             </SelectInput>
             <TextInput label="Apresentação" value={draft.headline} onChange={(e) => setDraft({ ...draft, headline: e.target.value })} maxLength={160} />
             <label className="flex items-center gap-2 text-sm text-ink">

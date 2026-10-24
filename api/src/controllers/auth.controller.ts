@@ -25,3 +25,8 @@ export async function changePassword(req: Request, res: Response) {
   await authService.changePassword(currentUser(req).id, parse(changePasswordSchema, req.body));
   res.status(204).end();
 }
+
+/** Leitor ativa o perfil de escritor para poder publicar as próprias obras. */
+export async function enableWriter(req: Request, res: Response) {
+  res.json({ user: await authService.enableWriterRole(currentUser(req).id) });
+}

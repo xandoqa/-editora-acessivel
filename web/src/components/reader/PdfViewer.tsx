@@ -3,7 +3,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { PALETTES, textStyle } from './readerPrefs';
-import type { ViewerProps } from './types';
+import type { PdfViewerProps } from './types';
 import { Spinner } from '../ui';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
@@ -13,8 +13,14 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
  * de texto do PDF e a exibe em "Texto desta página" com a tipografia escolhida
  * pelo leitor (fonte para dislexia, espaçamento, escala) — o que também torna o
  * conteúdo legível por leitores de tela.
+ *
+ * O arquivo é lido pela URL, em pedaços: o pdf.js busca só os trechos de que
+ * precisa (requisições Range), então a primeira página aparece sem esperar o
+ * download inteiro. Antes o arquivo todo era baixado como ArrayBuffer antes de
+ * qualquer coisa ser exibida — com o limite de 180 MB, isso é muito tempo de
+ * espera e muita memória na aba.
  */
-export default function PdfViewer({ data, page, onPageCount, prefs, title, pageAlt }: ViewerProps) {
+export default function PdfViewer({ url, authorization, page, onPageCount, prefs, title, pageAlt }: PdfViewerProps) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null);
@@ -24,8 +30,13 @@ export default function PdfViewer({ data, page, onPageCount, prefs, title, pageA
   const [width, setWidth] = useState(0);
 
   useEffect(() => {
-    // pdf.js transfere o buffer para o worker: enviamos uma cópia para poder reabrir.
-    const task = pdfjsLib.getDocument({ data: new Uint8Array(data.slice(0)), isEvalSupported: false });
+    const task = pdfjsLib.getDocument({
+      url,
+      httpHeaders: authorization ? { Authorization: authorization } : undefined,
+      isEvalSupported: false,
+      // Pedaços de 256 KB: o servidor responde Range (Express `sendFile`).
+      rangeChunkSize: 256 * 1024,
+    });
     let active = true;
     task.promise
       .then((d) => {
@@ -38,7 +49,7 @@ export default function PdfViewer({ data, page, onPageCount, prefs, title, pageA
       active = false;
       void task.destroy();
     };
-  }, [data, onPageCount]);
+  }, [url, authorization, onPageCount]);
 
   useEffect(() => {
     const el = wrapRef.current;

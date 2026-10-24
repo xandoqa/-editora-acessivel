@@ -27,7 +27,7 @@ erDiagram
 | name | varchar(120) | obrigatório |
 | email | varchar(255) | único (`users_email_unique`), sempre minúsculo |
 | password_hash | text | hash bcrypt (nunca a senha) |
-| role | enum `user_role` (`USER`, `ADMIN`) | padrão `USER`, índice |
+| role | enum `user_role` (`LEITOR`, `ESCRITOR`, `ADMIN`) | padrão `LEITOR`, índice |
 | is_active | boolean | padrão `true` — desativar = soft delete |
 | headline | varchar(160) | apresentação exibida em avaliações/notas |
 | last_login_at | timestamptz | atualizado no login |
@@ -46,13 +46,13 @@ erDiagram
 | format | enum `work_format` (`QUADRINHO`, `LIVRO`, `MANGA_WEBCOMIC`, `ZINE`) | |
 | pages | int | `CHECK pages > 0` |
 | synopsis | text | |
-| status | enum `work_status` (`RASCUNHO`, `EM_ANALISE`, `APROVADO`, `PUBLICADO`, `REJEITADO`, `ARQUIVADO`) | índice |
+| status | enum `work_status` (`RASCUNHO`, `EM_ANALISE`, `APROVADO`, `REJEITADO`, `ARQUIVADO`) | índice; `APROVADO` é o estado visível no catálogo |
 | edition_label, isbn, age_rating, author_notes | | metadados editoriais |
 | tags | text[] | padrão `{}` |
 | has_audio_desc, has_leitor_tela, has_texto_alt, has_libras, has_facil_leitura, has_alto_contraste | boolean | recursos de acessibilidade |
 | audio_describer, audio_narrator, audio_reviewer | varchar | créditos da audiodescrição |
 | cover_path, file_path, audio_path | text | caminhos **relativos** ao `UPLOAD_DIR` (não expostos pela API) |
-| file_type | enum `file_type` (`PDF`, `EPUB`, `CBZ`, `CBR`) | |
+| file_type | enum `file_type` (`PDF`, `EPUB`, `CBZ`, `CBR`, `DOCX`) | `DOCX` foi acrescentado na migração `0005_docx` — valor novo ao fim do enum, sem tocar nos anteriores |
 | file_size_bytes, file_original_name | | metadados do arquivo |
 | rejection_reason | text | motivo mostrado ao autor |
 | submitted_at, reviewed_at, published_at | timestamptz | datas do ciclo editorial |
@@ -91,7 +91,7 @@ Alterar o banco:
 `api/src/db/seed.ts` é **idempotente** (pode rodar a cada inicialização):
 1. insere os gêneros padrão (ignora os existentes);
 2. cria o administrador de `ADMIN_EMAIL`/`ADMIN_PASSWORD` se o e-mail ainda não existir;
-3. com `SEED_DEMO_DATA=true`, cria (uma única vez) os dados de demonstração: 11 usuários, 9 obras com capas e arquivos de amostra (`api/seed-assets/`), audiodescrições, checklists, notas, avaliações e ~400 sessões de leitura para popular as métricas.
+3. com `SEED_DEMO_DATA=true`, cria (uma única vez) os dados de demonstração: 11 usuários, 13 obras com capas e arquivos de amostra (`api/seed-assets/`), entre elas um manuscrito em `.docx` ainda em análise e sem capa, audiodescrições, checklists, notas, avaliações e ~400 sessões de leitura para popular as métricas.
 
 ## Operações comuns
 

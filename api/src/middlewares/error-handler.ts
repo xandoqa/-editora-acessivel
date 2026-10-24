@@ -17,6 +17,15 @@ const PG_ERRORS: Record<string, { status: number; code: string; message: string 
   '22P02': { status: 400, code: 'BAD_REQUEST', message: 'Formato de dado inválido.' },
 };
 
+/** Status HTTP já embutido no erro (serve-static, http-errors e afins). */
+function statusOf(err: unknown): number | undefined {
+  const candidate = (err as { status?: unknown; statusCode?: unknown }) ?? {};
+  for (const value of [candidate.status, candidate.statusCode]) {
+    if (typeof value === 'number' && value >= 400 && value <= 599) return value;
+  }
+  return undefined;
+}
+
 function findPgCode(err: unknown): string | undefined {
   let current: unknown = err;
   for (let depth = 0; current && depth < 4; depth++) {
@@ -61,6 +70,31 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
   if (pgCode && PG_ERRORS[pgCode]) {
     const mapped = PG_ERRORS[pgCode];
     res.status(mapped.status).json({ error: { code: mapped.code, message: mapped.message } });
+    return;
+  }
+
+  /*
+   * Erros que já trazem um status HTTP próprio — notadamente os do
+   * `express.static` que serve as capas, que chegam aqui com `status: 404` e
+   * `code: 'ENOENT'` quando o arquivo não está no volume.
+   *
+   * Sem este ramo eles caíam no 500 abaixo: cada capa faltando virava "Erro não
+   * tratado" no log e falha de servidor na tela, escondendo a causa real.
+   */
+  const httpStatus = statusOf(err);
+  if (httpStatus) {
+    const isMissingFile = (err as { code?: string }).code === 'ENOENT';
+    logger.warn(`${req.method} ${req.originalUrl} → ${httpStatus}${isMissingFile ? ' (arquivo ausente no volume de uploads)' : ''}`);
+    res.status(httpStatus).json({
+      error: {
+        code: httpStatus === 404 ? 'NOT_FOUND' : 'REQUEST_FAILED',
+        message: isMissingFile
+          ? 'Arquivo não encontrado no servidor.'
+          : httpStatus === 404
+            ? 'Recurso não encontrado.'
+            : 'Não foi possível concluir a requisição.',
+      },
+    });
     return;
   }
 

@@ -17,7 +17,11 @@ services:
     volumes:
       - ./api:/app
       - /app/node_modules
-      - uploads:/app/uploads
+      # Volume PRÓPRIO do modo de desenvolvimento. Em produção a API roda como
+      # o usuário "node"; aqui ela roda como root e gravaria arquivos que a
+      # imagem de produção depois não conseguiria sobrescrever. Separando os
+      # volumes, os dois modos convivem sem brigar por permissão.
+      - uploads_dev:/app/uploads
     # Os containers dev rodam como root para escrever nos volumes montados do host.
     user: root
 
@@ -36,3 +40,6 @@ services:
     depends_on:
       api:
         condition: service_started
+
+volumes:
+  uploads_dev:

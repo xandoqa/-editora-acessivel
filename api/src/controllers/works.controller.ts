@@ -20,6 +20,7 @@ import {
 
 const MIME: Record<string, string> = {
   PDF: 'application/pdf',
+  DOCX: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
   EPUB: 'application/epub+zip',
   CBZ: 'application/vnd.comicbook+zip',
   CBR: 'application/vnd.comicbook-rar',
@@ -53,10 +54,6 @@ export async function updateWork(req: Request, res: Response) {
 
 export async function submitWork(req: Request, res: Response) {
   res.json(await worksService.submitWork(workId(req), currentUser(req)));
-}
-
-export async function publishWork(req: Request, res: Response) {
-  res.json(await worksService.publishWork(workId(req), currentUser(req)));
 }
 
 export async function deleteWork(req: Request, res: Response) {
@@ -139,6 +136,8 @@ export async function startSession(req: Request, res: Response) {
 
 export async function updateSession(req: Request, res: Response) {
   const { sessionId } = parse(z.object({ sessionId: z.string().uuid('Sessão inválida') }), req.params);
-  await sessionService.updateSession(sessionId, parse(sessionUpdateSchema, req.body));
+  // O token é devolvido na criação da sessão e só quem a abriu o possui.
+  const token = req.header('x-session-token') ?? undefined;
+  await sessionService.updateSession(sessionId, token, parse(sessionUpdateSchema, req.body));
   res.status(204).end();
 }

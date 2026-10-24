@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight, BadgeCheck, BookOpen, Ear, Headphones, LayoutGrid, PlusCircle, Sparkles, Upload, Video, Volume2, VolumeX, AudioLines, Feather, SpellCheck2 } from 'lucide-react';
-import { useCatalog } from '../hooks/queries';
+import { useAuth } from '../auth/AuthContext';
+import { useCatalog, useGenres } from '../hooks/queries';
 import { errorMessage } from '../lib/api';
 import { formatNumber } from '../lib/format';
 import { speak, speechSupported, stopSpeaking } from '../lib/speech';
 import WorkCard from '../components/works/WorkCard';
 import { EmptyState, ErrorState, LoadingState, Pagination } from '../components/ui';
+import { OndaDivisoria, OndasDeSom, Rabisco } from '../components/ui/Ornamentos';
 
 interface Filter {
   key: string;
@@ -19,10 +21,11 @@ interface Filter {
 /** Chips de "Formatos & Recursos Assistivos" do protótipo, mapeados para filtros reais da API. */
 const FILTERS: Filter[] = [
   { key: 'todos', label: 'Todos os Títulos', icon: <Sparkles className="h-4 w-4" /> },
-  { key: 'hq-audio', label: 'Quadrinhos com Audiodescrição', icon: <AudioLines className="h-4 w-4" />, format: 'QUADRINHO', feature: 'audiodescricao' },
-  { key: 'ficcao', label: 'Ficção Independente', icon: <BookOpen className="h-4 w-4" />, format: 'LIVRO' },
-  { key: 'manga', label: 'Mangás & Webcomics Adaptados', icon: <LayoutGrid className="h-4 w-4" />, format: 'MANGA_WEBCOMIC' },
+  { key: 'quadrinhos', label: 'Quadrinhos', icon: <LayoutGrid className="h-4 w-4" />, format: 'QUADRINHO' },
+  { key: 'livros', label: 'Livros', icon: <BookOpen className="h-4 w-4" />, format: 'LIVRO' },
+  { key: 'manga', label: 'Mangás & Webcomics', icon: <LayoutGrid className="h-4 w-4" />, format: 'MANGA_WEBCOMIC' },
   { key: 'zines', label: 'Zines & Poesia', icon: <Feather className="h-4 w-4" />, format: 'ZINE' },
+  { key: 'hq-audio', label: 'Com Audiodescrição', icon: <AudioLines className="h-4 w-4" />, feature: 'audiodescricao' },
   { key: 'libras', label: 'Com Janela de Libras', icon: <Video className="h-4 w-4" />, feature: 'libras' },
   { key: 'facil', label: 'Leitura Fácil', icon: <SpellCheck2 className="h-4 w-4" />, feature: 'facil-leitura' },
 ];
@@ -30,18 +33,22 @@ const FILTERS: Filter[] = [
 const PAGE_SIZE = 9;
 
 export default function Catalog() {
+  const { user, isWriter } = useAuth();
   const [params, setParams] = useSearchParams();
   const q = params.get('q') ?? '';
   const filterKey = params.get('filtro') ?? 'todos';
   const sort = params.get('ordem') ?? 'recent';
+  const genreId = params.get('genero') ?? '';
   const page = Math.max(1, Number(params.get('pagina')) || 1);
   const filter = FILTERS.find((f) => f.key === filterKey) ?? FILTERS[0];
   const [readingIntro, setReadingIntro] = useState(false);
 
+  const { data: genres = [] } = useGenres();
   const { data, isLoading, isError, error, refetch, isFetching } = useCatalog({
     q: q || undefined,
     format: filter.format,
     feature: filter.feature,
+    genreId: genreId ? Number(genreId) : undefined,
     sort,
     page,
     pageSize: PAGE_SIZE,
@@ -77,7 +84,9 @@ export default function Catalog() {
   return (
     <div>
       {/* Hero */}
-      <section className="card relative mb-10 overflow-hidden bg-gradient-to-br from-surface via-surface to-primary-container/60 p-6 md:p-10" aria-labelledby="catalog-title">
+      <section className="card relative mb-10 overflow-hidden bg-surface p-6 md:p-10" aria-labelledby="catalog-title">
+        <Rabisco className="pointer-events-none absolute -right-2 -top-3 h-24 w-28 text-primary/25" />
+        <OndasDeSom className="pointer-events-none absolute bottom-4 right-6 hidden h-16 w-16 text-accent/30 lg:block" />
         <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">
             <p className="mb-3 flex flex-wrap items-center gap-2 text-sm">
@@ -106,8 +115,9 @@ export default function Catalog() {
             </ul>
           </div>
           <div className="flex shrink-0 flex-col gap-3 sm:flex-row lg:w-[300px] lg:flex-col">
-            <Link to="/submit" className="btn-primary py-3">
-              <PlusCircle className="h-5 w-5" aria-hidden /> + Nova Obra Independente
+            <Link to={isWriter ? '/submit' : user ? '/profile' : '/register'} className="btn-primary py-3">
+              <PlusCircle className="h-5 w-5" aria-hidden />
+              {isWriter ? '+ Nova Obra Independente' : 'Quero publicar minha obra'}
             </Link>
             <button type="button" className="btn bg-bg py-3 text-ink hover:bg-surface-high" onClick={readIntro} disabled={!speechSupported} aria-pressed={readingIntro}>
               {readingIntro ? <VolumeX className="h-5 w-5 text-accent" aria-hidden /> : <Volume2 className="h-5 w-5 text-accent" aria-hidden />}
@@ -123,7 +133,18 @@ export default function Catalog() {
           <h2 id="filters-title" className="eyebrow font-sans text-ink-muted">
             Formatos & recursos assistivos
           </h2>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <label htmlFor="genero" className="text-sm text-ink-muted">
+              Categoria
+            </label>
+            <select id="genero" className="input w-auto py-2" value={genreId} onChange={(e) => update({ genero: e.target.value })}>
+              <option value="">Todas as categorias</option>
+              {genres.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name}
+                </option>
+              ))}
+            </select>
             <label htmlFor="sort" className="text-sm text-ink-muted">
               Ordenar por
             </label>
@@ -195,8 +216,10 @@ export default function Catalog() {
         </>
       )}
 
+      <OndaDivisoria className="mt-12 text-outline/50" />
+
       {/* Chamada para autores */}
-      <section className="card mt-12 flex flex-col gap-6 p-6 md:flex-row md:items-center md:justify-between md:p-8" aria-labelledby="cta-title">
+      <section className="card mt-6 flex flex-col gap-6 p-6 md:flex-row md:items-center md:justify-between md:p-8" aria-labelledby="cta-title">
         <div className="max-w-md">
           <p className="eyebrow mb-2 text-accent">Para quadrinistas & editoras</p>
           <h2 id="cta-title" className="text-3xl font-bold text-ink">
@@ -208,12 +231,15 @@ export default function Catalog() {
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
-          <Link to="/submit" className="btn-primary px-6 py-3">
-            <Upload className="h-4 w-4" aria-hidden /> Submeter meu manuscrito
+          <Link to={isWriter ? '/submit' : user ? '/profile' : '/register'} className="btn-primary px-6 py-3">
+            <Upload className="h-4 w-4" aria-hidden />
+            {isWriter ? 'Submeter meu manuscrito' : 'Virar escritor na Livrin'}
           </Link>
-          <Link to="/review" className="btn-secondary px-6 py-3">
-            Acompanhar análise <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
+          {isWriter && (
+            <Link to="/review" className="btn-secondary px-6 py-3">
+              Acompanhar análise <ArrowRight className="h-4 w-4" aria-hidden />
+            </Link>
+          )}
         </div>
       </section>
     </div>

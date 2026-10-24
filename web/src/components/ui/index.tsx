@@ -1,6 +1,7 @@
-import { useEffect, useId, useRef, type ReactNode, type InputHTMLAttributes, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
-import { AlertTriangle, BookOpen, ChevronLeft, ChevronRight, Loader2, Star, X } from 'lucide-react';
+import { useEffect, useId, useRef, useState, type ReactNode, type InputHTMLAttributes, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { AlertTriangle, ChevronLeft, ChevronRight, Loader2, Star, X } from 'lucide-react';
 import { STATUS_LABEL, STATUS_TONE } from '../../lib/labels';
+import { PilhaDeLivros } from './Ornamentos';
 import { initials } from '../../lib/format';
 import type { WorkStatus } from '../../types/api';
 
@@ -64,9 +65,9 @@ export function ErrorState({ message, onRetry }: { message: string; onRetry?: ()
 
 export function EmptyState({ title, description, action }: { title: string; description?: string; action?: ReactNode }) {
   return (
-    <div className="card flex flex-col items-center gap-3 p-10 text-center">
-      <BookOpen className="h-10 w-10 text-primary" aria-hidden />
-      <p className="font-display text-lg font-semibold text-ink">{title}</p>
+    <div className="card flex flex-col items-center gap-4 p-10 text-center">
+      <PilhaDeLivros className="h-24 w-28 text-primary" />
+      <p className="font-display text-xl font-extrabold text-ink">{title}</p>
       {description && <p className="max-w-md text-sm text-ink-muted">{description}</p>}
       {action}
     </div>
@@ -176,12 +177,12 @@ export function Modal({ open, title, onClose, children, footer, wide }: ModalPro
         e.preventDefault();
         onClose();
       }}
-      className="m-auto rounded-2xl border border-outline bg-surface p-0 text-ink backdrop:bg-black/70"
+      className="m-auto border-2 border-outline bg-surface p-0 text-ink shadow-card backdrop:bg-black/70"
       style={{ width: `min(94vw, ${wide ? 760 : 520}px)` }}
     >
       {open && (
         <div className="flex max-h-[85vh] flex-col">
-          <div className="flex items-center justify-between border-b border-outline/60 px-6 py-4">
+          <div className="flex items-center justify-between border-b-2 border-outline px-6 py-4">
             <h2 id={titleId} className="text-lg font-bold">
               {title}
             </h2>
@@ -190,7 +191,7 @@ export function Modal({ open, title, onClose, children, footer, wide }: ModalPro
             </button>
           </div>
           <div className="overflow-y-auto px-6 py-5">{children}</div>
-          {footer && <div className="flex flex-wrap justify-end gap-3 border-t border-outline/60 px-6 py-4">{footer}</div>}
+          {footer && <div className="flex flex-wrap justify-end gap-3 border-t-2 border-outline px-6 py-4">{footer}</div>}
         </div>
       )}
     </dialog>
@@ -272,11 +273,34 @@ export function Stars({ value, size = 16 }: { value: number; size?: number }) {
   );
 }
 
-/** Capa da obra com fallback tipográfico quando não há imagem. */
+/**
+ * Capa da obra com fallback tipográfico.
+ *
+ * O fallback vale tanto para obra sem capa quanto para capa que não carrega:
+ * sem o `onError`, um arquivo ausente no volume de uploads deixava o ícone de
+ * imagem quebrada do navegador espalhado pelo catálogo.
+ */
 export function Cover({ url, title, className = '', alt }: { url: string | null; title: string; className?: string; alt?: string }) {
-  if (url) return <img src={url} alt={alt ?? `Capa da obra ${title}`} className={`object-cover ${className}`} loading="lazy" />;
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [url]);
+
+  if (url && !failed) {
+    return (
+      <img
+        src={url}
+        alt={alt ?? `Capa da obra ${title}`}
+        className={`object-cover ${className}`}
+        loading="lazy"
+        onError={() => setFailed(true)}
+      />
+    );
+  }
   return (
-    <div className={`flex items-center justify-center bg-gradient-to-br from-primary-container to-surface-highest p-3 text-center ${className}`} role="img" aria-label={`Obra ${title} sem capa`}>
+    <div
+      className={`flex items-center justify-center bg-gradient-to-br from-primary-container to-surface-highest p-3 text-center ${className}`}
+      role="img"
+      aria-label={`Obra ${title} sem capa`}
+    >
       <span className="font-display text-sm font-bold text-primary-onContainer">{title}</span>
     </div>
   );

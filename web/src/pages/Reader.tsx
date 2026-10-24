@@ -15,6 +15,7 @@ import {
   FileText,
   Headphones,
   Hand,
+  HandHeart,
   PersonStanding,
   Play,
   SpellCheck2,
@@ -33,6 +34,7 @@ import ReaderPreferencesPanel from '../components/reader/ReaderPreferencesPanel'
 import { PALETTES, textStyle, useReaderPrefs } from '../components/reader/readerPrefs';
 import { useReadingSession } from '../components/reader/useReadingSession';
 import FeedbackSection from '../components/works/FeedbackSection';
+import SeloLivrin from '../components/works/SeloLivrin';
 import { Avatar, Cover, ErrorState, LoadingState, Stars } from '../components/ui';
 
 export const LAST_READ_KEY = 'livrin_last_read';
@@ -61,7 +63,7 @@ export default function Reader() {
   const playerRef = useRef<PlayerHandle>(null);
   const readerRef = useRef<HTMLElement>(null);
   // Prévias do próprio autor e de rascunhos não contam como leitura nas métricas.
-  const track = useReadingSession(work?.id, !!work && work.status === 'PUBLICADO' && work.author.id !== user?.id);
+  const track = useReadingSession(work?.id, !!work && work.status === 'APROVADO' && work.author.id !== user?.id);
 
   const totalPages = work?.hasFile ? fileTotal || 1 : Math.max(1, ...descriptions.map((d) => d.pageNumber));
   const goTo = useCallback((p: number) => setPage(() => Math.min(Math.max(1, p), Math.max(1, totalPages))), [totalPages]);
@@ -72,13 +74,13 @@ export default function Reader() {
     setPage(Math.max(1, Number(params.get('pagina')) || 1));
     setFileTotal(0);
     if (work) safeStorage.set(LAST_READ_KEY, String(work.id));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Dependência intencionalmente só na obra: reiniciar a página ao trocar de obra, não a cada render.
   }, [work?.id]);
 
   // "Ouvir audiodescrição" vindo de outro lugar (?ouvir=1).
   useEffect(() => {
     if (params.get('ouvir') === '1' && work) setTimeout(() => playerRef.current?.play(), 300);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // Dependência intencionalmente só na obra: reiniciar a página ao trocar de obra, não a cada render.
   }, [work?.id]);
 
   useEffect(() => {
@@ -123,7 +125,7 @@ export default function Reader() {
 
   const palette = PALETTES[prefs.palette];
   const isOwner = user?.id === work.author.id;
-  const audioDescValidated = work.hasAudioDesc && (work.status === 'PUBLICADO' || work.status === 'APROVADO');
+  const audioDescValidated = work.hasAudioDesc && work.status === 'APROVADO';
   const fileLabel = work.file ? `${work.file.type} · ${formatBytes(work.file.sizeBytes)}` : '';
 
   const startReading = () => {
@@ -146,7 +148,7 @@ export default function Reader() {
 
   return (
     <div className="space-y-6">
-      {work.status !== 'PUBLICADO' && (
+      {work.status !== 'APROVADO' && (
         <div className="flex items-start gap-3 rounded-xl border border-warn/40 bg-warn-container p-4 text-sm text-ink" role="status">
           <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-warn" aria-hidden />
           <p>
@@ -171,7 +173,7 @@ export default function Reader() {
             <div className="relative overflow-hidden rounded-2xl bg-surface-high shadow-card">
               {work.hasAltoContraste && (
                 <span className="chip absolute left-3 top-3 z-10 bg-black/75 text-accent">
-                  <BadgeCheck className="h-4 w-4" aria-hidden /> WCAG AAA
+                  <BadgeCheck className="h-4 w-4" aria-hidden /> Alto contraste
                 </span>
               )}
               <Cover url={work.coverUrl} title={work.title} className="aspect-[3/4] w-full" />
@@ -230,6 +232,10 @@ export default function Reader() {
               )}
             </ul>
 
+            <div className="mt-6">
+              <SeloLivrin work={work} />
+            </div>
+
             <h2 className="eyebrow mt-6 mb-3 font-sans text-ink-muted">Recursos inclusivos certificados</h2>
             <ul className="flex flex-wrap gap-2">
               {certified.map((c) => (
@@ -282,6 +288,10 @@ export default function Reader() {
                   )}
                 </div>
               )}
+              {/* Apoio discreto, ao lado das ações da obra — nunca antes de ler (seção 19). */}
+              <Link to={`/apoiar?obra=${work.id}`} className="btn-ghost px-5 py-3">
+                <HandHeart className="h-5 w-5" aria-hidden /> Apoiar esta obra
+              </Link>
             </div>
           </div>
         </div>

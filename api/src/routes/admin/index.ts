@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as admin from '../../controllers/admin/admin.controller';
+import * as donations from '../../controllers/donations.controller';
 import { authenticate, requireAdmin } from '../../middlewares/auth';
 import { workUpload } from '../../middlewares/upload';
 
@@ -36,6 +37,9 @@ router.get('/genres', admin.listGenres);
 router.post('/genres', admin.createGenre);
 router.patch('/genres/:id', admin.updateGenre);
 router.delete('/genres/:id', admin.deleteGenre);
+
+router.get('/donations', donations.listAdmin);
+router.get('/donations/stats', donations.statsAdmin);
 
 router.get('/feedbacks', admin.listFeedbacks);
 router.patch('/feedbacks/:id', admin.updateFeedback);

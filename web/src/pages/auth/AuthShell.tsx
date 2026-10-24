@@ -18,7 +18,7 @@ export default function AuthShell({ children, subtitle }: { children: ReactNode;
               <LogoMark size="lg" />
             </Link>
             <p className="eyebrow mt-4 flex items-center gap-2 text-primary">
-              Acesso editorial <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden /> WCAG 2.2 AAA
+              Acesso editorial <span className="h-1.5 w-1.5 rounded-full bg-accent" aria-hidden /> Leitura para todo mundo
             </p>
             <h1 className="mt-2 text-3xl font-bold text-ink">Editora Livrin</h1>
             <p className="mt-2 max-w-sm text-ink-muted">{subtitle}</p>

@@ -1,10 +1,27 @@
-import type { CheckStatus, FeatureFlag, Work, WorkFormat, WorkStatus } from '../types/api';
+import type { CheckStatus, FeatureFlag, Role, Work, WorkFormat, WorkStatus } from '../types/api';
+
+export const ROLE_LABEL: Record<Role, string> = {
+  LEITOR: 'Leitor',
+  ESCRITOR: 'Escritor',
+  ADMIN: 'Administrador',
+};
+
+export const ROLE_DESCRIPTION: Record<Role, string> = {
+  LEITOR: 'Acessa o catálogo, lê as obras e avalia. Não publica.',
+  ESCRITOR: 'Tudo do leitor e mais: cadastra, envia e acompanha as próprias obras.',
+  ADMIN: 'Tudo do escritor e mais: painel administrativo, curadoria e decisão editorial.',
+};
+
+/** Hierarquia: cada perfil pode tudo do anterior. Espelha api/src/middlewares/auth.ts. */
+const ROLE_RANK: Record<Role, number> = { LEITOR: 0, ESCRITOR: 1, ADMIN: 2 };
+
+export const hasAtLeast = (role: Role | undefined, required: Role): boolean =>
+  !!role && ROLE_RANK[role] >= ROLE_RANK[required];
 
 export const STATUS_LABEL: Record<WorkStatus, string> = {
   RASCUNHO: 'Rascunho em Edição',
   EM_ANALISE: 'Em Análise',
-  APROVADO: 'Aprovado pelo Comitê',
-  PUBLICADO: 'Publicado',
+  APROVADO: 'No catálogo',
   REJEITADO: 'Ajustes Solicitados',
   ARQUIVADO: 'Arquivado',
 };
@@ -13,7 +30,6 @@ export const STATUS_TONE: Record<WorkStatus, 'primary' | 'warn' | 'accent' | 'da
   RASCUNHO: 'primary',
   EM_ANALISE: 'warn',
   APROVADO: 'accent',
-  PUBLICADO: 'accent',
   REJEITADO: 'danger',
   ARQUIVADO: 'muted',
 };
@@ -54,7 +70,7 @@ export const FEATURES: FeatureInfo[] = [
   { flag: 'hasTextoAlt', label: 'Texto alternativo', short: 'Texto alt.', description: 'Descrições semânticas em todos os quadros e balões.', catalogKey: 'texto-alt' },
   { flag: 'hasLibras', label: 'Janela de Libras', short: 'Vídeo Libras', description: 'Intérprete de Libras nos diálogos principais.', catalogKey: 'libras' },
   { flag: 'hasFacilLeitura', label: 'Leitura fácil', short: 'Fácil leitura', description: 'Vocabulário simplificado e frases curtas.', catalogKey: 'facil-leitura' },
-  { flag: 'hasAltoContraste', label: 'Alto contraste', short: 'WCAG AAA', description: 'Paleta testada com contraste mínimo de 7:1.', catalogKey: 'alto-contraste' },
+  { flag: 'hasAltoContraste', label: 'Alto contraste', short: 'Alto contraste', description: 'A autoria declara ter trabalhado o contraste da arte.', catalogKey: 'alto-contraste' },
 ];
 
 export function workFeatures(work: Pick<Work, FeatureFlag>): FeatureInfo[] {

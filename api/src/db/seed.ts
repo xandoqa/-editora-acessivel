@@ -2,9 +2,9 @@ import path from 'node:path';
 import { eq } from 'drizzle-orm';
 import { env } from '../config/env';
 import { DEFAULT_REVIEW_CHECKS } from '../services/work-policy';
-import { ensureUploadDirs, importLocalFile } from '../services/storage.service';
+import { ensureUploadDirs, importLocalFile, removeFile, type StoredFile } from '../services/storage.service';
 import { logger } from '../utils/logger';
-import { hashPassword, verifyPassword } from '../utils/password';
+import { hashPassword } from '../utils/password';
 import { slugify } from '../utils/text';
 import { closeDb, db } from './client';
 import {
@@ -44,31 +44,34 @@ async function seedGenres() {
     .onConflictDoNothing();
 }
 
+/**
+ * Cria o administrador inicial — e APENAS cria.
+ *
+ * A versão anterior também regravava papel, situação e senha a cada
+ * inicialização. Como o `iniciar.bat` roda `docker compose up` toda vez, quem
+ * trocasse a própria senha em "Meu perfil" a via voltar silenciosamente para a
+ * do `.env` no reinício seguinte. Agora o `.env` só tem efeito na criação; para
+ * mexer em uma conta que já existe, use `npm run admin:create`, que é explícito.
+ */
 async function seedAdmin() {
   if (!env.ADMIN_EMAIL || !env.ADMIN_PASSWORD) {
     logger.info('ADMIN_EMAIL/ADMIN_PASSWORD não definidos: nenhum administrador inicial criado (use `npm run admin:create`).');
     return;
   }
-  if (env.ADMIN_PASSWORD.length < 8) {
-    logger.warn('ADMIN_PASSWORD precisa ter pelo menos 8 caracteres. Administrador inicial NÃO criado.');
-    return;
-  }
   const email = env.ADMIN_EMAIL.toLowerCase();
-  const [existing] = await db.select().from(users).where(eq(users.email, email));
+  const [existing] = await db.select({ id: users.id, role: users.role, isActive: users.isActive }).from(users).where(eq(users.email, email));
+
   if (existing) {
-    // Mantém a conta do .env sincronizada: garante papel ADMIN/ativa e aplica a senha atual do .env.
-    const samePassword = await verifyPassword(env.ADMIN_PASSWORD, existing.passwordHash);
-    await db
-      .update(users)
-      .set({
-        role: 'ADMIN',
-        isActive: true,
-        ...(samePassword ? {} : { passwordHash: await hashPassword(env.ADMIN_PASSWORD) }),
-      })
-      .where(eq(users.id, existing.id));
-    if (!samePassword || existing.role !== 'ADMIN' || !existing.isActive) logger.info(`Administrador ${email} atualizado a partir do .env.`);
+    if (existing.role !== 'ADMIN' || !existing.isActive) {
+      logger.warn(
+        `A conta ${email} já existe, mas não é um administrador ativo. O seed não altera contas existentes. ` +
+          'Para promovê-la ou reativá-la: npm run admin:create -- --email ' +
+          email,
+      );
+    }
     return;
   }
+
   await db.insert(users).values({
     name: env.ADMIN_NAME,
     email,
@@ -95,8 +98,10 @@ async function seedDemo() {
     logger.info('Dados de demonstração já existem: seed de demonstração ignorado.');
     return;
   }
-  if (!env.DEMO_USER_PASSWORD || env.DEMO_USER_PASSWORD.length < 8) {
-    logger.warn('SEED_DEMO_DATA=true, mas DEMO_USER_PASSWORD não foi definido (mín. 8 caracteres). Demonstração ignorada.');
+  // O formato da senha já foi validado em config/env.ts; aqui só resta conferir
+  // se ela foi informada.
+  if (!env.DEMO_USER_PASSWORD) {
+    logger.warn('SEED_DEMO_DATA=true, mas DEMO_USER_PASSWORD não foi definido. Dados de demonstração ignorados.');
     return;
   }
 
@@ -108,6 +113,34 @@ async function seedDemo() {
     return g.id;
   };
 
+  // Os arquivos são copiados ANTES da transação: escrita em disco não participa
+  // do rollback do PostgreSQL, então copiar lá dentro deixaria arquivos órfãos
+  // no volume se a transação falhasse. Aqui, se algo der errado, o catch limpa.
+  const assets = new Map<string, { cover?: StoredFile; file?: StoredFile }>();
+  const copiedPaths = (): (string | undefined)[] =>
+    [...assets.values()].flatMap((a) => [a.cover?.relativePath, a.file?.relativePath]);
+
+  try {
+    for (const w of DEMO_WORKS) {
+      assets.set(w.key, {
+        cover: w.cover ? await importLocalFile(path.join(ASSETS, 'covers', w.cover), 'cover') : undefined,
+        file: w.file ? await importLocalFile(path.join(ASSETS, 'works', w.file), 'work') : undefined,
+      });
+    }
+    await seedDemoRecords(passwordHash, genreId, assets);
+  } catch (err) {
+    await Promise.all(copiedPaths().map((p) => removeFile(p)));
+    throw err;
+  }
+  logger.info(`Dados de demonstração criados (${DEMO_USERS.length} usuários, ${DEMO_WORKS.length} obras).`);
+}
+
+/** Insere todos os registros de demonstração em uma única transação. */
+async function seedDemoRecords(
+  passwordHash: string,
+  genreId: (name: string) => number,
+  assets: Map<string, { cover?: StoredFile; file?: StoredFile }>,
+): Promise<void> {
   await db.transaction(async (tx) => {
     const userIds: Record<string, number> = {};
     for (const u of DEMO_USERS) {
@@ -120,8 +153,7 @@ async function seedDemo() {
 
     const workIds: Record<string, number> = {};
     for (const w of DEMO_WORKS) {
-      const cover = w.cover ? await importLocalFile(path.join(ASSETS, 'covers', w.cover), 'cover') : undefined;
-      const file = w.file ? await importLocalFile(path.join(ASSETS, 'works', w.file), 'work') : undefined;
+      const { cover, file } = assets.get(w.key) ?? {};
       const submittedAt =
         w.status === 'RASCUNHO' ? null : daysAgo(w.submittedDaysAgo ?? (w.publishedDaysAgo ?? 0) + 15);
       const [row] = await tx
@@ -150,7 +182,7 @@ async function seedDemo() {
           fileSizeBytes: file?.sizeBytes,
           fileOriginalName: file?.originalName,
           submittedAt,
-          reviewedAt: ['APROVADO', 'PUBLICADO'].includes(w.status) ? daysAgo((w.publishedDaysAgo ?? 1) + 2) : null,
+          reviewedAt: w.status === 'APROVADO' ? daysAgo((w.publishedDaysAgo ?? 1) + 2) : null,
           publishedAt: w.publishedDaysAgo !== undefined ? daysAgo(w.publishedDaysAgo) : null,
         })
         .returning({ id: works.id });
@@ -190,7 +222,7 @@ async function seedDemo() {
 
     // Sessões de leitura de demonstração para popular as métricas dos painéis.
     const random = rng(2024);
-    const volume: Record<string, number> = { mapa: 140, alem: 110, raizes: 60, terra: 35, chamas: 45, vozes: 25 };
+    const volume: Record<string, number> = { mapa: 140, alem: 110, raizes: 60, terra: 35, chamas: 45, vozes: 25, ecos: 72, zine: 38, rimas: 54 };
     const sessions = Object.entries(volume).flatMap(([key, n]) =>
       Array.from({ length: n }, () => {
         const started = daysAgo(random() * 60);
@@ -208,7 +240,6 @@ async function seedDemo() {
     );
     await tx.insert(readingSessions).values(sessions);
   });
-  logger.info(`Dados de demonstração criados (${DEMO_USERS.length} usuários, ${DEMO_WORKS.length} obras).`);
 }
 
 if (require.main === module) {

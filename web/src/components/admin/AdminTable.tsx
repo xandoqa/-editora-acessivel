@@ -33,12 +33,12 @@ export function TableShell({ children, caption }: { children: ReactNode; caption
   );
 }
 
-export const theadClass = 'border-b border-outline/60 bg-surface-low text-xs uppercase tracking-wider text-ink-muted';
-export const rowClass = 'border-b border-outline/40 last:border-0 hover:bg-surface-high/60';
+export const theadClass = 'border-b-2 border-outline bg-surface-high text-xs uppercase tracking-wider text-ink-muted';
+export const rowClass = 'border-b border-outline/30 last:border-0 hover:bg-surface-high';
 
 export function SearchBox({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
   return (
-    <div className="flex min-w-[240px] flex-1 items-center gap-2 rounded-xl bg-surface-high px-3">
+    <div className="flex min-w-[240px] flex-1 items-center gap-2 rounded-xl border-2 border-outline bg-surface px-3">
       <Search className="h-4 w-4 text-ink-muted" aria-hidden />
       <input
         type="search"

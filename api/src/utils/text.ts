@@ -2,6 +2,9 @@
 export function slugify(value: string): string {
   return value
     .normalize('NFD')
+    // Remove os sinais diacríticos separados pelo NFD (U+0300 a U+036F).
+    // Escrito com escapes de propósito: os caracteres combinantes literais são
+    // invisíveis no editor e somem se o arquivo for salvo fora de UTF-8.
     .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')

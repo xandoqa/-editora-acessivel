@@ -8,6 +8,7 @@ import { escapeLike } from '../utils/text';
 import { paginated } from '../validators/common';
 import type { adminFeedbackListSchema } from '../validators/admin.schemas';
 import type { feedbackSchema } from '../validators/works.schemas';
+import { PUBLIC_STATUS } from './work-policy';
 import { findWork } from './work-queries';
 
 const feedbackSelect = {
@@ -29,20 +30,20 @@ function baseFeedbackQuery() {
     .innerJoin(works, eq(works.id, feedbacks.workId));
 }
 
-/** Avaliações visíveis de uma obra publicada. */
+/** Avaliações visíveis de uma obra que está no catálogo. */
 export async function listWorkFeedbacks(workId: number) {
   const work = await findWork(workId);
-  if (work.status !== 'PUBLICADO') return [];
+  if (work.status !== PUBLIC_STATUS) return [];
   return baseFeedbackQuery()
     .where(and(eq(feedbacks.workId, workId), eq(feedbacks.isVisible, true)))
     .orderBy(desc(feedbacks.createdAt))
     .limit(50);
 }
 
-/** Leitor avalia uma obra publicada (uma avaliação por leitor; reenviar atualiza a anterior). */
+/** Leitor avalia uma obra do catálogo (uma avaliação por leitor; reenviar atualiza a anterior). */
 export async function upsertFeedback(workId: number, user: AuthUser, input: z.infer<typeof feedbackSchema>) {
   const work = await findWork(workId);
-  if (work.status !== 'PUBLICADO') throw notFound('Obra não encontrada.');
+  if (work.status !== PUBLIC_STATUS) throw notFound('Obra não encontrada.');
   if (work.authorId === user.id) throw conflict('Autores não podem avaliar as próprias obras.');
   await db
     .insert(feedbacks)

@@ -36,12 +36,13 @@ const ascii = (head: Buffer, text: string, offset = 0) => head.subarray(offset, 
 
 const RULES: Record<UploadKind, KindRule> = {
   work: {
-    extensions: ['pdf', 'epub', 'cbz', 'cbr'],
+    extensions: ['pdf', 'epub', 'cbz', 'cbr', 'docx'],
     maxBytes: env.maxUploadBytes,
-    label: 'PDF, EPUB, CBZ ou CBR',
+    label: 'PDF, DOCX, EPUB, CBZ ou CBR',
     sniff: (head, ext) => {
       if (ext === 'pdf') return ascii(head, '%PDF-');
-      if (ext === 'epub' || ext === 'cbz') return startsWith(head, [0x50, 0x4b, 0x03, 0x04]);
+      // DOCX, EPUB e CBZ são arquivos ZIP: a assinatura é a mesma (PK\x03\x04).
+      if (ext === 'epub' || ext === 'cbz' || ext === 'docx') return startsWith(head, [0x50, 0x4b, 0x03, 0x04]);
       if (ext === 'cbr') return ascii(head, 'Rar!');
       return false;
     },

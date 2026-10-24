@@ -1,6 +1,6 @@
 {
   "name": "livrin-api",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "description": "API REST da Editora Livrin (Express 5 + TypeScript + Drizzle ORM + PostgreSQL)",
   "type": "commonjs",
@@ -15,10 +15,11 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx src/db/migrate.ts",
     "db:seed": "tsx src/db/seed.ts",
+    "db:verify": "tsx src/db/integrity.ts",
     "db:reset": "tsx src/db/reset.ts",
     "db:studio": "drizzle-kit studio",
     "admin:create": "tsx src/scripts/create-admin.ts",
-    "start:prod": "node dist/db/migrate.js && node dist/db/seed.js && node dist/server.js",
+    "start:prod": "node dist/db/migrate.js && node dist/db/seed.js && node dist/db/integrity.js && node dist/server.js",
     "test": "vitest run",
     "test:watch": "vitest"
   },

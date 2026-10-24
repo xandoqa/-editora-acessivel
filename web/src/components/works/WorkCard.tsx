@@ -5,6 +5,7 @@ import type { FeatureFlag, Work } from '../../types/api';
 import { FORMAT_SHORT } from '../../lib/labels';
 import { speak, speechSupported, stopSpeaking } from '../../lib/speech';
 import { Cover } from '../ui';
+import { SeloCompacto } from './SeloLivrin';
 
 /** Selo superior (recurso de destaque) e etiqueta lateral, como nos cards do protótipo. */
 const TOP_BADGE: Partial<Record<FeatureFlag, { label: string; icon: ReactNode }>> = {
@@ -16,11 +17,11 @@ const TOP_BADGE: Partial<Record<FeatureFlag, { label: string; icon: ReactNode }>
   hasAltoContraste: { label: 'Alto contraste', icon: <Eye className="h-3.5 w-3.5" /> },
 };
 const SIDE_TAG: Partial<Record<FeatureFlag, { label: string; icon: ReactNode; tone: string }>> = {
-  hasAltoContraste: { label: 'WCAG AAA', icon: <Eye className="h-3.5 w-3.5" />, tone: 'text-accent' },
+  hasAltoContraste: { label: 'Alto contraste', icon: <Eye className="h-3.5 w-3.5" />, tone: 'text-accent' },
   hasAudioDesc: { label: 'Audio HQ', icon: <Ear className="h-3.5 w-3.5" />, tone: 'text-primary' },
   hasLibras: { label: 'Vídeo Libras', icon: <Video className="h-3.5 w-3.5" />, tone: 'text-primary' },
   hasFacilLeitura: { label: 'Lexical', icon: <SpellCheck2 className="h-3.5 w-3.5" />, tone: 'text-primary' },
-  hasLeitorTela: { label: 'AAA', icon: <PersonStanding className="h-3.5 w-3.5" />, tone: 'text-accent' },
+  hasLeitorTela: { label: 'Leitor de tela', icon: <PersonStanding className="h-3.5 w-3.5" />, tone: 'text-accent' },
 };
 
 function pick<T>(work: Work, map: Partial<Record<FeatureFlag, T>>): T | undefined {
@@ -75,6 +76,7 @@ export default function WorkCard({ work }: { work: Work }) {
         </div>
       </div>
       <div className="flex flex-1 flex-col p-4">
+        <SeloCompacto work={work} className="mb-2 self-start" />
         <div className="mb-1 flex items-center justify-between gap-2">
           <p className="truncate text-sm font-semibold text-ink">{work.author.name}</p>
           {side && (

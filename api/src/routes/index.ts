@@ -1,9 +1,10 @@
 import { Router } from 'express';
 import * as authCtrl from '../controllers/auth.controller';
+import * as donationsCtrl from '../controllers/donations.controller';
 import * as meCtrl from '../controllers/me.controller';
 import * as worksCtrl from '../controllers/works.controller';
-import { authenticate, optionalAuth } from '../middlewares/auth';
-import { authLimiter } from '../middlewares/rate-limit';
+import { authenticate, optionalAuth, requireWriter } from '../middlewares/auth';
+import { authLimiter, sessionLimiter } from '../middlewares/rate-limit';
 import { workUpload } from '../middlewares/upload';
 import adminRoutes from './admin';
 
@@ -21,7 +22,8 @@ router.post('/auth/register', authLimiter, authCtrl.register); // público
 router.post('/auth/login', authLimiter, authCtrl.login); // público
 router.get('/auth/me', authenticate, authCtrl.me); // autenticado
 router.patch('/auth/me', authenticate, authCtrl.updateMe); // autenticado
-router.post('/auth/me/password', authenticate, authCtrl.changePassword); // autenticado
+router.post('/auth/me/password', authenticate, authCtrl.changePassword);
+router.post('/auth/me/writer', authenticate, authCtrl.enableWriter); // leitor → escritor // autenticado
 
 /* ------------------------------ Gêneros ------------------------------- */
 router.get('/genres', meCtrl.listGenres); // público
@@ -32,13 +34,12 @@ router.get('/me/summary', authenticate, meCtrl.mySummary);
 router.get('/me/dashboard', authenticate, meCtrl.myDashboard);
 
 /* ------------------------------- Obras -------------------------------- */
-router.get('/works', worksCtrl.listCatalog); // público (somente publicadas)
-router.post('/works', authenticate, workUpload, worksCtrl.createWork);
+router.get('/works', worksCtrl.listCatalog); // público (somente obras aprovadas)
+router.post('/works', authenticate, requireWriter, workUpload, worksCtrl.createWork); // leitor recebe 403
 router.get('/works/:id', optionalAuth, worksCtrl.getWork);
 router.patch('/works/:id', authenticate, workUpload, worksCtrl.updateWork);
 router.delete('/works/:id', authenticate, worksCtrl.deleteWork);
 router.post('/works/:id/submit', authenticate, worksCtrl.submitWork);
-router.post('/works/:id/publish', authenticate, worksCtrl.publishWork);
 router.get('/works/:id/file', optionalAuth, worksCtrl.streamWorkFile);
 router.get('/works/:id/audio', optionalAuth, worksCtrl.streamWorkAudio);
 
@@ -58,8 +59,15 @@ router.get('/works/:id/feedbacks/mine', authenticate, worksCtrl.myFeedback);
 router.post('/works/:id/feedbacks', authenticate, worksCtrl.upsertFeedback);
 
 /* ------------------------- Sessões de leitura ------------------------- */
-router.post('/works/:id/sessions', optionalAuth, worksCtrl.startSession);
+router.post('/works/:id/sessions', sessionLimiter, optionalAuth, worksCtrl.startSession);
+// Exige o cabeçalho X-Session-Token devolvido na criação da sessão.
 router.patch('/sessions/:sessionId', worksCtrl.updateSession);
+
+/* ------------------------------ Doações ------------------------------- */
+router.get('/donations/options', donationsCtrl.options); // público
+router.post('/donations', authLimiter, optionalAuth, donationsCtrl.create); // público (apoio anônimo permitido)
+router.post('/donations/:id/confirm', optionalAuth, donationsCtrl.confirm);
+router.get('/me/donations', authenticate, donationsCtrl.mine);
 
 /* --------------------------- Administração ---------------------------- */
 router.use('/admin', adminRoutes);

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { api, safeStorage, setUnauthorizedListener, TOKEN_KEY } from '../lib/api';
+import { hasAtLeast } from '../lib/labels';
 import type { User } from '../types/api';
 
 interface AuthContextValue {
@@ -8,6 +9,8 @@ interface AuthContextValue {
   /** true enquanto valida o token salvo com a API na abertura do app. */
   loading: boolean;
   isAdmin: boolean;
+  /** Pode cadastrar e enviar obras (ESCRITOR ou ADMIN). */
+  isWriter: boolean;
   login: (token: string, user: User) => void;
   logout: () => void;
   updateUser: (user: User) => void;
@@ -75,7 +78,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [logout, updateUser]);
 
   const value = useMemo(
-    () => ({ user, loading, isAdmin: user?.role === 'ADMIN', login, logout, updateUser }),
+    () => ({
+      user,
+      loading,
+      isAdmin: hasAtLeast(user?.role, 'ADMIN'),
+      isWriter: hasAtLeast(user?.role, 'ESCRITOR'),
+      login,
+      logout,
+      updateUser,
+    }),
     [user, loading, login, logout, updateUser],
   );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

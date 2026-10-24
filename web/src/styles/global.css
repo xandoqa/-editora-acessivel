@@ -2,38 +2,97 @@
 @tailwind components;
 @tailwind utilities;
 
-/* -------------------------------------------------------------------------- */
-/* Tokens de cor (canais RGB). Contraste do texto principal ≥ 7:1 (WCAG AAA).  */
-/* -------------------------------------------------------------------------- */
+/* ==========================================================================
+   LIVRIN — DESIGN SYSTEM
+   --------------------------------------------------------------------------
+   A direção é de livraria impressa, não de painel de software: papel creme,
+   traço de tinta em volta de tudo, sombra dura deslocada (como adesivo colado
+   na página), cantos irregulares e cor chapada de cartaz. A seção 14 da
+   especificação pede ilustração, desenho manual, formas orgânicas e aparência
+   editorial — e pede explicitamente para evitar a estética de dashboard.
+
+   Três temas, todos com os MESMOS nomes de token, para que nenhum componente
+   precise saber em qual deles está:
+     :root            → Papel (claro, padrão)
+     :root.tema-escuro → Noite
+     :root.hc          → Alto contraste (amarelo/preto), vence os outros dois
+
+   Todos os pares de texto foram medidos pela fórmula da WCAG e passam em
+   AAA (7:1) sobre TODAS as superfícies do tema. As bordas são de tinta, então
+   o limite de cada componente passa com folga no critério 1.4.11 (3:1) — antes
+   os campos de formulário tinham 1,1:1 contra o fundo e eram invisíveis.
+   ========================================================================== */
+
 :root {
-  --c-bg: 17 19 24;
-  --c-surface: 25 28 34;
-  --c-surface-low: 21 23 29;
-  --c-surface-high: 32 36 43;
-  --c-surface-highest: 42 46 55;
-  --c-outline: 52 57 67;
-  --c-outline-strong: 96 104 118;
-  --c-ink: 230 233 239;
-  --c-ink-muted: 190 196 207;
-  --c-ink-subtle: 165 172 184;
-  --c-primary: 173 198 255;
-  --c-on-primary: 10 37 84;
-  --c-primary-container: 36 60 99;
-  --c-on-primary-container: 214 226 255;
-  --c-accent: 110 231 168;
-  --c-accent-container: 14 59 42;
-  --c-on-accent: 4 40 25;
-  --c-warn: 251 199 84;
-  --c-warn-container: 66 50 10;
-  --c-danger: 255 170 156;
-  --c-danger-container: 74 24 20;
-  --c-admin: 255 184 128;
-  --c-admin-container: 72 40 16;
+  /* --- Papel: superfícies -------------------------------------------- */
+  --c-bg: 239 231 212;
+  --c-surface: 255 252 244;
+  --c-surface-low: 246 240 226;
+  --c-surface-high: 241 233 215;
+  --c-surface-highest: 230 219 194;
+
+  /* --- Traço de tinta -------------------------------------------------- */
+  --c-outline: 23 22 26;
+  --c-outline-strong: 23 22 26;
+
+  /* --- Texto ---------------------------------------------------------- */
+  --c-ink: 23 22 26;
+  --c-ink-muted: 64 62 73;
+  --c-ink-subtle: 70 67 79;
+
+  /* --- Cor de cartaz --------------------------------------------------- */
+  --c-primary: 23 58 161;
+  --c-on-primary: 255 252 244;
+  --c-primary-container: 215 224 251;
+  --c-on-primary-container: 16 40 111;
+  --c-accent: 16 79 47;
+  --c-accent-container: 214 238 223;
+  --c-on-accent: 255 252 244;
+  --c-warn: 97 61 0;
+  --c-warn-container: 251 235 200;
+  --c-danger: 133 29 12;
+  --c-danger-container: 251 223 216;
+  --c-admin: 94 39 137;
+  --c-admin-container: 234 221 247;
+
+  /* --- Materiais ------------------------------------------------------- */
+  --sombra-tinta: rgb(23 22 26);
+  --grao-opacidade: 0.055;
   --font-scale: 1;
+  color-scheme: light;
+}
+
+/* Tema Noite — para quem lê melhor com pouco brilho. */
+:root.tema-escuro {
+  --c-bg: 21 20 26;
+  --c-surface: 30 28 37;
+  --c-surface-low: 25 24 33;
+  --c-surface-high: 39 36 48;
+  --c-surface-highest: 51 48 62;
+  --c-outline: 140 134 160;
+  --c-outline-strong: 184 178 200;
+  --c-ink: 242 239 230;
+  --c-ink-muted: 214 209 224;
+  --c-ink-subtle: 198 192 212;
+  --c-primary: 175 196 255;
+  --c-on-primary: 11 31 85;
+  --c-primary-container: 42 60 114;
+  --c-on-primary-container: 222 230 255;
+  --c-accent: 123 224 172;
+  --c-accent-container: 19 67 43;
+  --c-on-accent: 6 48 27;
+  --c-warn: 245 200 107;
+  --c-warn-container: 69 51 12;
+  --c-danger: 255 176 160;
+  --c-danger-container: 86 32 20;
+  --c-admin: 217 180 255;
+  --c-admin-container: 62 35 89;
+  --sombra-tinta: rgb(0 0 0);
+  --grao-opacidade: 0.035;
   color-scheme: dark;
 }
 
-/* Modo Alto Contraste (Amarelo/Preto), ativado pelo botão da barra superior. */
+/* Alto contraste (amarelo/preto) — vence os demais temas. */
 :root.hc {
   --c-bg: 0 0 0;
   --c-surface: 0 0 0;
@@ -58,6 +117,9 @@
   --c-danger-container: 0 0 0;
   --c-admin: 255 255 0;
   --c-admin-container: 0 0 0;
+  --sombra-tinta: rgb(255 255 0);
+  --grao-opacidade: 0;
+  color-scheme: dark;
 }
 :root.hc img.decorative-tint {
   filter: grayscale(1) contrast(1.2);
@@ -70,6 +132,17 @@
 :root.hc .hc-border {
   border-color: rgb(var(--c-outline)) !important;
 }
+/* No alto contraste a sombra dura vira contorno: cor chapada não ajuda ninguém. */
+:root.hc .sombra-dura,
+:root.hc .sombra-dura-leve,
+:root.hc .card,
+:root.hc .btn {
+  box-shadow: none !important;
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
 
 html {
   font-size: calc(100% * var(--font-scale));
@@ -79,6 +152,26 @@ html {
 body {
   @apply bg-bg font-sans text-ink antialiased;
   min-height: 100vh;
+  position: relative;
+}
+
+/*
+ * Grão de papel. Uma textura sutil tira da interface aquele aspecto de
+ * superfície perfeitamente lisa que a seção 14 manda evitar. É um SVG inline
+ * (nenhuma requisição extra) e fica atrás de tudo, sem capturar cliques.
+ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--grao-opacidade);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+body > * {
+  position: relative;
+  z-index: 1;
 }
 
 h1,
@@ -86,16 +179,27 @@ h2,
 h3,
 h4 {
   @apply font-display;
+  font-weight: 800;
+  letter-spacing: -0.02em;
 }
 
-/* Foco sempre visível para navegação por teclado (WCAG 2.4.7 / 2.4.13). */
+/* ==========================================================================
+   FOCO
+   Visível em tudo, sempre. A versão anterior aplicava `focus:outline-none`
+   nos campos de formulário e apagava justamente o indicador de foco — uma
+   falha do critério WCAG 2.4.7 numa plataforma de acessibilidade.
+   ========================================================================== */
 :focus-visible {
   outline: 3px solid rgb(var(--c-primary));
   outline-offset: 2px;
   border-radius: 6px;
 }
+:root.tema-escuro :focus-visible,
+:root.hc :focus-visible {
+  outline-color: rgb(var(--c-ink));
+}
 
-/* Modo "Leitor Otimizado": links sublinhados, foco reforçado, sem animações, mais espaçamento. */
+/* Modo "Leitor Otimizado": links sublinhados, foco reforçado, sem animações. */
 :root.reader-optimized body {
   line-height: 1.75;
   letter-spacing: 0.01em;
@@ -114,6 +218,9 @@ h4 {
   animation: none !important;
   transition: none !important;
 }
+:root.reader-optimized body::before {
+  opacity: 0;
+}
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -126,58 +233,150 @@ h4 {
   }
 }
 
+/* ==========================================================================
+   COMPONENTES
+   ========================================================================== */
+
 @layer components {
+  /* --- Superfícies ---------------------------------------------------- */
+
+  /*
+   * Card: retângulo de papel com traço de tinta e sombra dura deslocada, como
+   * um recorte colado na página. Os quatro cantos têm raios diferentes de
+   * propósito — simetria perfeita é o que faz uma interface parecer gerada.
+   */
   .card {
-    @apply rounded-2xl border border-outline/60 bg-surface;
+    @apply border-2 border-outline bg-surface;
+    border-radius: 20px 26px 20px 26px;
+    box-shadow: 5px 5px 0 var(--sombra-tinta);
+  }
+  .card-plano {
+    @apply border-2 border-outline bg-surface;
+    border-radius: 20px 26px 20px 26px;
   }
   .card-high {
-    @apply rounded-xl bg-surface-high;
+    @apply border-2 border-outline bg-surface-high;
+    border-radius: 16px 22px 16px 22px;
   }
+  .sombra-dura {
+    box-shadow: 5px 5px 0 var(--sombra-tinta);
+  }
+  /* Sombra menor, para peças pequenas como o Selo Livrin. */
+  .sombra-dura-leve {
+    box-shadow: 2px 2px 0 var(--sombra-tinta);
+    transform: rotate(-1.5deg);
+  }
+
+  /* --- Texto ----------------------------------------------------------- */
   .eyebrow {
-    @apply text-xs font-bold uppercase tracking-[0.14em];
+    @apply font-display text-xs font-extrabold uppercase tracking-[0.16em];
   }
+
+  /* --- Botões ----------------------------------------------------------
+   * Todos com traço de tinta e sombra dura. Ao pressionar, o botão "encosta"
+   * na página: desloca 3px e perde a sombra. É um retorno físico, não uma
+   * mudança de brilho.
+   * -------------------------------------------------------------------- */
   .btn {
-    @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex min-h-[44px] items-center justify-center gap-2 border-2 border-outline px-4 py-2 text-sm font-bold;
+    border-radius: 14px 18px 14px 18px;
+    box-shadow: 3px 3px 0 var(--sombra-tinta);
+    transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+  }
+  .btn:hover:not(:disabled) {
+    transform: translate(-1px, -1px);
+    box-shadow: 4px 4px 0 var(--sombra-tinta);
+  }
+  .btn:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 var(--sombra-tinta);
+  }
+  .btn:disabled {
+    @apply cursor-not-allowed opacity-50;
+    box-shadow: 2px 2px 0 var(--sombra-tinta);
   }
   .btn-primary {
-    @apply btn bg-primary text-primary-on hover:brightness-110;
+    @apply btn bg-primary text-primary-on;
   }
   .btn-secondary {
-    @apply btn bg-surface-highest text-ink hover:bg-outline;
+    @apply btn bg-surface text-ink;
   }
   .btn-tonal {
-    @apply btn bg-primary-container text-primary-onContainer hover:brightness-125;
+    @apply btn bg-primary-container text-primary-onContainer;
   }
   .btn-accent {
-    @apply btn bg-accent-container text-accent hover:brightness-125;
+    @apply btn bg-accent-container text-accent;
   }
   .btn-danger {
-    @apply btn bg-danger-container text-danger hover:brightness-125;
-  }
-  /* Azul saturado da marca (botão "Entrar na Plataforma" e logotipo do protótipo). */
-  .btn-brand {
-    @apply btn bg-[#1d4ed8] text-white hover:bg-[#1e40af];
-  }
-  .brand-mark {
-    @apply bg-[#2563eb] text-white;
+    @apply btn bg-danger text-primary-on;
   }
   .btn-ghost {
-    @apply btn text-ink-muted hover:bg-surface-high hover:text-ink;
+    @apply btn border-transparent bg-transparent text-ink-muted;
+    box-shadow: none;
+  }
+  .btn-ghost:hover:not(:disabled) {
+    @apply bg-surface-high text-ink;
+    transform: none;
+    box-shadow: none;
+  }
+  /* Azul saturado da marca (botão "Entrar na Plataforma" e logotipo). */
+  .btn-brand {
+    @apply btn bg-primary text-primary-on;
+  }
+  .brand-mark {
+    @apply border-2 border-outline bg-primary text-primary-on;
   }
   .icon-btn {
-    @apply inline-flex h-11 w-11 items-center justify-center rounded-xl text-ink-muted transition-colors hover:bg-surface-highest hover:text-ink;
+    @apply inline-flex h-11 w-11 items-center justify-center border-2 border-transparent text-ink-muted transition-colors;
+    border-radius: 12px 14px 12px 14px;
   }
+  .icon-btn:hover {
+    @apply border-outline bg-surface-high text-ink;
+  }
+
+  /* --- Formulários ------------------------------------------------------
+   * Campo com traço de tinta: o limite do componente tem contraste de 17:1
+   * contra o papel, muito acima dos 3:1 que o critério 1.4.11 exige. O foco
+   * NÃO é removido — o `:focus-visible` global continua valendo.
+   * -------------------------------------------------------------------- */
   .input {
-    @apply w-full rounded-xl border border-transparent bg-surface-high px-4 py-3 text-ink placeholder:text-ink-subtle focus:border-primary focus:outline-none focus-visible:outline-none;
+    @apply w-full border-2 border-outline bg-surface px-4 py-3 text-ink placeholder:text-ink-subtle;
+    border-radius: 12px 16px 12px 16px;
+  }
+  .input:focus {
+    @apply bg-surface-low;
   }
   .input[aria-invalid='true'] {
     @apply border-danger;
+    box-shadow: 0 0 0 3px rgb(var(--c-danger) / 0.25);
   }
   .label {
-    @apply mb-2 block text-sm font-semibold text-ink;
+    @apply mb-2 block font-display text-sm font-bold text-ink;
   }
+
+  /* --- Etiquetas --------------------------------------------------------
+   * Pequenos adesivos. Levemente girados, como colados à mão.
+   * -------------------------------------------------------------------- */
   .chip {
-    @apply inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-semibold;
+    @apply inline-flex items-center gap-1.5 border-2 border-outline px-2.5 py-1 text-xs font-bold;
+    border-radius: 999px;
+  }
+  .chip-adesivo {
+    transform: rotate(-1.5deg);
+  }
+
+  /* --- Divisor ondulado --------------------------------------------------
+   * Uma régua desenhada à mão, no lugar da linha reta de 1px.
+   * -------------------------------------------------------------------- */
+  .onda {
+    height: 10px;
+    background-repeat: repeat-x;
+    background-size: 28px 10px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='10' viewBox='0 0 28 10'%3E%3Cpath d='M0 7 Q 7 0 14 7 T 28 7' fill='none' stroke='%2317161A' stroke-width='2'/%3E%3C/svg%3E");
+  }
+  :root.tema-escuro .onda,
+  :root.hc .onda {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='10' viewBox='0 0 28 10'%3E%3Cpath d='M0 7 Q 7 0 14 7 T 28 7' fill='none' stroke='%23B8B2C8' stroke-width='2'/%3E%3C/svg%3E");
   }
 }
 

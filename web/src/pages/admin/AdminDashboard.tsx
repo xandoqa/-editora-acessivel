@@ -3,7 +3,7 @@ import { ArrowRight, BookCopy, Clock, Eye, MessageSquareQuote, Tags, Users } fro
 import { useAdminStats } from '../../hooks/adminQueries';
 import { errorMessage } from '../../lib/api';
 import { formatDate, formatNumber } from '../../lib/format';
-import { FORMAT_LABEL, STATUS_LABEL } from '../../lib/labels';
+import { FORMAT_LABEL, ROLE_LABEL, STATUS_LABEL } from '../../lib/labels';
 import type { WorkFormat, WorkStatus } from '../../types/api';
 import { Badge, ErrorState, LoadingState, PageHeader, StatusBadge } from '../../components/ui';
 
@@ -29,7 +29,7 @@ function Kpi({ icon, label, value, detail, to }: { icon: React.ReactNode; label:
   );
 }
 
-const STATUS_ORDER: WorkStatus[] = ['EM_ANALISE', 'APROVADO', 'PUBLICADO', 'RASCUNHO', 'REJEITADO', 'ARQUIVADO'];
+const STATUS_ORDER: WorkStatus[] = ['EM_ANALISE', 'APROVADO', 'RASCUNHO', 'REJEITADO', 'ARQUIVADO'];
 
 /** Dashboard administrativo: todos os números vêm de agregações SQL reais (GET /api/admin/stats). */
 export default function AdminDashboard() {
@@ -40,12 +40,12 @@ export default function AdminDashboard() {
 
   return (
     <div>
-      <PageHeader eyebrow={<span className="text-admin">Acesso restrito</span>} title="Painel de Administração Livrin" description="Visão geral do acervo, da fila de curadoria WCAG e da comunidade de leitores." />
+      <PageHeader eyebrow={<span className="text-admin">Acesso restrito</span>} title="Painel de Administração Livrin" description="Visão geral do acervo, da fila de curadoria e da comunidade de leitores." />
 
       <section className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Indicadores">
         <Kpi icon={<Users className="h-5 w-5" />} label="Usuários" value={formatNumber(data.users.total)} detail={`${data.users.active} ativos · ${data.users.admins} admins · +${data.users.newLast30} em 30 dias`} to="/admin/users" />
-        <Kpi icon={<BookCopy className="h-5 w-5" />} label="Obras no catálogo" value={formatNumber(data.works.byStatus.PUBLICADO)} detail={`${data.works.total} obras cadastradas no total`} to="/admin/works?status=PUBLICADO" />
-        <Kpi icon={<Clock className="h-5 w-5" />} label="Fila de curadoria WCAG" value={formatNumber(data.works.byStatus.EM_ANALISE)} detail={`${data.works.byStatus.APROVADO} aprovadas aguardando lançamento`} to="/admin/works?status=EM_ANALISE" />
+        <Kpi icon={<BookCopy className="h-5 w-5" />} label="Obras no catálogo" value={formatNumber(data.works.byStatus.APROVADO)} detail={`${data.works.total} obras cadastradas no total`} to="/admin/works?status=APROVADO" />
+        <Kpi icon={<Clock className="h-5 w-5" />} label="Fila de curadoria" value={formatNumber(data.works.byStatus.EM_ANALISE)} detail={`${data.works.byStatus.REJEITADO} com ajustes solicitados`} to="/admin/works?status=EM_ANALISE" />
         <Kpi icon={<Eye className="h-5 w-5" />} label="Sessões de leitura (30 dias)" value={formatNumber(data.sessions.last30)} detail={`${formatNumber(data.sessions.total)} no total · ${formatNumber(data.sessions.audioDesc)} com audiodescrição`} />
       </section>
 
@@ -115,7 +115,7 @@ export default function AdminDashboard() {
                   {u.name}
                 </Link>
                 <span className="flex shrink-0 items-center gap-2 text-ink-subtle">
-                  {u.role === 'ADMIN' && <Badge tone="admin">Admin</Badge>}
+                  <Badge tone={u.role === 'ADMIN' ? 'admin' : u.role === 'ESCRITOR' ? 'accent' : 'muted'}>{ROLE_LABEL[u.role]}</Badge>
                   {formatDate(u.createdAt)}
                 </span>
               </li>

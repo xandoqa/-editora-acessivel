@@ -20,27 +20,42 @@ import {
 /*                                   ENUMS                                    */
 /* -------------------------------------------------------------------------- */
 
-export const userRoleEnum = pgEnum('user_role', ['USER', 'ADMIN']);
+/**
+ * Três perfis, conforme a seção 7 da especificação:
+ *   LEITOR    — acessa o catálogo, lê obras e avalia. NÃO publica.
+ *   ESCRITOR  — tudo do leitor + cadastrar, enviar e acompanhar as próprias obras.
+ *   ADMIN     — tudo + painel administrativo, curadoria e decisão editorial.
+ * A ordem importa: é usada como hierarquia em `middlewares/auth.ts`.
+ */
+export const userRoleEnum = pgEnum('user_role', ['LEITOR', 'ESCRITOR', 'ADMIN']);
 
 /**
  * Ciclo de vida editorial de uma obra (ver docs/business-rules.md):
- * RASCUNHO → EM_ANALISE → APROVADO → PUBLICADO → (ARQUIVADO)
+ * RASCUNHO → EM_ANALISE → APROVADO → (ARQUIVADO)
  *                      ↘ REJEITADO → (correção) → EM_ANALISE
+ *
+ * APROVADO é o estado visível no catálogo: aprovar JÁ disponibiliza a obra,
+ * como manda a seção 8 da especificação. ARQUIVADO despublica sem apagar.
  */
 export const workStatusEnum = pgEnum('work_status', [
   'RASCUNHO',
   'EM_ANALISE',
   'APROVADO',
-  'PUBLICADO',
   'REJEITADO',
   'ARQUIVADO',
 ]);
 
 export const workFormatEnum = pgEnum('work_format', ['QUADRINHO', 'LIVRO', 'MANGA_WEBCOMIC', 'ZINE']);
 
-export const fileTypeEnum = pgEnum('file_type', ['PDF', 'EPUB', 'CBZ', 'CBR']);
+export const fileTypeEnum = pgEnum('file_type', ['PDF', 'EPUB', 'CBZ', 'CBR', 'DOCX']);
 
 export const checkStatusEnum = pgEnum('check_status', ['PENDENTE', 'EM_ANDAMENTO', 'APROVADO', 'REPROVADO']);
+
+/** Situação de uma doação (ver services/payments). */
+export const donationStatusEnum = pgEnum('donation_status', ['PENDENTE', 'CONFIRMADA', 'FALHOU', 'CANCELADA']);
+
+/** Meios de pagamento oferecidos na tela de apoio. */
+export const paymentMethodEnum = pgEnum('payment_method', ['PIX', 'CARTAO', 'BOLETO']);
 
 /* -------------------------------------------------------------------------- */
 /*                                   TABELAS                                  */
@@ -63,7 +78,7 @@ export const users = pgTable(
     /** Sempre armazenado em minúsculas (normalizado pela camada de serviço). */
     email: varchar('email', { length: 255 }).notNull(),
     passwordHash: text('password_hash').notNull(),
-    role: userRoleEnum('role').notNull().default('USER'),
+    role: userRoleEnum('role').notNull().default('LEITOR'),
     isActive: boolean('is_active').notNull().default(true),
     /** Descrição curta exibida em avaliações/notas: ex. "Baixa Visão · Leitor de Tela". */
     headline: varchar('headline', { length: 160 }),
@@ -135,6 +150,8 @@ export const works = pgTable(
     rejectionReason: text('rejection_reason'),
     submittedAt: timestamp('submitted_at', { withTimezone: true }),
     reviewedAt: timestamp('reviewed_at', { withTimezone: true }),
+    /** Quem assinou a decisão editorial. É o responsável pelo Selo Livrin. */
+    reviewedBy: integer('reviewed_by').references(() => users.id, { onDelete: 'set null' }),
     publishedAt: timestamp('published_at', { withTimezone: true }),
     ...timestamps,
   },
@@ -256,6 +273,44 @@ export const readingSessions = pgTable(
   (t) => [index('reading_sessions_work_started_idx').on(t.workId, t.startedAt)],
 );
 
+/**
+ * Doações de apoio ao projeto (seções 17 a 19 da especificação).
+ *
+ * A Livrin existe para quem publica sem condições de bancar um lançamento
+ * tradicional, então a doação é um apoio voluntário — nunca um pedágio para
+ * ler. A linha guarda o essencial da cobrança e a referência devolvida pelo
+ * provedor; nenhum dado de cartão passa por aqui nem é armazenado.
+ */
+export const donations = pgTable(
+  'donations',
+  {
+    id: serial('id').primaryKey(),
+    /** Quem doou, se estava autenticado. Doação anônima é permitida. */
+    userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
+    /** Obra que motivou a doação, quando partiu da página de uma obra. */
+    workId: integer('work_id').references(() => works.id, { onDelete: 'set null' }),
+    donorName: varchar('donor_name', { length: 120 }),
+    /** Em centavos: dinheiro nunca é guardado como número de ponto flutuante. */
+    amountCents: integer('amount_cents').notNull(),
+    currency: varchar('currency', { length: 3 }).notNull().default('BRL'),
+    method: paymentMethodEnum('method').notNull(),
+    /** Nome do provedor que processou (ex.: "simulado"). */
+    provider: varchar('provider', { length: 40 }).notNull(),
+    /** Identificador da cobrança no provedor. */
+    providerRef: varchar('provider_ref', { length: 80 }).notNull(),
+    status: donationStatusEnum('status').notNull().default('PENDENTE'),
+    message: text('message'),
+    confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
+    ...timestamps,
+  },
+  (t) => [
+    index('donations_status_idx').on(t.status),
+    index('donations_created_idx').on(t.createdAt),
+    uniqueIndex('donations_provider_ref_unique').on(t.provider, t.providerRef),
+    check('donations_amount_positive', sql`${t.amountCents} > 0`),
+  ],
+);
+
 /* -------------------------------------------------------------------------- */
 /*                                    TIPOS                                   */
 /* -------------------------------------------------------------------------- */
@@ -273,3 +328,7 @@ export type UserRole = (typeof userRoleEnum.enumValues)[number];
 export type AudioDescription = typeof audioDescriptions.$inferSelect;
 export type ReviewCheck = typeof reviewChecks.$inferSelect;
 export type Feedback = typeof feedbacks.$inferSelect;
+export type Donation = typeof donations.$inferSelect;
+export type NewDonation = typeof donations.$inferInsert;
+export type DonationStatus = (typeof donationStatusEnum.enumValues)[number];
+export type PaymentMethod = (typeof paymentMethodEnum.enumValues)[number];

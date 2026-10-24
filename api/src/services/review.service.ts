@@ -10,7 +10,7 @@ import { findWork } from './work-queries';
  * Fluxo de avaliação editorial ("Seu livro em processo editorial"):
  *   Etapa 1 – Recebimento do arquivo  (concluída quando a obra é submetida)
  *   Etapa 2 – Revisão de conteúdo & testes de acessibilidade (checklist abaixo)
- *   Etapa 3 – Aprovação final (status APROVADO/PUBLICADO)
+ *   Etapa 3 – Aprovação final (status APROVADO: a obra entra no catálogo)
  */
 
 async function assertReviewAccess(workId: number, user: AuthUser) {
@@ -46,7 +46,7 @@ export async function getReview(workId: number, user: AuthUser) {
   const [checks, notes] = await Promise.all([listChecks(workId), listNotes(workId)]);
   const approved = checks.filter((c) => c.status === 'APROVADO').length;
   const stage =
-    work.status === 'APROVADO' || work.status === 'PUBLICADO' ? 3 : work.status === 'EM_ANALISE' ? 2 : work.submittedAt ? 2 : 1;
+    work.status === 'APROVADO' ? 3 : work.status === 'EM_ANALISE' ? 2 : work.submittedAt ? 2 : 1;
   return {
     workId,
     status: work.status,

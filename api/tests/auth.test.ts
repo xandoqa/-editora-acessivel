@@ -6,19 +6,27 @@ beforeAll(resetDatabase);
 afterAll(closeDb);
 
 describe('Autenticação', () => {
-  it('cadastra sempre como USER, mesmo se o cliente tentar enviar role=ADMIN', async () => {
+  it('cadastra como LEITOR por padrão e nunca aceita role=ADMIN do cliente', async () => {
     const res = await api()
       .post('/api/auth/register')
       .send({ name: 'Ana', email: 'ANA@Teste.com', password: 'Senha12345', role: 'ADMIN' });
-    // O schema é estrito: campos desconhecidos (role) são rejeitados.
+    // O cadastro público só aceita LEITOR ou ESCRITOR.
     expect(res.status).toBe(400);
 
     const ok = await api().post('/api/auth/register').send({ name: 'Ana', email: 'ANA@Teste.com', password: 'Senha12345' });
     expect(ok.status).toBe(201);
-    expect(ok.body.user.role).toBe('USER');
+    expect(ok.body.user.role).toBe('LEITOR');
     expect(ok.body.user.email).toBe('ana@teste.com');
     expect(ok.body.user).not.toHaveProperty('passwordHash');
     expect(ok.body.token).toBeTypeOf('string');
+  });
+
+  it('permite escolher o perfil de escritor no cadastro', async () => {
+    const res = await api()
+      .post('/api/auth/register')
+      .send({ name: 'Rita', email: 'rita@teste.com', password: 'Senha12345', role: 'ESCRITOR' });
+    expect(res.status).toBe(201);
+    expect(res.body.user.role).toBe('ESCRITOR');
   });
 
   it('rejeita e-mail duplicado e senha fraca', async () => {
@@ -67,7 +75,7 @@ describe('Autorização da área administrativa', () => {
     expect((await api().get('/api/admin/stats')).status).toBe(401);
     const res = await api().get('/api/admin/stats').set(bearer(token));
     expect(res.status).toBe(403);
-    expect((await api().patch('/api/admin/works/1/status').set(bearer(token)).send({ status: 'PUBLICADO' })).status).toBe(403);
+    expect((await api().patch('/api/admin/works/1/status').set(bearer(token)).send({ status: 'APROVADO' })).status).toBe(403);
   });
 
   it('permite ADMIN e aplica desativação imediatamente (mesmo com token válido)', async () => {
@@ -83,7 +91,7 @@ describe('Autorização da área administrativa', () => {
     expect((await api().post('/api/auth/login').send({ email: 'alvo@teste.com', password: 'Senha12345' })).status).toBe(401);
 
     // Proteções: não pode remover o próprio acesso nem excluir a própria conta.
-    expect((await api().patch(`/api/admin/users/${admin.id}`).set(bearer(adminToken)).send({ role: 'USER' })).status).toBe(400);
+    expect((await api().patch(`/api/admin/users/${admin.id}`).set(bearer(adminToken)).send({ role: 'LEITOR' })).status).toBe(400);
     expect((await api().delete(`/api/admin/users/${admin.id}`).set(bearer(adminToken))).status).toBe(400);
   });
 

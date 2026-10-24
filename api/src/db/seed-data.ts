@@ -1,4 +1,4 @@
-import type { Dialogue, WorkFormat, WorkStatus } from './schema';
+import type { Dialogue, UserRole, WorkFormat, WorkStatus } from './schema';
 
 /**
  * Dados de demonstração (usados apenas quando SEED_DEMO_DATA=true).
@@ -23,20 +23,20 @@ export interface DemoUser {
   key: string;
   name: string;
   email: string;
-  role: 'USER' | 'ADMIN';
+  role: UserRole;
   headline?: string;
 }
 
 export const DEMO_USERS: DemoUser[] = [
-  { key: 'marina', name: 'Marina Bastos', email: 'marina@livrin.com', role: 'USER', headline: 'Autora e quadrinista independente' },
-  { key: 'lorena', name: 'Lorena Campolina', email: 'lorena@livrin.com', role: 'USER', headline: 'Roteiro e Ilustrações Originais' },
-  { key: 'eloa', name: 'Eloá Santana', email: 'eloa@livrin.com', role: 'USER', headline: 'Escritora' },
-  { key: 'caua', name: 'Cauã Pataxó', email: 'caua@livrin.com', role: 'USER', headline: 'Autor de leitura fácil' },
-  { key: 'mduarte', name: 'Marina Duarte', email: 'marina.duarte@livrin.com', role: 'USER', headline: 'Graphic novelist' },
-  { key: 'tiago', name: 'Tiago Medeiros', email: 'tiago@livrin.com', role: 'USER', headline: 'Poeta visual' },
-  { key: 'lucas', name: 'Lucas Camargo', email: 'lucas@livrin.com', role: 'USER', headline: 'Baixa Visão Severa · Leitor de Tela' },
-  { key: 'tatiane', name: 'Tatiane Rocha', email: 'tatiane@livrin.com', role: 'USER', headline: 'Deficiência Motora · Switch Access' },
-  { key: 'gabriel', name: 'Gabriel Miranda', email: 'gabriel@livrin.com', role: 'USER', headline: 'Dislexia & TDAH' },
+  { key: 'marina', name: 'Marina Bastos', email: 'marina@livrin.com', role: 'ESCRITOR', headline: 'Autora e quadrinista independente' },
+  { key: 'lorena', name: 'Lorena Campolina', email: 'lorena@livrin.com', role: 'ESCRITOR', headline: 'Roteiro e Ilustrações Originais' },
+  { key: 'eloa', name: 'Eloá Santana', email: 'eloa@livrin.com', role: 'ESCRITOR', headline: 'Escritora' },
+  { key: 'caua', name: 'Cauã Pataxó', email: 'caua@livrin.com', role: 'ESCRITOR', headline: 'Autor de leitura fácil' },
+  { key: 'mduarte', name: 'Marina Duarte', email: 'marina.duarte@livrin.com', role: 'ESCRITOR', headline: 'Graphic novelist' },
+  { key: 'tiago', name: 'Tiago Medeiros', email: 'tiago@livrin.com', role: 'ESCRITOR', headline: 'Poeta visual' },
+  { key: 'lucas', name: 'Lucas Camargo', email: 'lucas@livrin.com', role: 'LEITOR', headline: 'Baixa Visão Severa · Leitor de Tela' },
+  { key: 'tatiane', name: 'Tatiane Rocha', email: 'tatiane@livrin.com', role: 'LEITOR', headline: 'Deficiência Motora · Switch Access' },
+  { key: 'gabriel', name: 'Gabriel Miranda', email: 'gabriel@livrin.com', role: 'LEITOR', headline: 'Dislexia & TDAH' },
   { key: 'camila', name: 'Camila Fontes', email: 'camila@livrin.com', role: 'ADMIN', headline: 'Especialista em Acessibilidade Visual' },
   { key: 'rodrigo', name: 'Rodrigo Santana', email: 'rodrigo@livrin.com', role: 'ADMIN', headline: 'Parecerista Editorial de Quadrinhos' },
 ];
@@ -74,8 +74,8 @@ export const DEMO_WORKS: DemoWork[] = [
     subtitle: 'Crônicas do Espaço',
     genre: 'Ficção Científica',
     format: 'QUADRINHO',
-    pages: 148,
-    status: 'PUBLICADO',
+    pages: 4,
+    status: 'APROVADO',
     editionLabel: 'Webcomic serial',
     isbn: '978-65-8912-04-1',
     ageRating: '12',
@@ -98,8 +98,8 @@ export const DEMO_WORKS: DemoWork[] = [
     title: 'O Último Mapa',
     genre: 'Fantasia Épica',
     format: 'QUADRINHO',
-    pages: 208,
-    status: 'PUBLICADO',
+    pages: 4,
+    status: 'APROVADO',
     editionLabel: 'Edição especial',
     ageRating: '10',
     synopsis:
@@ -118,8 +118,8 @@ export const DEMO_WORKS: DemoWork[] = [
     title: 'Raízes',
     genre: 'Ficção Histórica',
     format: 'LIVRO',
-    pages: 310,
-    status: 'PUBLICADO',
+    pages: 3,
+    status: 'APROVADO',
     editionLabel: 'Ficção histórica',
     ageRating: '12',
     synopsis:
@@ -136,8 +136,8 @@ export const DEMO_WORKS: DemoWork[] = [
     title: 'Terra Nova',
     genre: 'Aventura',
     format: 'LIVRO',
-    pages: 142,
-    status: 'PUBLICADO',
+    pages: 3,
+    status: 'APROVADO',
     editionLabel: 'Jovem adulto',
     ageRating: 'L',
     synopsis:
@@ -154,8 +154,8 @@ export const DEMO_WORKS: DemoWork[] = [
     title: 'Chamas de Agosto',
     genre: 'Drama',
     format: 'QUADRINHO',
-    pages: 278,
-    status: 'PUBLICADO',
+    pages: 3,
+    status: 'APROVADO',
     editionLabel: 'Graphic novel',
     ageRating: '14',
     synopsis:
@@ -173,8 +173,8 @@ export const DEMO_WORKS: DemoWork[] = [
     title: 'Vozes do Mar',
     genre: 'Poesia',
     format: 'ZINE',
-    pages: 88,
-    status: 'PUBLICADO',
+    pages: 4,
+    status: 'APROVADO',
     editionLabel: 'Zine independente',
     ageRating: 'L',
     synopsis:
@@ -186,13 +186,79 @@ export const DEMO_WORKS: DemoWork[] = [
     publishedDaysAgo: 5,
   },
   {
+    key: 'ecos',
+    author: 'mduarte',
+    title: 'Ecos de la Marea',
+    subtitle: 'Webcomic en español',
+    genre: 'Drama',
+    format: 'MANGA_WEBCOMIC',
+    pages: 6,
+    status: 'APROVADO',
+    editionLabel: 'Webcomic serial',
+    ageRating: 'L',
+    synopsis:
+      'Mara desenha o que escuta. Em uma vila onde a maré sobe duas vezes por dia e leva embora os sons da véspera, ela aprende com a avó a registrar em traço aquilo que o mar devolve: vozes antigas, conversas interrompidas, o silêncio que fica entre uma onda e outra. Webcomic em espanhol, criada para a Livrin, com painéis de alto contraste e audiodescrição integrada ao roteiro.',
+    authorNotes:
+      'Escrevi esta história em espanhol porque foi a língua em que minha avó me contava o mar. A diagramação segue uma leitura linear estrita, de cima para baixo, para que leitores de tela percorram os painéis na mesma ordem em que os olhos percorrem.',
+    tags: ['Espanhol', 'Webcomic', 'AltoContraste', 'MarEMemoria'],
+    flags: { hasAudioDesc: true, hasLeitorTela: true, hasTextoAlt: true, hasAltoContraste: true },
+    audioDescriber: 'Marina Duarte',
+    audioNarrator: 'Sarah Menezes',
+    cover: 'ecos-de-la-marea.webp',
+    file: 'ecos-de-la-marea.cbz',
+    publishedDaysAgo: 8,
+  },
+  {
+    key: 'zine',
+    author: 'tiago',
+    title: 'Zine Tátil #3',
+    subtitle: 'Poesia visual de bolso',
+    genre: 'Poesia',
+    format: 'ZINE',
+    pages: 7,
+    status: 'APROVADO',
+    editionLabel: 'Tiragem aberta',
+    ageRating: 'L',
+    synopsis:
+      'Sete páginas de poesia visual pensadas para serem lidas em voz alta, com tipografia ampliada e muito espaço entre as linhas. O terceiro número do Zine Tátil reúne poemas sobre o que se lê com as mãos e com os ouvidos: mapas de relevo, inventários de ruído, braille de domingo. Tiragem aberta: copie, empreste, leia alto.',
+    authorNotes:
+      'Zine é feito para circular. Deixei as margens largas e as linhas curtas de propósito, para caber em qualquer ampliação sem quebrar o verso no meio.',
+    tags: ['Zine', 'PoesiaVisual', 'LeituraFacil', 'TipografiaInclusiva'],
+    flags: { hasLeitorTela: true, hasFacilLeitura: true, hasAltoContraste: true, hasTextoAlt: true },
+    cover: 'zine-tatil-3.webp',
+    file: 'zine-tatil-3.pdf',
+    publishedDaysAgo: 15,
+  },
+  {
+    key: 'rimas',
+    author: 'eloa',
+    title: 'Rimas',
+    subtitle: 'Seleção em espanhol · domínio público',
+    genre: 'Poesia',
+    format: 'LIVRO',
+    pages: 4,
+    status: 'APROVADO',
+    editionLabel: 'Edição acessível',
+    ageRating: 'L',
+    synopsis:
+      'Três rimas de Gustavo Adolfo Bécquer (1836–1870), em espanhol, preparadas para leitura acessível. O texto está em domínio público e esta edição acrescenta apenas o trabalho de acessibilidade: estrutura semântica para leitores de tela, tipografia ampliável, espaçamento ajustável e uma nota editorial sobre a procedência do texto.',
+    authorNotes:
+      'Não sou a autora destes versos — eles são de Bécquer e já pertencem a todo mundo. O que fiz foi preparar a edição para que continuem pertencendo a todo mundo, inclusive a quem lê com os ouvidos ou com os dedos.',
+    tags: ['Espanhol', 'DominioPublico', 'Poesia', 'TipografiaInclusiva'],
+    flags: { hasLeitorTela: true, hasFacilLeitura: true, hasAltoContraste: true },
+    audioReviewer: 'Instituto Acessibilidade Aberta',
+    cover: 'rimas-becquer.webp',
+    file: 'rimas-becquer.epub',
+    publishedDaysAgo: 25,
+  },
+  {
     key: 'incrivel',
     author: 'marina',
     title: 'Meu Livro Incrível',
     subtitle: 'Volume 1: A Travessia das Vozes Silenciosas',
     genre: 'Ficção Científica',
     format: 'QUADRINHO',
-    pages: 132,
+    pages: 2,
     status: 'APROVADO',
     ageRating: '10',
     synopsis:
@@ -203,6 +269,7 @@ export const DEMO_WORKS: DemoWork[] = [
     cover: 'meu-livro-incrivel.webp',
     file: 'meu-livro-incrivel.pdf',
     submittedDaysAgo: 9,
+    publishedDaysAgo: 2,
   },
   {
     key: 'cosmic',
@@ -211,7 +278,7 @@ export const DEMO_WORKS: DemoWork[] = [
     subtitle: 'Issue #4',
     genre: 'Ficção Científica',
     format: 'MANGA_WEBCOMIC',
-    pages: 240,
+    pages: 3,
     status: 'EM_ANALISE',
     ageRating: '12',
     synopsis:
@@ -221,6 +288,28 @@ export const DEMO_WORKS: DemoWork[] = [
     cover: 'cosmic-fusion.webp',
     file: 'cosmic-fusion.cbz',
     submittedDaysAgo: 2,
+  },
+  {
+    // Manuscrito em .docx: o formato em que quem escreve entrega o texto.
+    // Está EM_ANALISE de propósito — é assim que ele chega à curadoria, antes
+    // de ter capa pronta. Entre com a conta de curadoria para abri-lo no leitor
+    // e ver o texto refluindo com a tipografia escolhida.
+    key: 'alfabeto',
+    author: 'caua',
+    title: 'O Alfabeto das Coisas Pequenas',
+    subtitle: 'Crônicas de leitura fácil',
+    genre: 'Slice of Life',
+    format: 'LIVRO',
+    pages: 3,
+    status: 'EM_ANALISE',
+    ageRating: 'L',
+    synopsis:
+      'Crônicas curtas sobre uma rua, uma janela e as coisas miúdas que sustentam o dia. Escritas em frases curtas, para serem lidas em voz alta por quem está aprendendo a ler ou por quem lê para outra pessoa.',
+    authorNotes: 'Mandei o manuscrito em Word mesmo, que é como eu escrevo. A capa ainda está sendo feita.',
+    tags: ['LeituraFacil', 'Cronicas', 'VozAlta'],
+    flags: { hasFacilLeitura: true, hasLeitorTela: true },
+    file: 'o-alfabeto-das-coisas-pequenas.docx',
+    submittedDaysAgo: 1,
   },
   {
     key: 'cronicas',

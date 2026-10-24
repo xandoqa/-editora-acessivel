@@ -1,9 +1,14 @@
 import { and, asc, desc, eq, ilike, or, sql, type SQL } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { db } from '../db/client';
 import { genres, users, works, type Work } from '../db/schema';
 import { notFound } from '../utils/http-error';
 import { escapeLike } from '../utils/text';
 import { coverUrl } from './storage.service';
+import { PUBLIC_STATUS } from './work-policy';
+
+/** Segunda referência a `users`: o curador que assinou a decisão editorial. */
+const revisores = alias(users, 'revisores');
 
 /**
  * Consultas de leitura sobre obras e o formato (DTO) devolvido pela API.
@@ -34,6 +39,7 @@ export const workRowSelect = {
   work: works,
   authorName: users.name,
   authorHeadline: users.headline,
+  reviewerName: revisores.name,
   genreName: genres.name,
   ratingAvg: ratingAvgSql,
   ratingCount: ratingCountSql,
@@ -44,6 +50,7 @@ export type WorkRow = {
   work: Work;
   authorName: string;
   authorHeadline: string | null;
+  reviewerName: string | null;
   genreName: string;
   ratingAvg: number;
   ratingCount: number;
@@ -90,6 +97,18 @@ export function toWorkDto(row: WorkRow) {
     genre: { id: w.genreId, name: row.genreName },
     rating: { average: row.ratingAvg, count: row.ratingCount },
     readsCount: row.readsCount,
+    /**
+     * Selo de Qualidade Livrin. Não é um dado novo: é o resumo do que a
+     * curadoria já verificou. Uma obra só chega a APROVADO depois que o
+     * checklist inteiro passa, então estar no catálogo É ter o selo. O que o
+     * selo acrescenta é o responsável e a data — um selo sem responsável não
+     * atesta nada. A lista dos itens vai junto só no detalhe da obra.
+     */
+    seal: {
+      granted: w.status === PUBLIC_STATUS,
+      grantedAt: w.status === PUBLIC_STATUS ? w.reviewedAt : null,
+      reviewer: w.status === PUBLIC_STATUS ? row.reviewerName : null,
+    },
   };
 }
 
@@ -100,7 +119,9 @@ export function baseWorkQuery() {
     .select(workRowSelect)
     .from(works)
     .innerJoin(users, eq(users.id, works.authorId))
-    .innerJoin(genres, eq(genres.id, works.genreId));
+    .innerJoin(genres, eq(genres.id, works.genreId))
+    // `left`, e não `inner`: obra sem decisão registrada continua aparecendo.
+    .leftJoin(revisores, eq(revisores.id, works.reviewedBy));
 }
 
 export function countWorkQuery() {
@@ -138,7 +159,9 @@ export async function findWork(id: number): Promise<Work> {
 }
 
 export const orderings = {
-  recent: [desc(works.publishedAt), desc(works.id)],
+  // DESC no PostgreSQL usa NULLS FIRST por padrão: sem o "nulls last", uma obra
+  // sem data de publicação apareceria no topo do catálogo.
+  recent: [sql`${works.publishedAt} desc nulls last`, desc(works.id)],
   title: [asc(works.title)],
   rating: [desc(ratingAvgSql), desc(ratingCountSql)],
 };

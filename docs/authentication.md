@@ -8,7 +8,7 @@
 4. O front-end guarda o token em `localStorage` (`livrin_token`) e o envia em todas as requisições no header `Authorization: Bearer <token>` (interceptor do axios em `web/src/lib/api.ts`).
 5. Ao abrir o app, o `AuthContext` chama `GET /api/auth/me` para revalidar a sessão; se a API responder `401` (token expirado, conta desativada), a sessão é encerrada no navegador.
 
-Cadastro (`POST /api/auth/register`) cria **sempre** um usuário `USER` — o campo `role` é rejeitado pela validação, impedindo que alguém se torne administrador pelo cadastro.
+Cadastro (`POST /api/auth/register`) aceita `role` apenas como `LEITOR` (padrão) ou `ESCRITOR`. `ADMIN` **nunca** é aceito do cliente: ninguém vira administrador pelo cadastro.
 
 ## Como o back-end valida cada requisição
 
@@ -29,7 +29,8 @@ Além disso, as regras de propriedade (o autor só altera as próprias obras) fi
 | Perfil | Pode |
 | --- | --- |
 | Visitante | Catálogo, leitura de obras publicadas, download de obras publicadas, cadastro/login. |
-| `USER` (autor/leitor) | Tudo do visitante + submeter e gerenciar as próprias obras, audiodescrição das próprias obras (conforme status), acompanhar a análise, conversar com a curadoria, publicar obras aprovadas, avaliar obras de outros autores, editar perfil/senha. |
+| `LEITOR` | Tudo do visitante + ler as obras do catálogo, avaliar, apoiar o projeto, editar o próprio perfil e senha. **Não publica.** |
+| `ESCRITOR` | Tudo do leitor + cadastrar e gerenciar as próprias obras, audiodescrição das próprias obras (conforme status), acompanhar a análise e conversar com a curadoria. Não aprova nada — nem a própria obra. |
 | `ADMIN` (curadoria) | Tudo + área `/admin`: todas as obras e transições de status, checklist e notas, audiodescrição de qualquer obra, usuários (criar, editar, papéis, ativar/desativar, redefinir senha, excluir), gêneros, moderação de avaliações, dashboard. |
 
 ## Rotas por nível
@@ -43,7 +44,7 @@ Mapa completo comentado em `api/src/routes/index.ts` e `api/src/routes/admin/ind
 
 ## Criar um administrador com segurança
 
-1. **No primeiro start:** defina `ADMIN_EMAIL` e `ADMIN_PASSWORD` no `.env`. O seed cria a conta se o e-mail ainda não existir (e nunca altera uma conta existente).
+1. **No primeiro start:** defina `ADMIN_EMAIL` e `ADMIN_PASSWORD` no `.env`. O seed cria a conta se o e-mail ainda não existir. Se a conta já existir, o seed **não mexe na senha dela** — uma troca feita em "Meu perfil" é definitiva. (Até a versão 2.0.0 o seed regravava a senha a cada inicialização e desfazia a troca em silêncio.)
 2. **Pela linha de comando** (cria ou promove um usuário existente e o reativa):
    ```bash
    # Docker (imagem de produção)

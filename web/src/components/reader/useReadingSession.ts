@@ -16,26 +16,30 @@ export interface SessionFlags {
  */
 export function useReadingSession(workId: number | undefined, enabled: boolean) {
   const sessionId = useRef<string | null>(null);
+  /** Token assinado devolvido ao abrir a sessão: a API só aceita atualizações com ele. */
+  const sessionToken = useRef<string | null>(null);
   const pending = useRef<SessionFlags>({});
   const sent = useRef<SessionFlags>({});
   const timer = useRef<number>();
 
   const flush = useCallback(() => {
     const id = sessionId.current;
+    const token = sessionToken.current;
     const body = pending.current;
-    if (!id || !Object.keys(body).length) return;
+    if (!id || !token || !Object.keys(body).length) return;
     pending.current = {};
-    api.patch(`/sessions/${id}`, body).catch(() => undefined);
+    api.patch(`/sessions/${id}`, body, { headers: { 'X-Session-Token': token } }).catch(() => undefined);
   }, []);
 
   useEffect(() => {
     if (!workId || !enabled) return;
     let cancelled = false;
     api
-      .post<{ id: string }>(`/works/${workId}/sessions`)
+      .post<{ id: string; token: string }>(`/works/${workId}/sessions`)
       .then((res) => {
         if (cancelled) return;
         sessionId.current = res.data.id;
+        sessionToken.current = res.data.token;
         flush();
       })
       .catch(() => undefined);
@@ -44,6 +48,7 @@ export function useReadingSession(workId: number | undefined, enabled: boolean) 
       window.clearTimeout(timer.current);
       flush();
       sessionId.current = null;
+      sessionToken.current = null;
       sent.current = {};
     };
   }, [workId, enabled, flush]);

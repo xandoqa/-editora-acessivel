@@ -5,6 +5,7 @@ import { genres, reviewChecks, works, type NewWork, type Work, type WorkStatus }
 import type { AuthUser } from '../middlewares/auth';
 import { badRequest, conflict, forbidden, notFound, unprocessable } from '../utils/http-error';
 import { paginated } from '../validators/common';
+import { listChecks } from './review.service';
 import type { catalogQuerySchema, WorkFields, WorkUpdate } from '../validators/works.schemas';
 import { absolutePath, commitUpload, removeFile, type StoredFile } from './storage.service';
 import {
@@ -14,6 +15,7 @@ import {
   AUTHOR_METADATA_EDIT,
   DEFAULT_REVIEW_CHECKS,
   METADATA_FIELDS,
+  PUBLIC_STATUS,
   canView,
   isAdmin,
   isOwner,
@@ -55,10 +57,10 @@ const FEATURE_COLUMN = {
   'alto-contraste': works.hasAltoContraste,
 } as const;
 
-/** Catálogo público: somente obras PUBLICADAS, com busca, filtros, ordenação e paginação. */
+/** Catálogo público: somente obras APROVADAS, com busca, filtros, ordenação e paginação. */
 export async function listCatalog(query: z.infer<typeof catalogQuerySchema>) {
   const where = allOf(
-    eq(works.status, 'PUBLICADO'),
+    eq(works.status, PUBLIC_STATUS),
     searchCondition(query.q),
     query.format ? eq(works.format, query.format) : undefined,
     query.feature ? eq(FEATURE_COLUMN[query.feature], true) : undefined,
@@ -72,16 +74,22 @@ export async function listCatalog(query: z.infer<typeof catalogQuerySchema>) {
       .limit(query.pageSize)
       .offset(offset),
     countWorkQuery().where(where),
-    db.select({ published: sql<number>`count(*)`.mapWith(Number) }).from(works).where(eq(works.status, 'PUBLICADO')),
+    db.select({ published: sql<number>`count(*)`.mapWith(Number) }).from(works).where(eq(works.status, PUBLIC_STATUS)),
   ]);
   return { ...paginated(rows.map(toWorkDto), total, query.page, query.pageSize), catalogTotal: published };
 }
 
-/** Detalhe de uma obra. Não publicadas retornam 404 para quem não é autor/admin (não revela existência). */
-export async function getWork(id: number, viewer?: AuthUser): Promise<WorkDto> {
+/** Detalhe de uma obra. Não aprovadas retornam 404 para quem não é autor/admin (não revela existência). */
+export async function getWork(id: number, viewer?: AuthUser) {
   const row = await findWorkRow(id);
   if (!canView(row.work, viewer)) throw notFound('Obra não encontrada.');
-  return toWorkDto(row);
+  const dto = toWorkDto(row);
+  // No detalhe da obra o selo vem com a lista do que a curadoria verificou: o
+  // leitor vê no que confiar e o autor vê o que foi cobrado. É público de
+  // propósito — um selo cujo critério ninguém pode ler não vale nada.
+  if (!dto.seal.granted) return dto;
+  const checks = await listChecks(id);
+  return { ...dto, seal: { ...dto.seal, checks } };
 }
 
 /** Arquivo original da obra (para o leitor e para download). */
@@ -155,7 +163,14 @@ async function prepareReviewChecks(tx: Tx, workId: number): Promise<void> {
 }
 
 /** Efeitos colaterais de entrar em cada status (datas, checklist). */
-async function applyStatusEffects(tx: Tx, work: Work, status: WorkStatus, reason?: string | null): Promise<Partial<NewWork>> {
+async function applyStatusEffects(
+  tx: Tx,
+  work: Work,
+  status: WorkStatus,
+  reason?: string | null,
+  /** Quem assinou a decisão. Fica registrado para dar responsável ao Selo Livrin. */
+  reviewer?: AuthUser,
+): Promise<Partial<NewWork>> {
   const now = new Date();
   switch (status) {
     case 'EM_ANALISE':
@@ -163,14 +178,24 @@ async function applyStatusEffects(tx: Tx, work: Work, status: WorkStatus, reason
       await prepareReviewChecks(tx, work.id);
       return { status, submittedAt: now, rejectionReason: null, reviewedAt: null };
     case 'APROVADO':
+      // Aprovar É publicar: a obra entra no catálogo na mesma ação (seção 8).
+      if (!work.filePath) throw unprocessable('Não é possível aprovar uma obra sem o arquivo original.');
       // A aprovação conclui a Etapa 2: todos os itens do checklist passam a "APROVADO".
       await tx.update(reviewChecks).set({ status: 'APROVADO' }).where(eq(reviewChecks.workId, work.id));
-      return { status, reviewedAt: now, rejectionReason: null };
+      return {
+        status,
+        reviewedAt: now,
+        reviewedBy: reviewer?.id ?? work.reviewedBy,
+        rejectionReason: null,
+        publishedAt: work.publishedAt ?? now,
+      };
     case 'REJEITADO':
-      return { status, reviewedAt: now, rejectionReason: reason ?? 'Obra rejeitada pela curadoria.' };
-    case 'PUBLICADO':
-      if (!work.filePath) throw unprocessable('Não é possível publicar uma obra sem arquivo.');
-      return { status, publishedAt: work.publishedAt ?? now };
+      return {
+        status,
+        reviewedAt: now,
+        reviewedBy: reviewer?.id ?? work.reviewedBy,
+        rejectionReason: reason ?? 'Obra rejeitada pela curadoria.',
+      };
     case 'ARQUIVADO':
     case 'RASCUNHO':
       return { status };
@@ -189,7 +214,7 @@ export async function createWork(
 ): Promise<WorkDto> {
   await assertGenreUsable(fields.genreId);
   if (fields.action === 'submit' && !files.file) {
-    throw unprocessable('Envie o arquivo original da obra (PDF, EPUB, CBZ ou CBR) para submetê-la à análise.', [
+    throw unprocessable('Envie o arquivo original da obra (PDF, DOCX, EPUB, CBZ ou CBR) para submetê-la à análise.', [
       { field: 'file', message: 'Arquivo obrigatório para envio à análise' },
     ]);
   }
@@ -217,7 +242,7 @@ export async function createWork(
 /**
  * Atualização feita pelo autor, respeitando o status:
  *  - RASCUNHO/REJEITADO: tudo (inclusive arquivos);
- *  - APROVADO/PUBLICADO: apenas metadados de divulgação e capa;
+ *  - APROVADO (no catálogo): apenas metadados de divulgação e capa;
  *  - EM_ANALISE/ARQUIVADO: bloqueado.
  */
 export async function updateWorkAsAuthor(id: number, user: AuthUser, patch: WorkUpdate, files: WorkFiles) {
@@ -229,7 +254,7 @@ export async function updateWorkAsAuthor(id: number, user: AuthUser, patch: Work
     const forbiddenFields = Object.keys(patch).filter((k) => patch[k as keyof WorkUpdate] !== undefined && !allowed.has(k));
     if (forbiddenFields.length || files.file || files.audio) {
       throw forbidden(
-        'Obras aprovadas ou publicadas só permitem editar subtítulo, sinopse, notas, tags, rótulo e capa. Para outras mudanças, fale com a curadoria.',
+        'Obras já no catálogo só permitem editar subtítulo, sinopse, notas, tags, rótulo e capa. Para outras mudanças, fale com a curadoria.',
       );
     }
   } else if (!AUTHOR_FULL_EDIT.includes(work.status)) {
@@ -278,17 +303,8 @@ export async function submitWork(id: number, user: AuthUser) {
   return toWorkDto(await findWorkRow(id));
 }
 
-/** Autor publica definitivamente uma obra aprovada pelo comitê ("Lançar Agora"). */
-export async function publishWork(id: number, user: AuthUser) {
-  const work = await findWork(id);
-  if (!isOwner(work, user)) throw notFound('Obra não encontrada.');
-  if (work.status !== 'APROVADO') throw conflict('A publicação só é liberada após a aprovação final (Etapa 3).');
-  await db.transaction(async (tx) => {
-    const effects = await applyStatusEffects(tx, work, 'PUBLICADO');
-    await tx.update(works).set(effects).where(eq(works.id, id));
-  });
-  return toWorkDto(await findWorkRow(id));
-}
+/* A antiga `publishWork` (botão "Lançar Agora" do autor) foi removida: a
+ * aprovação da curadoria já coloca a obra no catálogo. Ver docs/business-rules.md. */
 
 /** Exclusão definitiva (autor: apenas rascunhos/rejeitadas; admin: qualquer obra). */
 export async function deleteWork(id: number, user: AuthUser): Promise<void> {
@@ -310,6 +326,7 @@ export async function deleteWork(id: number, user: AuthUser): Promise<void> {
 export async function createWorkAsAdmin(
   fields: WorkFields & { authorId: number; status: WorkStatus },
   files: WorkFiles,
+  actor: AuthUser,
 ): Promise<WorkDto> {
   await assertGenreUsable(fields.genreId, true);
   const committed = await commitFiles(files);
@@ -323,10 +340,9 @@ export async function createWorkAsAdmin(
       if (status !== 'RASCUNHO') {
         // Aplica os mesmos efeitos de uma transição normal (datas, checklist, exigência de arquivo).
         let current: Work = created;
-        const path: WorkStatus[] =
-          status === 'PUBLICADO' ? ['EM_ANALISE', 'APROVADO', 'PUBLICADO'] : status === 'APROVADO' ? ['EM_ANALISE', 'APROVADO'] : [status];
+        const path: WorkStatus[] = status === 'APROVADO' ? ['EM_ANALISE', 'APROVADO'] : [status];
         for (const step of path) {
-          const effects = await applyStatusEffects(tx, current, step);
+          const effects = await applyStatusEffects(tx, current, step, null, actor);
           [current] = await tx.update(works).set(effects).where(eq(works.id, created.id)).returning();
         }
       }
@@ -340,17 +356,17 @@ export async function createWorkAsAdmin(
 }
 
 /** Decisão editorial / ciclo de vida, validando a transição. */
-export async function changeStatusAsAdmin(id: number, status: WorkStatus, reason?: string | null) {
+export async function changeStatusAsAdmin(id: number, status: WorkStatus, reason: string | null | undefined, actor: AuthUser) {
   const work = await findWork(id);
   if (work.status === status) throw conflict(`A obra já está com o status ${status}.`);
   if (!ADMIN_TRANSITIONS[work.status].includes(status)) {
     throw conflict(`Transição não permitida: ${work.status} → ${status}.`, { allowed: ADMIN_TRANSITIONS[work.status] });
   }
-  if (work.status === 'ARQUIVADO' && status === 'PUBLICADO' && !work.publishedAt) {
-    throw conflict('Esta obra nunca foi publicada; envie-a para análise antes de publicar.');
+  if (work.status === 'ARQUIVADO' && status === 'APROVADO' && !work.filePath) {
+    throw conflict('Esta obra não tem arquivo original; envie-a para análise antes de republicar.');
   }
   await db.transaction(async (tx) => {
-    const effects = await applyStatusEffects(tx, work, status, reason);
+    const effects = await applyStatusEffects(tx, work, status, reason, actor);
     await tx.update(works).set(effects).where(eq(works.id, id));
   });
   return toWorkDto(await findWorkRow(id));
@@ -366,7 +382,6 @@ export async function countByStatus() {
     RASCUNHO: 0,
     EM_ANALISE: 0,
     APROVADO: 0,
-    PUBLICADO: 0,
     REJEITADO: 0,
     ARQUIVADO: 0,
   };

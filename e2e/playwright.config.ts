@@ -1,9 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
+import { BASE_URL } from './env';
 
 /**
  * Testes E2E contra um ambiente já em execução (Docker ou npm run dev).
- * BASE_URL padrão: http://localhost:5173. Requer SEED_DEMO_DATA=true e as
- * credenciais definidas no .env (ADMIN_EMAIL/ADMIN_PASSWORD/DEMO_USER_PASSWORD).
+ *
+ * As credenciais e a porta saem do `.env` da raiz do projeto (ver env.ts), que
+ * é o mesmo arquivo usado pelo docker compose — não há valores duplicados aqui.
+ * Requer SEED_DEMO_DATA=true para que as contas de demonstração existam.
  */
 export default defineConfig({
   testDir: './tests',
@@ -13,7 +16,7 @@ export default defineConfig({
   workers: 1,
   reporter: [['list']],
   use: {
-    baseURL: process.env.BASE_URL ?? 'http://localhost:5173',
+    baseURL: BASE_URL,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },

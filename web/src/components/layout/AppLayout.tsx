@@ -18,9 +18,14 @@ function Rodape() {
           O Livrin é uma editora digital aberta: quem não tem como bancar um lançamento tradicional publica e é lido aqui. Ler é de graça e
           continua sendo.
         </p>
-        <Link to="/apoiar" className="btn-secondary shrink-0">
-          <HandHeart className="h-4 w-4" aria-hidden /> Apoiar o Livrin
-        </Link>
+        <div className="flex shrink-0 items-center gap-4">
+          <span className="text-xs text-ink-subtle" title="Versão do site que está no seu navegador">
+            v{__LIVRIN_VERSAO__}
+          </span>
+          <Link to="/apoiar" className="btn-secondary">
+            <HandHeart className="h-4 w-4" aria-hidden /> Apoiar o Livrin
+          </Link>
+        </div>
       </div>
     </footer>
   );

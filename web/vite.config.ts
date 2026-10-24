@@ -1,4 +1,5 @@
 import { defineConfig, loadEnv } from 'vite';
+import { readFileSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
 
 /**
@@ -9,8 +10,13 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const target = env.API_PROXY_TARGET || 'http://localhost:3000';
+  // Carimbo da versão no próprio pacote: sem isso, não há como olhar a tela e
+  // saber qual build está rodando — foi assim que um bundle velho passou
+  // despercebido por três correções seguidas.
+  const versao = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8')).version;
   return {
     plugins: [react()],
+    define: { __LIVRIN_VERSAO__: JSON.stringify(versao) },
     server: {
       host: true,
       port: 5173,

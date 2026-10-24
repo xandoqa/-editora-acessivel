@@ -67,7 +67,17 @@ fi
 
 if [ ! -f .env.example ]; then
   echo "Não achei o .env.example nesta pasta ($(pwd))." >&2
-  echo "Rode o script de dentro da pasta do projeto, descompactada por inteiro." >&2
+  # Caso comum: o descompactador criou um nível a mais, ou o .zip foi extraído
+  # duas vezes. Em vez de só reclamar, aponta onde o projeto realmente está.
+  if [ -f livrin/.env.example ]; then
+    echo "" >&2
+    echo "Mas encontrei o projeto um nível abaixo. Rode:" >&2
+    echo "" >&2
+    echo "    cd livrin && ./iniciar.sh" >&2
+  else
+    echo "Rode o script de dentro da pasta do projeto, descompactada por inteiro." >&2
+    echo "Um 'ls' ali deve mostrar api, web, docs e docker-compose.yml juntos." >&2
+  fi
   exit 1
 fi
 

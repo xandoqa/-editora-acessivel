@@ -29,10 +29,22 @@ A proposta da Livrin é ser uma editora de quadrinhos acessíveis; a própria in
 
 | Recurso | Como funciona |
 | --- | --- |
-| Formatos | PDF (pdf.js, canvas), **DOCX** (leitor próprio: o XML do Word vira blocos tipados, nunca HTML injetado), EPUB (epub.js, iframe sem scripts), CBZ (JSZip, imagens). CBR é aceito no upload e oferecido para download (não há descompressor RAR no navegador). |
+| Formatos | PDF (pdf.js, canvas; ver *Leitura de PDF em três vias* abaixo), **DOCX** (leitor próprio: o XML do Word vira blocos tipados, nunca HTML injetado), EPUB (epub.js, iframe sem scripts), CBZ (JSZip, imagens). CBR é aceito no upload e oferecido para download (não há descompressor RAR no navegador). |
 | Formato mais acessível | **DOCX e EPUB**, porque o texto reflui: aceitam tipografia, espaçamento, escala e paleta de verdade, e o leitor de tela recebe texto na ordem certa. O PDF é página fixa — a camada de texto ajuda, mas não reflui. Vale dizer isso a quem publica. |
 | Texto alternativo das páginas | A audiodescrição da página é usada como `alt`/`aria-label` da imagem da página. |
-| Texto do PDF | "Texto desta página" extrai a camada de texto do PDF e a exibe com a tipografia escolhida — legível por leitores de tela. |
+| Texto do PDF | "Texto desta página" extrai a camada de texto do PDF e a exibe com a tipografia escolhida — legível por leitores de tela. **Só funciona se o PDF tiver camada de texto**: um PDF digitalizado é imagem, e imagem não tem o que extrair. As obras de demonstração em PDF foram geradas com texto real justamente por isso. |
+
+### Leitura de PDF em três vias
+
+O pdf.js é uma implementação em JavaScript e recusa arquivos que leitores nativos abrem sem reclamar — tabela de referências cruzadas quebrada, cifra de permissão, objetos empacotados fora do esperado. Em digitalização antiga isso é a regra. O leitor tenta, nesta ordem:
+
+1. **Por pedaços** (requisições HTTP Range): a primeira página aparece sem esperar o arquivo inteiro.
+2. **Arquivo completo**, quando o transporte não repassa Range — proxy que não encaminha, resposta sem `Content-Range`.
+3. **Leitor embutido do navegador**, como última saída. Aqui a navegação por páginas do Livrin e o "Texto desta página" não valem, e a tela avisa isso.
+
+Antes das três vias, o arquivo já é **normalizado no envio** pelo `qpdf` (ver [architecture.md](architecture.md)), que resolve a maior parte desses casos na origem.
+
+> Atenção ao testar: o leitor embutido do **Firefox é o próprio pdf.js**. Se o arquivo falha no Livrin, falha igual lá. O Chrome usa o PDFium, que é outro motor e mais tolerante.
 | Escala do texto | 70%–200%; no PDF/CBZ amplia a página (com rolagem horizontal), no DOCX, no EPUB e nos textos amplia a fonte. |
 | Espaçamento | Padrão / Amplo / Largo (entrelinha, espaçamento entre letras e palavras). |
 | Tipografia | Inter, Lexend e **OpenDyslexic** — fontes empacotadas localmente (também injetadas dentro do EPUB). |

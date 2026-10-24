@@ -29,16 +29,20 @@ Sem Docker: aponte `TEST_DATABASE_URL` para qualquer PostgreSQL seu cujo banco t
 
 ### O que cada arquivo cobre
 
-47 testes, em quatro arquivos.
+48 testes, em quatro arquivos.
 
 | Arquivo | Cobre |
 | --- | --- |
 | `auth.test.ts` | Cadastro como `LEITOR` por padrão e recusa de `role=ADMIN` vindo do cliente; escolha do perfil de escritor no cadastro; e-mail duplicado (`409`); senha fraca (`400`); login e `/auth/me`; mensagem genérica para credenciais inválidas; token inválido ou ausente (`401`); troca de senha exigindo a atual; `/admin` → `401` para visitante e `403` para conta comum; desativação invalidando o token na hora; proteção contra remover o próprio acesso administrativo; redefinição de senha; ID de rota inválido (`400`) |
-| `works.test.ts` | Leitor não cadastra obra e escritor cadastra; leitor ativa o próprio perfil de escritor; escritor não alcança a administração; rascunho sem arquivo; recusa de arquivo cuja assinatura binária não bate com a extensão; envio para análise criando o checklist; obra não aprovada invisível a visitantes e a terceiros; bloqueio de edição durante a análise; nota da curadoria, validação de transições e aprovação; **a obra aprovada aparece no catálogo sem nenhuma ação do autor**; avaliações (uma por pessoa, atualizável, autor não avalia a própria obra); sessões de leitura alimentando o painel; audiodescrição por página; proteção de gênero em uso e de usuário com obras; arquivamento tirando a obra do catálogo; manuscrito em `.docx` aceito com o tipo e o `Content-Type` corretos, e `.docx` falso (que não é ZIP) recusado |
+| `works.test.ts` | Leitor não cadastra obra e escritor cadastra; leitor ativa o próprio perfil de escritor; escritor não alcança a administração; rascunho sem arquivo; recusa de arquivo cuja assinatura binária não bate com a extensão; envio para análise criando o checklist; obra não aprovada invisível a visitantes e a terceiros; bloqueio de edição durante a análise; nota da curadoria, validação de transições e aprovação; **a obra aprovada aparece no catálogo sem nenhuma ação do autor**; avaliações (uma por pessoa, atualizável, autor não avalia a própria obra); sessões de leitura alimentando o painel; audiodescrição por página; proteção de gênero em uso e de usuário com obras; arquivamento tirando a obra do catálogo; manuscrito em `.docx` aceito com o tipo e o `Content-Type` corretos, `.docx` falso (que não é ZIP) recusado e **PDF truncado recusado no envio** |
 | `catalog.test.ts` | Só obras `APROVADO` aparecem; rascunho, em análise e arquivada não vazam nem para visitante nem para outro usuário; filtro por formato; filtro por recurso de acessibilidade; busca por título e por tag; curinga de SQL tratado como texto; paginação e recusa de parâmetros inválidos; arquivar tira do catálogo e reaprovar devolve |
 | `donations.test.ts` | Meios aceitos e aviso de provedor simulado; apoio anônimo com código de pagamento; valores fora da faixa e método inexistente; obra inexistente; apoio vinculado a obra e conta, com confirmação idempotente; ninguém confirma o apoio de outra pessoa; estatísticas somando só os confirmados; listagem administrativa bloqueada para não-administrador; **ler uma obra continua não exigindo apoio nenhum** |
 
-Os dois testes em negrito existem por causa de defeitos reais corrigidos na 3.0.0: a obra que ficava presa entre a aprovação e o catálogo, e a garantia de que a doação não virou um pedágio.
+Os testes em negrito existem por causa de defeitos reais: a obra que ficava presa entre a aprovação e o catálogo e a garantia de que a doação não virou um pedágio (3.0.0), e o PDF cortado no meio do envio que passava na validação e só falhava no leitor, longe da causa (3.1.2).
+
+### O que a suíte não cobre
+
+A renderização dos leitores roda só no navegador e não é exercitada aqui. Isso foi caro: entre a 3.1.0 e a 3.1.4, três correções seguidas passaram no CI e não apareciam na tela, porque o `index.html` era servido sem cabeçalho de cache e o navegador continuava com o pacote antigo. Nenhum teste de back-end pegaria isso. Hoje a versão aparece no rodapé do site justamente para que esse tipo de engano seja visível em um olhar.
 
 ---
 

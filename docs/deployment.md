@@ -2,7 +2,7 @@
 
 ## O que já está pronto
 
-- Imagens de produção multi-stage: API compilada (Node 22 Alpine, usuário sem privilégios, só dependências de runtime, healthcheck) e front-end estático no Nginx (gzip, cache de assets, cabeçalhos de segurança, proxy para a API).
+- Imagens de produção multi-stage: API compilada (Node 22 Alpine, usuário sem privilégios, só dependências de runtime, healthcheck, `qpdf` para normalizar PDFs enviados) e front-end estático no Nginx (gzip, `immutable` nos assets com hash, `no-store` no `index.html`, cabeçalhos de segurança repetidos em cada `location`, proxy para a API).
 - Migrations e seed idempotente executados automaticamente a cada start.
 - Configuração 100% por variáveis de ambiente; segredos obrigatórios validados na inicialização.
 - Logs em stdout/stderr (coletados pelo Docker).
@@ -76,4 +76,4 @@ Faça backup do banco **e** dos uploads juntos: o banco guarda apenas o caminho 
 
 ## Sem Docker
 
-API: `npm ci && npm run build && npm run start:prod` com as variáveis de ambiente definidas (Node 20+). Front: `npm ci && npm run build` e sirva `web/dist` com qualquer servidor estático, fazendo proxy de `/api` e `/uploads` para a API e fallback de rotas para `index.html` (use `web/nginx.conf` como referência).
+API: `npm ci && npm run build && npm run start:prod` com as variáveis de ambiente definidas (Node 20+). Front: `npm ci && npm run build` e sirva `web/dist` com qualquer servidor estático, fazendo proxy de `/api` e `/uploads` para a API e fallback de rotas para `index.html` (use `web/nginx.conf` como referência). **Sirva o `index.html` com `no-store`**: ele aponta para os pacotes com hash, e se o navegador o guardar o site continua rodando a versão anterior depois do deploy, sem nenhum sinal de erro.

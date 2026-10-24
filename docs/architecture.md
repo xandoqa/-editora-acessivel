@@ -78,7 +78,7 @@ Hierarquia (`api/src/middlewares/auth.ts`): `LEITOR` 0 < `ESCRITOR` 1 < `ADMIN` 
 3. **Rate limit** confere o limite por IP.
 4. **`authenticate`** valida o token e carrega o usuário.
 5. **`requireWriter`** recusa com `403` se o papel for `LEITOR`.
-6. **`workUpload` (Multer)** grava os arquivos em `uploads/tmp` com nome UUID — o nome enviado pelo usuário nunca vira caminho em disco.
+6. **`workUpload` (Multer)** grava os arquivos em `uploads/tmp` com nome UUID — o nome enviado pelo usuário nunca vira caminho em disco. Em seguida o `storage.service` confere extensão, tamanho e assinatura binária; para PDF, confere também a marca `%%EOF` no fim (um arquivo cortado no meio do envio continua começando com `%PDF-`) e passa o arquivo pelo **`qpdf`**, que remove cifra sem senha de abertura, reconstrói a tabela de referências cruzadas e desfaz os object streams. Se o `qpdf` não existir ou falhar, o original segue intacto: normalizar é ganho, não requisito.
 7. **Controller** valida o corpo com Zod.
 8. **Service** confere o gênero, valida **a assinatura binária** de cada arquivo, move de `tmp` para a pasta definitiva e grava a obra em transação.
 9. **Resposta** `201` com o DTO da obra — caminhos internos de arquivo nunca saem daqui.
@@ -127,6 +127,7 @@ O provedor padrão, `simulado`, percorre o mesmo caminho sem movimentar dinheiro
 - **Estado local:** `useState` e dois contextos — sessão (`AuthContext`) e preferências de acessibilidade (`PreferencesContext`).
 - **Rotas:** React Router. `RequireAuth` aceita um papel mínimo; a API valida de novo, sempre.
 - **Carregamento sob demanda:** leitor (pdf.js/epub.js) e área administrativa só são baixados por quem os usa.
+- **Cache do `index.html`:** ele é o único arquivo que aponta para os pacotes com hash no nome, e vai com `no-store, must-revalidate`. Sem isso o navegador aplica heurística própria, guarda a página por horas e segue rodando o pacote antigo depois de um deploy — sem erro e sem pista. Os arquivos em `/assets/` continuam `immutable` por um ano, que é seguro porque o nome muda a cada build.
 - **Design:** tokens CSS em `web/src/styles/global.css`, consumidos pelo Tailwind. O modo de alto contraste redefine os tokens e troca a interface inteira de uma vez.
 
 ---

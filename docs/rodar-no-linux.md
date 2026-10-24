@@ -196,6 +196,8 @@ O PostgreSQL **não** é exposto, então a porta 5432 nunca entra em conflito.
 
 Abra **<http://localhost:5173>** (ou a porta que você colocou em `WEB_PORT`).
 
+> **Confira a versão no rodapé da página.** Se não for a que você acabou de baixar, o navegador está com o pacote antigo: recarregue com `Ctrl+Shift+R`. Se continuar diferente, a imagem não foi reconstruída — `docker compose up` sozinho reaproveita a antiga; use `./iniciar.sh`.
+
 | Perfil | E-mail | Senha | O que pode fazer |
 | --- | --- | --- | --- |
 | Administrador | `admin@livrin.local` | `Livrin.Dev2026` | Curadoria, usuários, gêneros, apoios |

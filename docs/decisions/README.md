@@ -16,3 +16,4 @@ Cada arquivo responde: o que foi escolhido, por quê, quais alternativas existia
 | [010](010-aprovar-e-publicar.md) | Aprovar passa a publicar; `PUBLICADO` é aposentado |
 | [011](011-doacoes-provedor-simulado.md) | Doações com provedor de pagamento simulado |
 | [012](012-manuscrito-em-docx.md) | Manuscrito em `.docx` lido no navegador, sem conversão e sem dependência nova |
+| [013](013-leitura-de-pdf.md) | PDF: normalizar no envio com qpdf e ler em três vias |

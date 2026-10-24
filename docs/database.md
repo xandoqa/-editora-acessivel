@@ -91,7 +91,7 @@ Alterar o banco:
 `api/src/db/seed.ts` é **idempotente** (pode rodar a cada inicialização):
 1. insere os gêneros padrão (ignora os existentes);
 2. cria o administrador de `ADMIN_EMAIL`/`ADMIN_PASSWORD` se o e-mail ainda não existir;
-3. com `SEED_DEMO_DATA=true`, cria (uma única vez) os dados de demonstração: 11 usuários, 13 obras com capas e arquivos de amostra (`api/seed-assets/`), entre elas um manuscrito em `.docx` ainda em análise e sem capa, audiodescrições, checklists, notas, avaliações e ~400 sessões de leitura para popular as métricas.
+3. com `SEED_DEMO_DATA=true`, cria (uma única vez) os dados de demonstração: 11 usuários, 13 obras com capas e **obras completas** (`api/seed-assets/`) — contos, poemas e roteiros de quadrinho originais, escritos para o projeto e gerados a partir de `ferramentas/historias/` —, entre elas um manuscrito em `.docx` ainda em análise, audiodescrições, checklists, notas, avaliações e ~400 sessões de leitura para popular as métricas.
 
 ## Operações comuns
 

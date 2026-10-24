@@ -4,7 +4,7 @@ Plataforma editorial aberta para quadrinhos e livros independentes, com acessibi
 
 O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. Ler é de graça; o apoio financeiro é voluntário e nunca condiciona o acesso a uma obra.
 
-**Versão 3.0.0** — veja o [CHANGELOG](CHANGELOG.md) para o que mudou em relação à 2.0.0.
+**Versão 3.1.5** — veja o [CHANGELOG](CHANGELOG.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF.
 
 ---
 
@@ -162,7 +162,7 @@ Livros e quadrinhos (mais mangás/webcomics e zines), com capa, título, autoria
 
 ### Leitor acessível
 
-PDF (pdf.js, com extração da camada de texto), **DOCX** (leitor próprio, sem dependência nova), EPUB (epub.js) e CBZ (JSZip). CBR não renderiza no navegador e é oferecido para download. O DOCX é o formato mais acessível do leitor: o texto reflui e obedece à tipografia, ao espaçamento e à escala escolhidos, ao contrário do PDF, que é página fixa. Escala, espaçamento, tipografia (Inter, Lexend, OpenDyslexic) e quatro paletas aplicadas ao conteúdo em tempo real; navegação por teclado; audiodescrição página a página narrada por faixa gravada ou por síntese de voz.
+PDF, **DOCX** (leitor próprio, sem dependência nova), EPUB (epub.js) e CBZ (JSZip). CBR não renderiza no navegador e é oferecido para download. O PDF é normalizado pelo `qpdf` no envio e lido em três vias — pedaços, arquivo completo e leitor do navegador —, porque o pdf.js recusa arquivos que leitores nativos abrem (ver [ADR 013](docs/decisions/013-leitura-de-pdf.md)). O DOCX é o formato mais acessível do leitor: o texto reflui e obedece à tipografia, ao espaçamento e à escala escolhidos, ao contrário do PDF, que é página fixa. Escala, espaçamento, tipografia (Inter, Lexend, OpenDyslexic) e quatro paletas aplicadas ao conteúdo em tempo real; navegação por teclado; audiodescrição página a página narrada por faixa gravada ou por síntese de voz.
 
 ### Apoio voluntário
 
@@ -346,7 +346,7 @@ TEST_DATABASE_URL=postgres://livrin_test:livrin_test@localhost:5433/livrin_test 
 docker compose -f docker-compose.test.yml down -v
 ```
 
-Os 47 testes cobrem autenticação (login dos três perfis, senha inválida, acesso sem autenticação), autorização (leitor não alcança a área de escritor, escritor não alcança a administração), obras (criar, enviar arquivo e capa, alterar status, aprovar, rejeitar), catálogo (obra aprovada aparece, filtros, busca, paginação) apoio (valores, confirmação, isolamento entre pessoas) e manuscrito em `.docx` (aceito com o tipo correto; recusado quando o conteúdo não é um ZIP de verdade).
+Os 48 testes cobrem autenticação (login dos três perfis, senha inválida, acesso sem autenticação), autorização (leitor não alcança a área de escritor, escritor não alcança a administração), obras (criar, enviar arquivo e capa, alterar status, aprovar, rejeitar), catálogo (obra aprovada aparece, filtros, busca, paginação) apoio (valores, confirmação, isolamento entre pessoas) manuscrito em `.docx` (aceito com o tipo correto; recusado quando o conteúdo não é um ZIP de verdade) e PDF truncado (recusado no envio, antes de a obra entrar no catálogo).
 
 ### Navegador (Playwright)
 
@@ -402,6 +402,7 @@ Lista completa em [docs/troubleshooting.md](docs/troubleshooting.md).
 | Documento | Conteúdo |
 | --- | --- |
 | [rodar-no-linux.md](docs/rodar-no-linux.md) | **Passo a passo para rodar no Linux**, do zero ao navegador, com o que fazer em cada erro |
+| [decisions/013](docs/decisions/013-leitura-de-pdf.md) | Por que o PDF é normalizado no envio e lido em três vias |
 | [architecture.md](docs/architecture.md) | Camadas, fluxo de uma requisição, decisões estruturais |
 | [database.md](docs/database.md) | Tabelas, colunas, relacionamentos, migrations, seed |
 | [api.md](docs/api.md) | Todas as rotas: método, URL, autenticação, perfil, entrada, saída e erros |

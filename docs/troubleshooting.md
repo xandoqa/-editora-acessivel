@@ -4,6 +4,35 @@
 
 > **Antes de tudo:** `docker compose version` (com espaço) precisa responder `v2.x` ou maior. Se só existir `docker-compose` com hífen, é a v1 descontinuada, que **não** entende este `docker-compose.yml` (ele usa `name:` no topo e `depends_on: condition: service_healthy`, da Compose Spec). Instale o plugin: `sudo apt install docker-compose-plugin` ou o equivalente da sua distribuição.
 
+### Mudei o código (ou atualizei o projeto) e a tela continua igual
+
+**Sintoma clássico:** o design não muda, ou uma correção não aparece, e não há erro nenhum.
+
+**Confira primeiro qual versão está no seu navegador:** role até o rodapé do site. O número ali é o do pacote que está carregado.
+
+1. A imagem foi reconstruída? `docker compose up` **sozinho reaproveita a imagem antiga**. Use `./iniciar.sh`, que faz `up --build`.
+2. Qual versão está rodando na API? `docker compose exec api node -p "require('/app/package.json').version"`. Se não bater com o `git log`, a imagem é velha.
+3. Se ainda assim o rodapé mostrar o número antigo, recarregue com **Ctrl+Shift+R**.
+
+Até a versão 3.1.4 havia uma causa no próprio projeto: o `index.html` era servido sem cabeçalho de cache, o navegador o guardava por horas e seguia carregando os pacotes antigos (que são `immutable` por um ano). Corrigido — mas se você estiver vindo de uma versão anterior, o primeiro recarregamento forçado ainda é necessário.
+
+### Um PDF específico não abre no leitor
+
+A tela agora diz o motivo, e o fim dela traz o detalhe técnico. Os casos e o que fazer:
+
+| O que a tela diz | O que fazer |
+| --- | --- |
+| Arquivo não encontrado no servidor | O registro existe no banco mas os bytes não estão no volume. Reenvie a obra, ou rode `npm run db:verify` na API |
+| PDF protegido por senha | Reenvie sem proteção, ou baixe para ler no computador |
+| Não é um PDF válido / chegou incompleto | O arquivo foi cortado no envio ou renomeado. Reenvie |
+| Nenhum leitor conseguiu interpretá-lo | Veja abaixo |
+
+No último caso: **se o arquivo foi enviado antes da 3.1.5, reenvie**. A partir dela, todo PDF passa pelo `qpdf` no envio, que remove cifra sem senha de abertura e reconstrói a tabela de referências cruzadas — é o que resolve a maior parte das digitalizações antigas.
+
+Se mesmo reenviado não abrir, **teste no Chrome**. O leitor embutido do Firefox é o próprio pdf.js, o mesmo do Livrin; se falha aqui, falha lá. O Chrome usa o PDFium, que é outro motor e mais tolerante.
+
+E vale lembrar do que o formato é: PDF digitalizado é imagem, não texto. Mesmo abrindo, ele não é legível por leitor de tela. Para leitura acessível de verdade, DOCX e EPUB são os formatos certos.
+
 ### Build falha com `error TS1378: Top-level 'await' expressions are only allowed...`
 
 Ou qualquer erro de TypeScript em um arquivo que **não deveria existir** — por exemplo `src/seed.ts`, quando o seed deste projeto mora em `src/db/seed.ts`.

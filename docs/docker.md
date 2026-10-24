@@ -45,6 +45,10 @@ Ordem de inicialização (healthchecks):
 
 `web/Dockerfile` (multi-stage): `deps` → `dev` (Vite) → `build` (`vite build`) → `runtime` (`nginx:1.27-alpine` + `web/nginx.conf`).
 
+A imagem da API instala o **`qpdf`** (~3 MB) no estágio de runtime: é ele que normaliza os PDFs enviados. Sem ele a API funciona igual, só deixa de consertar arquivos fora do padrão.
+
+No `web/nginx.conf`, o `index.html` vai com `no-store, must-revalidate` e os arquivos de `/assets/` com `immutable`. Os cabeçalhos de segurança são **repetidos em cada bloco `location`**, porque no nginx um `add_header` no filho anula os herdados do servidor em vez de somar.
+
 Nenhum script `.sh` é usado (os comandos estão em `package.json`), evitando problemas de fim de linha (CRLF) e permissão de execução no Windows. O `.gitattributes` força `LF` nos arquivos de texto.
 
 ## Comandos

@@ -108,6 +108,8 @@ Caracteres de curinga digitados na busca (`%`, `_`) são escapados e tratados co
 
 Arquivos: obra em PDF/DOCX/EPUB/CBZ/CBR até `MAX_UPLOAD_MB`; capa em JPG/PNG/WEBP até 5 MB; áudio em MP3/OGG/M4A. A **assinatura binária** é conferida — renomear um executável para `.pdf` ou para `.docx` é recusado. DOCX, EPUB e CBZ são arquivos ZIP e compartilham a mesma assinatura (`PK\x03\x04`); o que os distingue é a extensão declarada.
 
+Para PDF há mais dois passos. O **fim do arquivo** é conferido: sem a marca `%%EOF`, o envio é recusado com `400` — a assinatura do começo continua intacta num arquivo cortado no meio do upload, e sem essa conferência o problema só apareceria no leitor, longe da causa. Depois o arquivo passa pelo **`qpdf`**, que reescreve a estrutura preservando o conteúdo (remove cifra sem senha de abertura, reconstrói o xref, desfaz object streams). É o que faz um PDF de digitalização antiga abrir no navegador. Se o `qpdf` não estiver disponível, o original é guardado como chegou.
+
 ### `PATCH /works/:id` 🔒
 
 Mesmos campos, todos opcionais, mais `removeCover` e `removeAudio`. O que pode ser alterado depende do status — ver [business-rules.md](business-rules.md).

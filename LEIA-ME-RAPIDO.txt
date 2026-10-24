@@ -26,6 +26,8 @@ EDITORA LIVRIN — COMO RODAR EM 4 PASSOS
       docs/rodar-no-linux.md
 
 3) Abra http://localhost:5173
+   No rodape da pagina aparece a versao. Se nao for a que voce baixou,
+   recarregue com Ctrl+Shift+R.
 
 4) Entre com uma das contas de demonstracao:
 

@@ -115,6 +115,8 @@ Se o seu sistema estiver em inglês, é `~/Documents/livrin`.
 
 O `ls` tem que mostrar, **no mesmo nível**: `api`, `web`, `docs`, `docker-compose.yml`, `iniciar.sh`.
 
+> **Extraia sempre numa pasta vazia e nova.** Descompactar por cima de uma pasta que já tinha outra versão do projeto deixa arquivos antigos no meio dos novos — e o build quebra com erros de TypeScript em arquivos que nem deveriam existir. Para checar uma pasta de que você desconfia: `ls api/src/*.ts` tem que mostrar **só** `app.ts` e `server.ts`.
+
 **Se aparecer uma pasta `livrin` dentro da pasta `livrin`**, o descompactador criou um nível a mais — ou o arquivo foi extraído duas vezes. Entre na de dentro:
 
 ```bash

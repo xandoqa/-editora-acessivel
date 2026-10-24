@@ -4,6 +4,32 @@
 
 > **Antes de tudo:** `docker compose version` (com espaço) precisa responder `v2.x` ou maior. Se só existir `docker-compose` com hífen, é a v1 descontinuada, que **não** entende este `docker-compose.yml` (ele usa `name:` no topo e `depends_on: condition: service_healthy`, da Compose Spec). Instale o plugin: `sudo apt install docker-compose-plugin` ou o equivalente da sua distribuição.
 
+### Build falha com `error TS1378: Top-level 'await' expressions are only allowed...`
+
+Ou qualquer erro de TypeScript em um arquivo que **não deveria existir** — por exemplo `src/seed.ts`, quando o seed deste projeto mora em `src/db/seed.ts`.
+
+**Causa:** a pasta tem arquivos de mais de uma versão do projeto misturados. Acontece ao extrair o `.zip` por cima de uma pasta que já tinha outra versão, ou ao copiar o conteúdo de um protótipo antigo para dentro de `api/` ou `web/`. O `tsc` compila **tudo** que estiver em `src/`, inclusive o que sobrou.
+
+**Como confirmar:**
+
+```bash
+ls api/src/*.ts
+```
+
+Tem que mostrar **exatamente** `app.ts` e `server.ts`, nada mais. Se aparecer `db.ts`, `schema.ts` ou `seed.ts` soltos ali, são restos de outra versão.
+
+**Solução: comece de uma pasta limpa.** Não tente consertar a misturada — além dos arquivos que sobram, há os que foram *sobrescritos*, e esses não dão erro, só se comportam diferente.
+
+```bash
+cd ~/Documentos
+rm -rf livrin-novo
+git clone -b livrin-3.0.0 https://github.com/xandoqa/-editora-acessivel.git livrin-novo
+cd livrin-novo
+./iniciar.sh
+```
+
+Ou extraia o `.zip` numa pasta vazia e nova, nunca por cima de uma existente.
+
 ### `./iniciar.sh: Permission denied` (Linux/macOS)
 O descompactador perdeu a permissão de execução — acontece com vários extratores gráficos e ao baixar o projeto por outros caminhos. **Solução:** `chmod +x iniciar.sh parar.sh`. Alternativa imediata, sem mexer em permissão: `sh iniciar.sh`.
 

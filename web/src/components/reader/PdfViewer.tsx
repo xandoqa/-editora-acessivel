@@ -78,6 +78,8 @@ export default function PdfViewer({ url, authorization, page, onPageCount, prefs
   const wrapRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [doc, setDoc] = useState<PDFDocumentProxy | null>(null);
+  // Última via: o leitor nativo do navegador, quando o pdf.js desiste.
+  const [urlNativa, setUrlNativa] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [pageText, setPageText] = useState('');
   const [rendering, setRendering] = useState(true);
@@ -124,6 +126,32 @@ export default function PdfViewer({ url, authorization, page, onPageCount, prefs
           setDoc(d);
           onPageCount(d.numPages);
         } catch (segundoErro) {
+          /*
+           * Terceira via: o leitor embutido do navegador.
+           *
+           * O pdf.js é uma implementação em JavaScript e recusa arquivos que o
+           * motor nativo abre sem reclamar — o do Chrome é o PDFium, bem mais
+           * tolerante com estrutura fora do padrão, que é o caso de muita
+           * digitalização antiga. Se o arquivo abre de algum jeito, ele tem de
+           * abrir: o projeto existe para a pessoa CONSEGUIR LER.
+           *
+           * Buscamos como blob para que obras não publicadas, que exigem
+           * cabeçalho de autenticação, também funcionem — um <object> não
+           * manda cabeçalho próprio.
+           */
+          try {
+            const resposta = await fetch(url, {
+              headers: authorization ? { Authorization: authorization } : undefined,
+            });
+            if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+            const blob = await resposta.blob();
+            if (!ativo) return;
+            setUrlNativa(URL.createObjectURL(blob));
+            onPageCount(1);
+            return;
+          } catch {
+            /* sem terceira via: cai na mensagem de erro abaixo */
+          }
           const texto = await mensagemDeErro(segundoErro, url, authorization);
           if (ativo) setError(texto);
         }
@@ -135,6 +163,12 @@ export default function PdfViewer({ url, authorization, page, onPageCount, prefs
       void tarefa?.destroy();
     };
   }, [url, authorization, onPageCount]);
+
+  // O blob da via nativa precisa ser liberado quando a obra muda ou a tela sai.
+  useEffect(() => {
+    if (!urlNativa) return;
+    return () => URL.revokeObjectURL(urlNativa);
+  }, [urlNativa]);
 
   useEffect(() => {
     const el = wrapRef.current;
@@ -181,6 +215,23 @@ export default function PdfViewer({ url, authorization, page, onPageCount, prefs
       renderTask?.cancel();
     };
   }, [doc, page, width, prefs.scale]);
+
+  if (urlNativa) {
+    return (
+      <div className="flex flex-col gap-3">
+        <p className="rounded-xl border border-outline bg-surface-high px-4 py-3 text-sm text-ink-muted" role="status">
+          Este PDF não abriu no leitor acessível do Livrin, então está sendo exibido pelo leitor do seu navegador. A
+          navegação por páginas do Livrin e o recurso &quot;Texto desta página&quot; não funcionam neste modo — para a
+          melhor experiência de leitura, peça à autoria um arquivo em DOCX ou EPUB.
+        </p>
+        <object data={urlNativa} type="application/pdf" className="h-[75vh] w-full rounded-xl border border-outline" aria-label={`Leitura de ${title}`}>
+          <p className="p-6 text-center text-sm text-ink-muted">
+            Seu navegador não consegue exibir PDF embutido. Use o botão de baixar para abrir a obra no computador.
+          </p>
+        </object>
+      </div>
+    );
+  }
 
   if (error) {
     return (

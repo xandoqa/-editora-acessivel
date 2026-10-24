@@ -2,6 +2,32 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.1.4] — 2026-10-24
+
+### Corrigido
+
+- **O navegador continuava rodando a versão antiga do site depois do deploy.**
+  O `index.html` é o único arquivo que aponta para os pacotes com hash no nome,
+  e ele era servido **sem cabeçalho de cache** — então o navegador aplicava
+  heurística própria e o guardava por horas, enquanto os arquivos em `/assets/`
+  seguem marcados como `immutable` por um ano. Resultado: correções publicadas
+  e invisíveis na tela, sem erro e sem pista. Agora o `index.html` vai com
+  `no-store, must-revalidate`. Era a causa de "o design não mudou" e de "a
+  mensagem de erro é a mesma" aparecerem juntos.
+- **O PDF que o pdf.js recusa agora abre pelo leitor do navegador.** O pdf.js é
+  uma implementação em JavaScript e rejeita arquivos que o motor nativo — o
+  PDFium, no Chrome — abre sem reclamar, o que é comum em digitalização antiga.
+  A leitura passou a ter três vias: por pedaços (Range), arquivo inteiro e, por
+  último, o leitor embutido do navegador, com aviso de que a navegação por
+  páginas e o "Texto desta página" não valem nesse modo. Se o arquivo abre de
+  algum jeito, ele tem de abrir.
+
+### Adicionado
+
+- **A versão aparece no rodapé.** Sem isso não havia como olhar a tela e saber
+  qual build estava no ar — foi assim que um pacote velho passou despercebido
+  por três correções seguidas.
+
 ## [3.1.3] — 2026-10-24
 
 ### Corrigido

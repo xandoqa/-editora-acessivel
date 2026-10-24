@@ -3,6 +3,7 @@ import * as pdfjsLib from 'pdfjs-dist';
 import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { PALETTES, textStyle } from './readerPrefs';
+import { detalheTecnico } from './erroDeLeitura';
 import type { PdfViewerProps } from './types';
 import { Spinner } from '../ui';
 
@@ -52,9 +53,7 @@ async function mensagemDeErro(err: unknown, url: string, authorization?: string)
   // abre. Não dá para prever a lista, e esconder o motivo atrás de uma frase
   // genérica é pior do que mostrá-lo: sem o nome da exceção ninguém, nem quem
   // usa nem quem mantém, tem por onde começar.
-  const detalhe = [(err as { name?: string })?.name, (err as { message?: string })?.message]
-    .filter(Boolean)
-    .join(': ');
+  const detalhe = detalheTecnico(err);
   return (
     'Este PDF existe no servidor e chegou inteiro, mas o leitor do navegador não conseguiu interpretá-lo. ' +
     'Costuma ser um arquivo gerado por um programa que escreve a estrutura fora do padrão, ou protegido por cifra. ' +

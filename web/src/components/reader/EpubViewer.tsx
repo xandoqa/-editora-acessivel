@@ -7,6 +7,7 @@ import lexendUrl from '@fontsource/lexend/files/lexend-latin-400-normal.woff2?ur
 import dyslexicUrl from '@fontsource/opendyslexic/files/opendyslexic-latin-400-normal.woff2?url';
 import dyslexicBoldUrl from '@fontsource/opendyslexic/files/opendyslexic-latin-700-normal.woff2?url';
 import { PALETTES, SPACING_VALUES, TYPOGRAPHY_FAMILY } from './readerPrefs';
+import { falhaAoAbrir } from './erroDeLeitura';
 import type { ViewerProps } from './types';
 import { Spinner } from '../ui';
 
@@ -55,7 +56,7 @@ export default function EpubViewer({ data, page, onPageCount, onPageChange, pref
         return rendition.display();
       })
       .then(() => active && setReady(true))
-      .catch(() => active && setError('Não foi possível abrir este EPUB.'));
+      .catch((err: unknown) => active && setError(falhaAoAbrir('EPUB', err)));
     return () => {
       active = false;
       rendition.destroy();
@@ -96,7 +97,11 @@ export default function EpubViewer({ data, page, onPageCount, onPageChange, pref
           <Spinner label="Abrindo livro..." />
         </div>
       )}
-      {error && <p className="p-6 text-center text-danger">{error}</p>}
+      {error && (
+        <div className="mx-auto max-w-prose p-6 text-center" role="alert">
+          <p className="whitespace-pre-line text-sm text-danger">{error}</p>
+        </div>
+      )}
       <div
         ref={hostRef}
         role="document"

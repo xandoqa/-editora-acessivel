@@ -2,6 +2,27 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.1.3] — 2026-10-24
+
+### Corrigido
+
+- **O mesmo defeito estava em todos os leitores, não só no de PDF.** EPUB, CBZ,
+  DOCX e a faixa de audiodescrição tinham, cada um, um `catch` que trocava o
+  erro real por uma frase fixa — "Não foi possível abrir este EPUB", "...este
+  arquivo CBZ", "...este arquivo do Word". Verdadeiras e inúteis: não
+  distinguem arquivo que não chegou de arquivo corrompido, e não deixam pista
+  nenhuma para quem for investigar.
+
+  Agora os quatro usam `web/src/components/reader/erroDeLeitura.ts`, que
+  traduz o erro para linguagem comum **e** mantém o detalhe técnico junto. As
+  bibliotecas já diziam coisas específicas — "Can't find end of central
+  directory" para ZIP truncado, "sem document.xml" para DOCX inválido —, e
+  descartar isso era jogar fora a única pista existente. Os casos de ZIP
+  truncado e de arquivo protegido por senha ganharam explicação própria, já que
+  EPUB, CBZ e DOCX compartilham o mesmo formato por baixo.
+- A faixa de audiodescrição passou a mostrar a mensagem que a API devolve, em
+  vez de uma frase genérica.
+
 ## [3.1.2] — 2026-10-24
 
 ### Corrigido

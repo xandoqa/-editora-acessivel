@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import JSZip from 'jszip';
 import { PALETTES, textStyle } from './readerPrefs';
 import { blocosDoDocumentXml, paginar, type BlocoDocx, type TrechoDocx } from './docxParser';
+import { falhaAoAbrir } from './erroDeLeitura';
 import type { ViewerProps } from './types';
 import { Spinner } from '../ui';
 
@@ -93,8 +94,8 @@ export default function DocxViewer({ data, page, onPageCount, prefs, title }: Vi
         if (!lidos.length) throw new Error('documento vazio');
         setBlocos(lidos);
       })
-      .catch(() => {
-        if (ativo) setErro('Não foi possível abrir este arquivo do Word. Baixe a obra para ler no seu computador.');
+      .catch((err: unknown) => {
+        if (ativo) setErro(falhaAoAbrir('DOCX', err));
       });
     return () => {
       ativo = false;
@@ -107,7 +108,13 @@ export default function DocxViewer({ data, page, onPageCount, prefs, title }: Vi
     if (paginas) onPageCount(paginas.length);
   }, [paginas, onPageCount]);
 
-  if (erro) return <p className="p-6 text-center text-danger">{erro}</p>;
+  if (erro) {
+    return (
+      <div className="mx-auto max-w-prose p-6 text-center" role="alert">
+        <p className="whitespace-pre-line text-sm text-danger">{erro}</p>
+      </div>
+    );
+  }
   if (!paginas) {
     return (
       <div className="flex min-h-[320px] items-center justify-center">

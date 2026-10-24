@@ -28,6 +28,10 @@ RUN npm run build
 # Imagem final de produção: somente dependências de runtime + build
 FROM base AS runtime
 ENV NODE_ENV=production
+# qpdf normaliza PDFs enviados: remove cifra de permissão, reconstrói a tabela
+# de referências cruzadas e desfaz estruturas que o pdf.js recusa. É o que faz
+# uma digitalização antiga abrir no navegador em vez de só dar erro. ~3 MB.
+RUN apk add --no-cache qpdf
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=build /app/dist ./dist

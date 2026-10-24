@@ -1,0 +1,34 @@
+# Além das Estrelas
+@ Lorena Campolina
+= Quadrinho · Crônicas do Espaço · Capítulo 1: O Limiar da Nebulosa Carina
+% Os quadros seguem a audiodescrição registrada no banco: o que a pessoa ouve e o que a página mostra contam a mesma cena.
+
+## 1
+[CENA] Plano aberto. A nave Alvorada desliza em silêncio. O casco prateado reflete tons quentes de ametista vindos dos gases da nebulosa. No alto, detritos rochosos flutuam em gravidade zero.
+[FALA] Comandante Yara: Mantenham os sensores direcionais ligados. Essa névoa tem densidade magnética que nenhum mapa estelar previu.
+[FALA] Sintético N-400: Frequência de pulso detectada. Não é estática orbital... há um padrão repetitivo de quatro compassos.
+
+## 2
+[CENA] Plano geral. Um planeta azul-acinzentado ocupa o lado direito do quadro, envolto em névoa violeta e pontos de luz. À esquerda, a Alvorada parece pequena diante da imensidão.
+[FALA] Comandante Yara: Sinto a vibração no casco antes mesmo dos sensores. Este planeta está cantando.
+
+## 3
+[CENA] Plano médio. Interior da ponte de comando. Seis consoles iluminados em ciano formam um semicírculo. Yara está de costas, com a mão apoiada no painel central.
+[FALA] Comandante Yara: Leia em voz alta cada leitura, N-400. Quero ouvir o caminho.
+[FALA] Sintético N-400: Eco-localização ativa. Distância até a superfície: 12 quilômetros.
+
+## 4
+[CENA] Close. Círculos concêntricos verdes se expandem a partir do centro do quadro, como ondas sonoras visíveis, sobre um fundo de estrelas.
+[FALA] Comandante Yara: Quatro compassos... é uma linguagem. Alguém está nos chamando.
+
+## 5
+[CENA] Plano médio. Yara abre a tampa do painel de transmissão. A mão paira sobre a chave, sem encostar.
+[LEGENDA] O manual da frota tem uma linha sobre isto. A linha diz: não responda.
+[FALA] Sintético N-400: Protocolo 9 recomenda apenas registrar, comandante.
+[FALA] Comandante Yara: Registrar é o que a gente faz com quem já morreu.
+
+## 6
+[CENA] Plano aberto final. Da Alvorada parte um feixe fino em direção ao planeta. Os círculos verdes, agora, vêm dos dois lados do quadro e se encontram no meio.
+[LEGENDA] Catorze minutos depois, veio resposta. Não era eco: era uma frase nova.
+[FALA] Comandante Yara: Anota a hora, N-400.
+[FALA] Sintético N-400: Anotado. E, comandante... eles mudaram o compasso. Agora somos dois conversando.

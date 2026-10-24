@@ -21,8 +21,28 @@ enviada, e uma revisão visual pedida depois de ver o sistema no ar.
   falhava com um erro que não dizia nada. Agora a resposta nomeia o problema e
   diz o que fazer. Vale também para a faixa de audiodescrição.
 
+### Adicionado
+
+- **As obras de demonstração passaram a ter conteúdo de leitura de verdade.**
+  Antes eram amostras de duas a quatro páginas. Agora são contos, poemas e
+  roteiros de quadrinho originais, escritos para o projeto: *Meu Livro
+  Incrível*, *Além das Estrelas*, *Chamas de Agosto*, *O Último Mapa* (HQs, 6 a
+  10 páginas), *Terra Nova* (leitura fácil), *Vozes do Mar* (dez poemas),
+  *Raízes* (três gerações no sertão, em EPUB). O texto-fonte fica em
+  `ferramentas/historias/` e os arquivos saem de `ferramentas/gerar-obras.py`.
+- Os PDFs têm **camada de texto real**, extraível e legível por leitor de tela —
+  antes, parte do acervo era imagem de texto, o que numa plataforma de
+  acessibilidade é contradizer a própria proposta. O EPUB ganhou `lang="pt-BR"`
+  e sumário navegável.
+
 ### Alterado
 
+- **Formato e arquivo agora batem.** *Meu Livro Incrível*, *Chamas de Agosto* e
+  *Além das Estrelas* estavam cadastrados como quadrinho e guardavam um PDF de
+  prosa; viraram HQ de fato, em CBZ. As páginas de *Além das Estrelas* seguem a
+  audiodescrição já registrada no banco, de modo que o que se ouve e o que se vê
+  contam a mesma cena. O número de páginas de cada obra passou a conferir com o
+  arquivo.
 - **Peso visual.** Todo card tinha traço de 2px e sombra dura de 5px; com tudo
   em destaque, nada ficava em destaque. O traço caiu para 1px **mantendo a mesma
   cor** — o contraste do critério 1.4.11 é idêntico —, a sombra dura saiu dos

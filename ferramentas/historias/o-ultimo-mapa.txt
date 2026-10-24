@@ -1,0 +1,56 @@
+# O Último Mapa
+@ Marina Bastos
+= Quadrinho · a cidade submersa
+% Em uma metrópole submersa, navegadores cegos desvendam rotas esquecidas guiados pelo som das correntes.
+
+## 1
+[CENA] Vista ampla da cidade submersa. Torres cobertas de coral, luz vindo de cima em feixes.
+[LEGENDA] Chamam de Baixa Grande. Antes tinha outro nome.
+[FALA] Narradora: A água subiu em uma noite. O mapa levou cem anos.
+
+## 2
+[CENA] Interior. Uma sala redonda, paredes cobertas de cordas com nós.
+[LEGENDA] A Casa das Cordas. Cada nó é uma esquina.
+[FALA] Mestra Dalva: Põe a mão aqui. Não force. Deixa a corda te contar.
+
+## 3
+[CENA] Close nas mãos de uma jovem correndo os dedos por uma corda cheia de nós.
+[FALA] Sãmia: Três nós juntos.
+[FALA] Mestra Dalva: Três nós juntos é ponte.
+
+## 4
+[CENA] Sãmia nadando por um corredor estreito entre dois prédios.
+[LEGENDA] O ouvido faz o que o olho não faz: atravessa a parede.
+[FALA] Sãmia: A corrente bate diferente aqui. Tem buraco à esquerda.
+
+## 5
+[CENA] Uma porta antiga, soterrada até a metade, com um símbolo gasto.
+[FALA] Sãmia: Achei.
+[FALA] Mestra Dalva (distante): Achou o quê, menina?
+[FALA] Sãmia: O último.
+
+## 6
+[CENA] Interior da sala alagada. Prateleiras. Um rolo de couro preservado numa cápsula.
+[LEGENDA] O mapa que a cidade perdeu quando parou de precisar de mapas.
+[FALA] Sãmia: Está inteiro.
+
+## 7
+[CENA] Sãmia abre o rolo. O mapa é liso, sem relevo nenhum.
+[FALA] Sãmia: ...
+[FALA] Sãmia: É só tinta.
+[LEGENDA] Um mapa que só serve para quem enxerga não serve para a Baixa Grande.
+
+## 8
+[CENA] De volta à Casa das Cordas. Sãmia estende o mapa sobre a mesa e pega um novelo.
+[FALA] Mestra Dalva: E agora?
+[FALA] Sãmia: Agora eu traduzo.
+
+## 9
+[CENA] Mãos atando nós sobre a superfície do mapa antigo, corda sobre tinta.
+[LEGENDA] Levou onze meses.
+[FALA] Sãmia: Três nós juntos é ponte. Dois é esquina. Um é beco sem saída.
+
+## 10
+[CENA] Vista ampla final: dezenas de pessoas, de várias idades, lendo o mapa com as mãos.
+[LEGENDA] O último mapa da Baixa Grande foi o primeiro que todo mundo pôde ler.
+[FALA] Mestra Dalva: Você não achou o mapa, menina. Você fez.

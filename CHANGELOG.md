@@ -2,6 +2,29 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.1.2] — 2026-10-24
+
+### Corrigido
+
+- **O leitor escondia o motivo real da falha.** A versão anterior tratava quatro
+  casos conhecidos e mandava todo o resto para uma frase genérica, descartando o
+  nome e a mensagem da exceção do pdf.js. Quem lia ficava sem próximo passo e
+  quem mantém ficava sem pista. Agora o caso não previsto mostra o que de fato
+  aconteceu, com o detalhe técnico junto.
+- **Leitura em duas vias.** O pdf.js lê o arquivo em pedaços, por requisições
+  Range. Quando isso falha — proxy que não repassa Range, resposta sem
+  `Content-Range`, intermediário que recomprime —, o leitor agora tenta de novo
+  baixando o arquivo inteiro antes de desistir. Boa parte dos "não abre" é do
+  transporte, não do arquivo.
+
+### Adicionado
+
+- **Conferência de PDF truncado no envio.** A assinatura `%PDF-` continua no
+  começo de um arquivo cortado no meio do upload, então a validação anterior o
+  aceitava e o problema só aparecia no leitor, longe da causa. Agora o fim do
+  arquivo é conferido: sem a marca `%%EOF`, o envio é recusado com uma mensagem
+  que aponta para o envio interrompido. Com teste.
+
 ## [3.1.0] — 2026-10-24
 
 Rodada de ajustes a partir do uso real: dois defeitos que impediam ler uma obra

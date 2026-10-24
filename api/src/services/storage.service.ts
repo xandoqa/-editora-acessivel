@@ -97,6 +97,19 @@ export interface StoredFile {
   fileType?: FileType;
 }
 
+/** O PDF termina com a marca "%%EOF"? Olha só o último KB, não o arquivo todo. */
+async function terminaComEOF(caminho: string, tamanho: number): Promise<boolean> {
+  const janela = Math.min(1024, tamanho);
+  const cauda = Buffer.alloc(janela);
+  const handle = await fsp.open(caminho, 'r');
+  try {
+    await handle.read(cauda, 0, janela, tamanho - janela);
+  } finally {
+    await handle.close();
+  }
+  return cauda.toString('latin1').includes('%%EOF');
+}
+
 /**
  * Valida (extensão, tamanho e assinatura binária) e move um arquivo temporário
  * do multer para o diretório definitivo. Lança 400 se o conteúdo for inválido.
@@ -120,6 +133,21 @@ export async function commitUpload(file: Express.Multer.File, kind: UploadKind):
     }
     if (!rule.sniff(head, ext)) {
       throw badRequest(`O conteúdo do arquivo não corresponde a um ${ext.toUpperCase()} válido.`);
+    }
+
+    /*
+     * Assinatura no começo prova o tipo, não prova que o arquivo chegou
+     * inteiro. Um PDF cortado no meio do envio continua começando com "%PDF-"
+     * e passa na conferência acima — e só vai falhar lá na frente, no leitor,
+     * com um erro que não aponta para o envio. Um PDF íntegro termina com
+     * "%%EOF" (pode haver alguns bytes de sobra depois), então olhar o fim é
+     * barato e pega o caso antes de a obra entrar no catálogo.
+     */
+    if (ext === 'pdf' && !(await terminaComEOF(file.path, file.size))) {
+      throw badRequest(
+        'O PDF parece ter chegado incompleto: falta a marca de fim de arquivo. ' +
+          'Isso costuma ser conexão interrompida durante o envio. Tente enviar novamente.',
+      );
     }
 
     const relativePath = path.posix.join(DIRS[kind], `${randomUUID()}.${ext}`);

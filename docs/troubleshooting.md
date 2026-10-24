@@ -1,5 +1,7 @@
 # Problemas comuns
 
+> **Está tentando rodar no Linux pela primeira vez?** Vá direto para o [passo a passo de Linux](rodar-no-linux.md) — ele é seguido, do zero até o navegador, e já traz a solução de cada erro no lugar onde ele aparece. Esta página aqui é por sintoma, para quando você já sabe o que deu errado.
+
 > **Antes de tudo:** `docker compose version` (com espaço) precisa responder `v2.x` ou maior. Se só existir `docker-compose` com hífen, é a v1 descontinuada, que **não** entende este `docker-compose.yml` (ele usa `name:` no topo e `depends_on: condition: service_healthy`, da Compose Spec). Instale o plugin: `sudo apt install docker-compose-plugin` ou o equivalente da sua distribuição.
 
 ### `./iniciar.sh: Permission denied` (Linux/macOS)

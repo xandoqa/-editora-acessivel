@@ -4,15 +4,26 @@ EDITORA LIVRIN — COMO RODAR EM 4 PASSOS
 1) Tenha o Docker rodando.
    Windows / macOS .. abra o Docker Desktop e espere "Engine running".
    Linux ............ sudo systemctl start docker
-   Em qualquer sistema, o comando  docker compose version  (COM ESPACO)
-   precisa responder v2.x ou maior. Se so existir "docker-compose" com
-   hifen, e a versao 1, que nao entende este projeto: instale o plugin
-   (Debian/Ubuntu: sudo apt install docker-compose-plugin).
 
-2) Windows ......... de dois cliques em iniciar.bat
-   Linux / macOS ... rode ./iniciar.sh no terminal
-   (a primeira vez demora alguns minutos; o arquivo .env e um segredo de
-    seguranca exclusivo da sua instalacao sao criados automaticamente)
+2) WINDOWS
+      De dois cliques em iniciar.bat
+
+   LINUX / macOS
+      Abra o terminal na pasta do projeto e rode:
+
+         cd ~/Documentos/livrin        (ou ~/Documents/livrin)
+         chmod +x iniciar.sh parar.sh
+         ./iniciar.sh
+
+      O chmod e necessario porque o .zip perde a permissao de execucao.
+      Quem clonou pelo Git pode pular essa linha.
+
+   A primeira vez demora: baixa e compila cerca de 1,5 GB, entao dez
+   minutos e normal. O arquivo .env e um segredo exclusivo da sua
+   instalacao sao criados automaticamente.
+
+   Passo a passo completo do Linux, com cada erro possivel:
+      docs/rodar-no-linux.md
 
 3) Abra http://localhost:5173
 
@@ -64,4 +75,6 @@ SE JA RODOU UMA VERSAO ANTERIOR NESTE COMPUTADOR
      docker compose down -v
    Em seguida rode iniciar.bat / ./iniciar.sh novamente.
 
-PROBLEMAS?  docs/troubleshooting.md
+PROBLEMAS?
+   Linux, passo a passo ..... docs/rodar-no-linux.md
+   Por sintoma .............. docs/troubleshooting.md

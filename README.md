@@ -11,6 +11,7 @@ O Livrin existe para que quem não tem como bancar um lançamento tradicional co
 ## Sumário
 
 - [Começar em um comando](#começar-em-um-comando)
+- [O que precisa estar instalado](#o-que-precisa-estar-instalado)
 - [Credenciais de desenvolvimento](#credenciais-de-desenvolvimento)
 - [O que o sistema faz](#o-que-o-sistema-faz)
 - [Tecnologias e requisitos](#tecnologias-e-requisitos)
@@ -27,60 +28,46 @@ O Livrin existe para que quem não tem como bancar um lançamento tradicional co
 
 ## Começar em um comando
 
-**Requisito único: Docker com o plugin Compose v2.** Nada mais precisa estar instalado na sua máquina — Node, PostgreSQL e todas as dependências ficam dentro dos contêineres.
+### Linux e macOS
+
+Se você extraiu o `.zip` (digamos, em `~/Documentos/livrin`):
+
+```bash
+cd ~/Documentos/livrin
+chmod +x iniciar.sh parar.sh    # o .zip perde a permissão de execução
+./iniciar.sh
+```
+
+Se clonou pelo Git, a permissão já vem certa — basta `./iniciar.sh`.
+
+### Windows
+
+Dê dois cliques em `iniciar.bat`.
+
+### Depois
+
+Abra **<http://localhost:5173>**. Para parar: `./parar.sh` (Linux/macOS), `parar.bat` (Windows) ou `Ctrl+C`.
+
+A primeira execução demora: o script cria o `.env`, **gera um `JWT_SECRET` aleatório só para a sua instalação** e baixa e compila cerca de 1,5 GB. Dez minutos numa conexão comum é normal; nas próximas vezes são segundos.
+
+> **Travou em algum ponto, ou é a primeira vez?** [**docs/rodar-no-linux.md**](docs/rodar-no-linux.md) é o passo a passo completo para Linux, com o que fazer em cada erro possível — permissão, Docker, porta ocupada, disco cheio.
+
+---
+
+## O que precisa estar instalado
+
+**Só Docker com o plugin Compose v2.** Node, PostgreSQL e todas as dependências ficam dentro dos contêineres; nada é instalado na sua máquina.
 
 | Sistema | O que instalar | Como conferir |
 | --- | --- | --- |
+| Linux | `docker.io` + `docker-compose-plugin` | `docker compose version` |
 | Windows / macOS | Docker Desktop (espere o status "running") | `docker compose version` |
-| Linux | Docker Engine + `docker-compose-plugin` (pacote oficial da Docker) | `docker compose version` |
 
-`docker compose version` (com **espaço**) precisa responder `v2.x` ou maior. Se só existir `docker-compose` com hífen, é a v1, que foi descontinuada e **não** entende este `docker-compose.yml` — ele usa `name:` no topo e `depends_on: condition: service_healthy`, recursos da Compose Spec. Instale o plugin: `sudo apt install docker-compose-plugin` (Debian/Ubuntu) ou equivalente da sua distribuição.
+`docker compose version` — com **espaço** — precisa responder `v2.x` ou maior. Se só existir `docker-compose` com hífen, é a v1, descontinuada, que **não** entende este `docker-compose.yml` (ele usa `name:` e `depends_on: condition: service_healthy`, da Compose Spec). Instale o plugin: `sudo apt install docker-compose-plugin` ou o equivalente da sua distribuição.
 
-As imagens são `node:22-alpine` e `postgres:16-alpine`, ambas Linux nativas: o projeto roda igual em Linux, Windows (WSL2) e macOS.
+O `iniciar.sh` confere tudo isso sozinho antes de tentar subir, e diz o que fazer em vez de deixar o Docker devolver o erro cru.
 
-| Sistema | Comando |
-| --- | --- |
-| Windows | dê dois cliques em `iniciar.bat` |
-| Linux / macOS | `./iniciar.sh` |
-
-Na primeira execução o script cria o arquivo `.env` a partir de `.env.example` e **gera um `JWT_SECRET` aleatório só para a sua instalação** — nenhum segredo vem pronto dentro do repositório. Depois disso ele sobe os três containers.
-
-A primeira subida demora alguns minutos (baixa imagens e compila). Quando terminar, abra:
-
-**<http://localhost:5173>**
-
-Para parar: `parar.bat` (Windows) ou `./parar.sh` (Linux/macOS).
-
-<details>
-<summary><strong>Linux: quatro coisas que costumam travar a primeira execução</strong></summary>
-
-**1. `./iniciar.sh: Permission denied`** — o extrator perdeu a permissão de execução (acontece com vários descompactadores gráficos). Resolva com `chmod +x iniciar.sh parar.sh`, ou rode `sh iniciar.sh`, que funciona sem a permissão.
-
-**2. `permission denied while trying to connect to the Docker daemon socket`** — seu usuário não está no grupo `docker`. O caminho recomendado:
-
-```bash
-sudo usermod -aG docker $USER
-# saia e entre na sessão de novo (ou: newgrp docker)
-docker compose version       # deve responder sem sudo
-```
-
-Dá para usar `sudo ./iniciar.sh`, mas aí o `.env` criado pelo script fica pertencendo ao `root` e você precisa de `sudo` para editá-lo depois. Se isso já aconteceu: `sudo chown $USER:$USER .env`.
-
-**3. `port is already allocated`** — outra coisa já usa a 5173 ou a 3000. Descubra com `ss -ltnp | grep -E ':(5173|3000)'` e, se preferir não encerrar o processo, mude no `.env`:
-
-```bash
-WEB_PORT=8080
-API_PORT=3001
-CORS_ORIGINS=http://localhost:8080   # precisa acompanhar o WEB_PORT
-```
-
-O PostgreSQL **não** é exposto no `docker-compose.yml` padrão, então a porta 5432 nunca entra em conflito (só no modo de desenvolvimento, onde vale `DB_PORT`).
-
-**4. Espaço em disco.** A primeira subida baixa e compila cerca de 1,5 GB entre imagens e camadas. `docker system df` mostra o que já está ocupado e `docker system prune` libera o que não é mais usado.
-
-Outros tropeços estão em [docs/troubleshooting.md](docs/troubleshooting.md).
-
-</details>
+As imagens são `node:22-alpine` e `postgres:16-alpine`: o projeto roda igual em Linux, Windows (WSL2) e macOS.
 
 <details>
 <summary>Prefere rodar os comandos na mão?</summary>
@@ -414,6 +401,7 @@ Lista completa em [docs/troubleshooting.md](docs/troubleshooting.md).
 
 | Documento | Conteúdo |
 | --- | --- |
+| [rodar-no-linux.md](docs/rodar-no-linux.md) | **Passo a passo para rodar no Linux**, do zero ao navegador, com o que fazer em cada erro |
 | [architecture.md](docs/architecture.md) | Camadas, fluxo de uma requisição, decisões estruturais |
 | [database.md](docs/database.md) | Tabelas, colunas, relacionamentos, migrations, seed |
 | [api.md](docs/api.md) | Todas as rotas: método, URL, autenticação, perfil, entrada, saída e erros |

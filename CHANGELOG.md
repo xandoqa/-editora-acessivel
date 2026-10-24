@@ -107,6 +107,12 @@ críticos, 9 altos, 13 médios e 7 baixos; esta versão endereça todos.
   acessível — e, em cada caso, diz o que fazer em vez de deixar o Docker
   devolver o erro cru. Também respeita um `WEB_PORT` trocado no `.env` ao
   informar a URL.
+- **`docs/rodar-no-linux.md`**: passo a passo seguido para rodar no Linux, do
+  zero até o navegador, com a solução de cada erro no ponto em que ele aparece
+  (permissão perdida no unzip, Compose v1, socket sem permissão, porta ocupada,
+  disco cheio, "parece travado"). A abertura do README e o `LEIA-ME-RAPIDO.txt`
+  passaram a começar pelos comandos, com os pré-requisitos logo abaixo: antes a
+  explicação vinha antes do que digitar, e era fácil se perder nela.
 - Pré-requisitos e tropeços de Linux documentados onde se tropeça neles:
   `LEIA-ME-RAPIDO.txt`, a abertura do README, `docs/docker.md` e cinco entradas
   novas em `docs/troubleshooting.md` (permissão de execução perdida no unzip,

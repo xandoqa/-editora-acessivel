@@ -2,6 +2,8 @@
 
 ## Requisitos
 
+> Para rodar no Linux pela primeira vez, o caminho seguido está em [rodar-no-linux.md](rodar-no-linux.md). Esta página descreve como o Docker está montado.
+
 **Docker Engine + plugin Compose v2.** `docker compose version` (com espaço) precisa responder `v2.x` ou maior; o `docker-compose` v1, com hífen, **não** serve: este `docker-compose.yml` segue a Compose Spec (`name:` no topo, `depends_on` com `condition: service_healthy`), que a v1 não interpreta.
 
 | Sistema | Instalação | Observação |

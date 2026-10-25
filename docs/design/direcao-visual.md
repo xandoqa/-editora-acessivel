@@ -66,14 +66,19 @@ Referências que servem melhor a este caso, e que carregam o mesmo silêncio: **
 
 A revisão da série 3.1.x mexeu em **tokens**: paleta, peso do traço, sombra, tipografia e respiro. Isso aliviou a página, mas não entrega o que as referências mostram, porque o que falta é **layout** — estrutura e posição, não variável.
 
-Pendente, em ordem de risco crescente:
+| Etapa | Estado |
+| --- | --- |
+| 1. Catálogo e card da obra | **feita** — capa sem moldura, título fora da imagem, ação contornada, filtros em aba |
+| 2. Cabeçalho, barra lateral e página da obra | **feita** — traços de 2px para 1px, item ativo com filete à esquerda, abertura sem caixa |
+| 3. Leitura em voz alta | **feita** — palavra sob o cursor, no lugar da página inteira |
+| 4. Leitor | **feita** — painel de preferências sem caixa dentro de caixa |
+| Formulários e administração | pendente — estrutural, pouco visual |
 
-1. **Catálogo e card da obra** — onde a mudança mais aparece e o risco é menor.
-2. **Cabeçalho, barra lateral e página da obra.**
-3. **Leitor** — por último: é onde a acessibilidade é mais densa e onde moram a navegação por teclado e o player.
-4. **Formulários e administração** — estrutural, pouco visual.
+Cada etapa é um commit próprio, para que reverter uma não derrube as outras.
 
-Cada etapa em seu próprio PR, com CI verde antes da seguinte, para que reverter uma não derrube as outras.
+### O que ficou de fora, e por quê
+
+O fundo escuro do menu em tela pequena (`bg-black/70`) continua fixo: um véu atrás de um diálogo precisa escurecer em qualquer tema, e trocá-lo por token o faria desaparecer no tema Noite.
 
 ## Capas e obras
 

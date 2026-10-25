@@ -49,6 +49,8 @@ Antes das três vias, o arquivo já é **normalizado no envio** pelo `qpdf` (ver
 | Espaçamento | Padrão / Amplo / Largo (entrelinha, espaçamento entre letras e palavras). |
 | Tipografia | Inter, Lexend e **OpenDyslexic** — fontes empacotadas localmente (também injetadas dentro do EPUB). |
 | Paletas | Escuro, Claro, Sépia, Amarelo/Preto. No DOCX, no EPUB e nos textos as cores mudam de fato; nas páginas em imagem (PDF/CBZ) aplica-se filtro (sépia ou alto contraste em escala de cinza), já que não é possível recolorir a arte. |
+| Leitura em voz alta | Liga pelo alto-falante da barra superior. Fala **a palavra sob o ponteiro**; sem mouse, as setas ← → andam palavra a palavra e a palavra corrente é selecionada, ficando visível. Há seletor de voz e velocidade. |
+| Qualidade da voz | Vem do sistema operacional, não do Livrin. No Linux a voz padrão em português costuma ser o espeak, que é robótico; Windows, macOS e Chrome trazem vozes melhores. O painel avisa quando não encontra nenhuma voz em português instalada. |
 | Audiodescrição | Descrição do quadro + falas (personagem, tom de voz, texto) por página. |
 | Player | Se a obra tem faixa gravada (MP3/OGG/M4A): play/pausa, ±10s, barra de posição, velocidade 1.0×/1.25×/1.5×. Sem faixa: narração por **voz sintetizada** página a página, avançando as páginas do leitor em sincronia. |
 | Teclado | ← → trocam de página; Espaço reproduz/pausa o áudio-guia. |

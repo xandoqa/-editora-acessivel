@@ -49,8 +49,12 @@ export interface PaletteColors {
 
 export const PALETTES: Record<Palette, PaletteColors> = {
   escuro: { label: 'Escuro', bg: '#14161b', surface: '#1f232a', text: '#e6e9ef', muted: '#bec4cf', accent: '#6ee7a8', swatch: '#0b0c0f', imageFilter: 'none' },
-  claro: { label: 'Claro', bg: '#f7f7f5', surface: '#ffffff', text: '#16181d', muted: '#3b4250', accent: '#0b6b3a', swatch: '#f1f1f1', imageFilter: 'none' },
-  sepia: { label: 'Sépia', bg: '#f3e7cf', surface: '#faf1de', text: '#3d2a12', muted: '#5a4425', accent: '#7a4b0f', swatch: '#f0deb8', imageFilter: 'sepia(0.55)' },
+  // `accent` é cor de TEXTO (rótulo de audiodescrição e fala alternada), não só
+  // de borda: por isso precisa de 7:1, e não dos 3:1 de elemento não textual.
+  // Os valores anteriores (#0b6b3a e #7a4b0f) ficavam em 6,0–6,6:1 — passavam
+  // em AA e reprovavam no AAA que o projeto declara. Medidos: 7,06 e 7,08.
+  claro: { label: 'Claro', bg: '#f7f7f5', surface: '#ffffff', text: '#16181d', muted: '#3b4250', accent: '#0a6134', swatch: '#f1f1f1', imageFilter: 'none' },
+  sepia: { label: 'Sépia', bg: '#f3e7cf', surface: '#faf1de', text: '#3d2a12', muted: '#5a4425', accent: '#6c420d', swatch: '#f0deb8', imageFilter: 'sepia(0.55)' },
   amarelo: { label: 'Amarelo/Preto', bg: '#000000', surface: '#000000', text: '#ffff00', muted: '#ffff00', accent: '#ffffff', swatch: '#ffd400', imageFilter: 'grayscale(1) contrast(1.35)' },
 };
 

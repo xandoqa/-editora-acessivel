@@ -122,7 +122,21 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         <Menu className="h-6 w-6" aria-hidden />
       </button>
 
-      <form role="search" onSubmit={onSearch} className="flex min-w-0 flex-1 items-center gap-2 rounded-full border border-outline bg-surface px-4 md:max-w-xl">
+      {/*
+        O campo NÃO leva `focus:outline-none`.
+
+        O utilitário do Tailwind gera `.focus\:outline-none:focus`, de
+        especificidade 0-2-0, e vence o `:focus-visible` do global.css, que é
+        0-1-0 — aplicando `outline: 2px solid transparent`. O resultado era um
+        campo de busca sem nenhum indicador de foco ao chegar pelo Tab, falha do
+        critério WCAG 2.4.7 numa plataforma de acessibilidade. O realce da borda
+        abaixo é um reforço visual, não o indicador: o indicador é o contorno.
+      */}
+      <form
+        role="search"
+        onSubmit={onSearch}
+        className="flex min-w-0 flex-1 items-center gap-2 rounded-full border border-outline bg-surface px-4 focus-within:border-primary md:max-w-xl"
+      >
         <Search className="h-5 w-5 shrink-0 text-ink-muted" aria-hidden />
         <label htmlFor="global-search" className="sr-only">
           Buscar obras
@@ -133,7 +147,7 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
           value={term}
           onChange={(e) => setTerm(e.target.value)}
           placeholder="Buscar HQs, graphic novels, autores e obras com audiodescrição..."
-          className="h-11 min-w-0 flex-1 bg-transparent text-sm text-ink placeholder:text-ink-subtle focus:outline-none"
+          className="h-11 min-w-0 flex-1 bg-transparent text-sm text-ink placeholder:text-ink-subtle"
         />
       </form>
 

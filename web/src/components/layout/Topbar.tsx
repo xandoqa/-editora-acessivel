@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { ChevronDown, Contrast, LayoutDashboard, LogOut, Menu, Moon, Plus, Search, ShieldCheck, Sun, UserRound, Volume2, VolumeX } from 'lucide-react';
+import { ChevronDown, Contrast, LayoutDashboard, LogOut, Menu, Moon, Plus, Search, ShieldCheck, Sun, UserRound } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext';
 import { FONT_MAX, FONT_MIN, usePreferences } from '../../preferences/PreferencesContext';
 import { ROLE_LABEL } from '../../lib/labels';
-import { speak, speechSupported, stopSpeaking } from '../../lib/speech';
+import { stopSpeaking } from '../../lib/speech';
+import LeituraEmVoz from './LeituraEmVoz';
 import { Avatar } from '../ui';
 
 function UserMenu() {
@@ -96,7 +97,6 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
   const location = useLocation();
   const [params] = useSearchParams();
   const [term, setTerm] = useState(params.get('q') ?? '');
-  const [reading, setReading] = useState(false);
 
   useEffect(() => {
     if (location.pathname === '/') setTerm(params.get('q') ?? '');
@@ -105,7 +105,6 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
   useEffect(() => {
     // Interrompe a leitura em voz alta ao trocar de página.
     stopSpeaking();
-    setReading(false);
   }, [location.pathname]);
 
   const onSearch = (e: FormEvent) => {
@@ -114,26 +113,16 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
     navigate(q ? `/?q=${encodeURIComponent(q)}` : '/');
   };
 
-  const toggleRead = () => {
-    if (reading) {
-      stopSpeaking();
-      setReading(false);
-      return;
-    }
-    const text = document.getElementById('main-content')?.innerText ?? '';
-    const utterance = speak(text.slice(0, 4000), { onEnd: () => setReading(false), onError: () => setReading(false) });
-    setReading(!!utterance);
-  };
-
-  const tool = 'inline-flex h-10 min-w-[40px] items-center justify-center rounded-lg px-2 text-sm font-bold text-ink-muted hover:bg-surface-highest hover:text-ink disabled:opacity-40';
+  const tool =
+    'inline-flex h-10 min-w-[40px] items-center justify-center rounded-full px-2 text-sm font-bold text-ink-muted hover:bg-surface-high hover:text-ink disabled:opacity-40';
 
   return (
-    <header className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b-2 border-outline bg-bg/95 px-4 backdrop-blur md:px-6">
+    <header className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b border-outline/25 bg-bg/95 px-4 backdrop-blur md:px-6">
       <button type="button" className="icon-btn lg:hidden" onClick={onOpenMenu} aria-label="Abrir menu de navegação">
         <Menu className="h-6 w-6" aria-hidden />
       </button>
 
-      <form role="search" onSubmit={onSearch} className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-outline bg-surface px-3 md:max-w-xl">
+      <form role="search" onSubmit={onSearch} className="flex min-w-0 flex-1 items-center gap-2 rounded-full border border-outline bg-surface px-4 md:max-w-xl">
         <Search className="h-5 w-5 shrink-0 text-ink-muted" aria-hidden />
         <label htmlFor="global-search" className="sr-only">
           Buscar obras
@@ -148,7 +137,7 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         />
       </form>
 
-      <div className="hidden items-center gap-0.5 rounded-xl border border-outline bg-surface-high p-1 sm:flex" role="group" aria-label="Recursos de acessibilidade">
+      <div className="hidden items-center gap-0.5 rounded-full border border-outline bg-surface p-1 sm:flex" role="group" aria-label="Recursos de acessibilidade">
         <button
           type="button"
           className={tool}
@@ -169,17 +158,7 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         <button type="button" className={tool} onClick={prefs.increaseFont} disabled={prefs.fontScale >= FONT_MAX} aria-label="Aumentar tamanho do texto">
           A+
         </button>
-        <button
-          type="button"
-          className={tool}
-          onClick={toggleRead}
-          disabled={!speechSupported}
-          aria-pressed={reading}
-          title={speechSupported ? 'Ler a página em voz alta' : 'Seu navegador não suporta leitura em voz alta'}
-        >
-          {reading ? <VolumeX className="h-5 w-5" aria-hidden /> : <Volume2 className="h-5 w-5" aria-hidden />}
-          <span className="sr-only">{reading ? 'Parar leitura em voz alta' : 'Ler a página em voz alta'}</span>
-        </button>
+        <LeituraEmVoz classeBotao={tool} />
       </div>
 
       {isWriter && (

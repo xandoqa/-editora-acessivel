@@ -23,16 +23,16 @@ const seg = (active: boolean) =>
 export default function ReaderPreferencesPanel({ prefs, onChange }: Props) {
   const set = <K extends keyof ReaderPrefs>(key: K, value: ReaderPrefs[K]) => onChange({ ...prefs, [key]: value });
   return (
-    <section className="card p-5" aria-labelledby="prefs-title">
+    <section className="border-b border-outline/25 pb-6" aria-labelledby="prefs-title">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 id="prefs-title" className="flex items-center gap-2 text-lg font-semibold text-ink">
-          <SlidersHorizontal className="h-5 w-5 text-primary" aria-hidden /> Preferências de Visualização e Leitura
+        <h2 id="prefs-title" className="eyebrow flex items-center gap-2 text-ink-muted">
+          <SlidersHorizontal className="h-4 w-4" aria-hidden /> Preferências de visualização e leitura
         </h2>
-        <span className="chip bg-accent-container text-accent">Tempo Real</span>
+        <span className="text-xs text-ink-subtle">aplicado em tempo real</span>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 2xl:grid-cols-3">
-        <fieldset className="card-high p-3">
+        <fieldset className="rounded-[10px_14px_10px_14px] border border-outline/40 p-3">
           <legend className="sr-only">Escala do texto</legend>
           <p className="mb-2 text-sm font-medium text-ink-muted" aria-hidden>
             Escala do Texto
@@ -50,7 +50,7 @@ export default function ReaderPreferencesPanel({ prefs, onChange }: Props) {
           </div>
         </fieldset>
 
-        <fieldset className="card-high p-3">
+        <fieldset className="rounded-[10px_14px_10px_14px] border border-outline/40 p-3">
           <legend className="float-left mb-2 w-full text-sm font-medium text-ink-muted">Espaçamento Vertical</legend>
           <div className="clear-both flex rounded-lg bg-surface-low p-1" role="radiogroup" aria-label="Espaçamento vertical">
             {(Object.keys(SPACING_LABEL) as Spacing[]).map((s) => (
@@ -61,7 +61,7 @@ export default function ReaderPreferencesPanel({ prefs, onChange }: Props) {
           </div>
         </fieldset>
 
-        <div className="card-high p-3 sm:col-span-2 2xl:col-span-1">
+        <div className="rounded-[10px_14px_10px_14px] border border-outline/40 p-3 sm:col-span-2 2xl:col-span-1">
           <label htmlFor="typography" className="mb-2 block text-sm font-medium text-ink-muted">
             Tipografia
           </label>
@@ -85,8 +85,8 @@ export default function ReaderPreferencesPanel({ prefs, onChange }: Props) {
               type="button"
               aria-pressed={active}
               onClick={() => set('palette', p)}
-              className={`flex min-h-[40px] items-center gap-2 rounded-lg border px-3 text-sm font-semibold ${
-                active ? 'border-primary bg-surface-highest text-ink' : 'border-transparent bg-surface-high text-ink-muted hover:text-ink'
+              className={`flex min-h-[44px] items-center gap-2 border-b-2 px-2 text-sm transition-colors ${
+                active ? 'border-primary font-semibold text-ink' : 'border-transparent text-ink-muted hover:text-ink'
               }`}
             >
               <span className="h-3.5 w-3.5 rounded-full border border-outline-strong" style={{ background: PALETTES[p].swatch }} aria-hidden />

@@ -33,7 +33,7 @@ export function TableShell({ children, caption }: { children: ReactNode; caption
   );
 }
 
-export const theadClass = 'border-b-2 border-outline bg-surface-high text-xs uppercase tracking-wider text-ink-muted';
+export const theadClass = 'border-b border-outline/40 bg-surface-high text-xs uppercase tracking-wider text-ink-muted';
 export const rowClass = 'border-b border-outline/30 last:border-0 hover:bg-surface-high';
 
 export function SearchBox({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {

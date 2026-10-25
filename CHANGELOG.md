@@ -4,6 +4,31 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
+### Leitura em voz alta: palavra sob o cursor
+
+- **Saiu a leitura da página inteira.** Ela entregava minutos de texto corrido
+  sem controle de onde se estava. Agora o Livrin fala **a palavra sob o
+  ponteiro**, encontrada por `caretPositionFromPoint` / `caretRangeFromPoint` —
+  sem envolver cada palavra num elemento e sem alterar o HTML da página.
+- **Equivalente por teclado**, com as setas ← → andando palavra a palavra e a
+  palavra corrente selecionada pela API de seleção, portanto visível sem
+  inserir marcação. Hover sozinho reprovaria no critério WCAG 2.1.1.
+- **Seletor de voz e velocidade.** A qualidade da fala é do sistema
+  operacional; o que cabe ao Livrin é deixar escolher entre as vozes
+  instaladas — e dizer isso quando não encontra nenhuma em português.
+
+### Design — etapas 2 a 4
+
+- **Cabeçalho, barra lateral e moldura:** traços estruturais de 2px que
+  moravam dentro dos componentes caíram para 1px com a mesma cor, então o
+  contraste do critério 1.4.11 ficou idêntico. O item ativo da navegação
+  deixou de ser um bloco de cor e virou um filete à esquerda.
+- **Página da obra:** abertura sem caixa nem degradê, como o catálogo.
+- **Leitor:** o painel de preferências era um card com outros cards dentro.
+  Virou seção com filetes, e as paletas viraram abas. As quatro paletas de
+  leitura continuam iguais.
+
+
 ### Design — etapa 1 de 4: catálogo e card da obra
 
 Primeira etapa da reforma de layout, na direção do site do Instituto Ziraldo:

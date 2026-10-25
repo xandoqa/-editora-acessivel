@@ -18,7 +18,7 @@ function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
   const { user } = useAuth();
   return (
     <div className="flex h-full flex-col bg-surface-low">
-      <div className="flex h-[72px] items-center gap-3 border-b-2 border-outline px-5">
+      <div className="flex h-[72px] items-center gap-3 border-b border-outline/25 px-5">
         <LogoMark />
         <div className="leading-tight">
           <p className="font-display text-lg font-bold text-ink">Livrin</p>
@@ -42,7 +42,7 @@ function AdminNav({ onNavigate }: { onNavigate?: () => void }) {
           </NavLink>
         ))}
       </nav>
-      <div className="space-y-2 border-t-2 border-outline p-3">
+      <div className="space-y-2 border-t border-outline/25 p-3">
         {user && (
           <div className="flex items-center gap-3 px-2 py-2">
             <Avatar name={user.name} size="sm" />
@@ -71,7 +71,7 @@ export default function AdminLayout() {
       <a href="#admin-content" className="sr-only-focusable fixed left-3 top-3 z-[70] rounded-lg bg-primary px-4 py-2 font-semibold text-primary-on">
         Pular para o conteúdo
       </a>
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-[260px] border-r-2 border-outline lg:block">
+      <aside className="fixed inset-y-0 left-0 z-20 hidden w-[260px] border-r border-outline/30 lg:block">
         <AdminNav />
       </aside>
       {drawer && (
@@ -86,7 +86,7 @@ export default function AdminLayout() {
         </div>
       )}
       <div className="lg:pl-[260px]">
-        <header className="sticky top-0 z-30 flex h-[60px] items-center gap-3 border-b-2 border-outline bg-admin-container px-4 backdrop-blur md:px-8">
+        <header className="sticky top-0 z-30 flex h-[60px] items-center gap-3 border-b border-outline/25 bg-admin-container px-4 backdrop-blur md:px-8">
           <button type="button" className="icon-btn lg:hidden" onClick={() => setDrawer(true)} aria-label="Abrir menu administrativo">
             <Menu className="h-6 w-6" aria-hidden />
           </button>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowRight, BadgeCheck, BookOpen, Ear, Headphones, LayoutGrid, PlusCircle, Sparkles, Upload, Video, Volume2, VolumeX, AudioLines, Feather, SpellCheck2 } from 'lucide-react';
+import { ArrowRight, BookOpen, Ear, Headphones, LayoutGrid, PlusCircle, Sparkles, Upload, Video, Volume2, VolumeX, AudioLines, Feather, SpellCheck2 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { useCatalog, useGenres } from '../hooks/queries';
 import { errorMessage } from '../lib/api';
@@ -83,47 +83,56 @@ export default function Catalog() {
 
   return (
     <div>
-      {/* Hero */}
-      <section className="card relative mb-10 overflow-hidden bg-surface p-6 md:p-10" aria-labelledby="catalog-title">
-        <Rabisco className="pointer-events-none absolute -right-2 -top-3 h-24 w-28 text-primary/25" />
-        <OndasDeSom className="pointer-events-none absolute bottom-4 right-6 hidden h-16 w-16 text-accent/30 lg:block" />
-        <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
-          <div className="max-w-2xl">
-            <p className="mb-3 flex flex-wrap items-center gap-2 text-sm">
-              <span className="chip bg-accent-container uppercase tracking-wider text-accent">
-                <BadgeCheck className="h-4 w-4" aria-hidden /> Catálogo editorial aberto
-              </span>
-              <span className="font-medium text-ink-muted">· {formatNumber(data?.catalogTotal ?? 0)} títulos inclusivos</span>
-            </p>
-            <h1 id="catalog-title" className="text-4xl font-bold tracking-tight text-ink md:text-5xl">
-              Leituras em destaque
-            </h1>
-            <p className="mt-4 text-lg leading-relaxed text-ink-muted">
-              Histórias plurais que todo mundo pode ler e sentir. Narrativas visuais independentes com tecnologia assistiva integrada,
-              audiodescrição imersiva e tipografia universal.
-            </p>
-            <ul className="mt-5 flex flex-wrap gap-x-6 gap-y-2 text-sm font-medium text-ink">
-              <li className="flex items-center gap-2">
-                <Headphones className="h-4 w-4 text-ink-muted" aria-hidden /> Audiodescrição nativa
-              </li>
-              <li className="flex items-center gap-2">
-                <span className="font-bold text-primary" aria-hidden>A+</span> Compatível com Leitores de Tela
-              </li>
-              <li className="flex items-center gap-2">
-                <Ear className="h-4 w-4 text-ink-muted" aria-hidden /> Janela de Libras
-              </li>
-            </ul>
-          </div>
-          <div className="flex shrink-0 flex-col gap-3 sm:flex-row lg:w-[300px] lg:flex-col">
-            <Link to={isWriter ? '/submit' : user ? '/profile' : '/register'} className="btn-primary py-3">
-              <PlusCircle className="h-5 w-5" aria-hidden />
-              {isWriter ? '+ Nova Obra Independente' : 'Quero publicar minha obra'}
-            </Link>
-            <button type="button" className="btn bg-bg py-3 text-ink hover:bg-surface-high" onClick={readIntro} disabled={!speechSupported} aria-pressed={readingIntro}>
-              {readingIntro ? <VolumeX className="h-5 w-5 text-accent" aria-hidden /> : <Volume2 className="h-5 w-5 text-accent" aria-hidden />}
-              {readingIntro ? 'Parar introdução' : 'Ouvir introdução da página'}
-            </button>
-          </div>
+      {/*
+        * Abertura sem caixa.
+        *
+        * Era um card com borda, sombra e uma etiqueta colorida antes do
+        * título. A referência do Instituto Ziraldo faz o contrário: fundo
+        * limpo, um rótulo pequeno em versalete, o título grande e um filete
+        * fechando a seção. Quem organiza a página é o alinhamento, não a
+        * moldura.
+        */}
+      <section className="relative mb-12 border-b border-outline/25 pb-10" aria-labelledby="catalog-title">
+        <Rabisco className="pointer-events-none absolute -right-1 -top-7 h-20 w-24 text-primary/20" />
+        <OndasDeSom className="pointer-events-none absolute -bottom-2 right-8 hidden h-14 w-14 text-accent/20 lg:block" />
+
+        <p className="eyebrow text-ink-subtle">
+          Catálogo editorial aberto · {formatNumber(data?.catalogTotal ?? 0)} títulos inclusivos
+        </p>
+
+        <h1
+          id="catalog-title"
+          className="mt-3 max-w-3xl font-display text-[2.75rem] font-semibold leading-[1.05] tracking-tight text-ink md:text-6xl"
+        >
+          Leituras em destaque
+        </h1>
+
+        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-muted">
+          Histórias plurais que todo mundo pode ler e sentir. Narrativas visuais independentes com tecnologia assistiva integrada,
+          audiodescrição imersiva e tipografia universal.
+        </p>
+
+        <ul className="mt-6 flex flex-wrap gap-x-7 gap-y-2 text-sm text-ink-muted">
+          <li className="flex items-center gap-2">
+            <Headphones className="h-4 w-4" aria-hidden /> Audiodescrição nativa
+          </li>
+          <li className="flex items-center gap-2">
+            <span className="font-bold text-primary" aria-hidden>A+</span> Compatível com leitores de tela
+          </li>
+          <li className="flex items-center gap-2">
+            <Ear className="h-4 w-4" aria-hidden /> Janela de Libras
+          </li>
+        </ul>
+
+        <div className="mt-8 flex flex-wrap gap-3">
+          <Link to={isWriter ? '/submit' : user ? '/profile' : '/register'} className="btn-primary py-3">
+            <PlusCircle className="h-5 w-5" aria-hidden />
+            {isWriter ? 'Nova obra independente' : 'Quero publicar minha obra'}
+          </Link>
+          <button type="button" className="btn-ghost py-3" onClick={readIntro} disabled={!speechSupported} aria-pressed={readingIntro}>
+            {readingIntro ? <VolumeX className="h-5 w-5 text-accent" aria-hidden /> : <Volume2 className="h-5 w-5 text-accent" aria-hidden />}
+            {readingIntro ? 'Parar introdução' : 'Ouvir introdução da página'}
+          </button>
         </div>
       </section>
 
@@ -155,7 +164,11 @@ export default function Catalog() {
             </select>
           </div>
         </div>
-        <div className="scrollbar-thin -mx-1 mb-3 flex gap-2 overflow-x-auto px-1 pb-2" role="group" aria-label="Filtrar catálogo">
+        <div
+          className="scrollbar-thin -mx-1 mb-4 flex gap-5 overflow-x-auto border-b border-outline/25 px-1"
+          role="group"
+          aria-label="Filtrar catálogo"
+        >
           {FILTERS.map((f) => {
             const active = f.key === filter.key;
             return (
@@ -164,8 +177,10 @@ export default function Catalog() {
                 type="button"
                 aria-pressed={active}
                 onClick={() => update({ filtro: f.key === 'todos' ? null : f.key })}
-                className={`hc-border flex min-h-[44px] shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors ${
-                  active ? 'border-transparent bg-primary text-primary-on' : 'border-outline/60 bg-surface-high text-ink hover:bg-surface-highest'
+                /* Aba com filete, no lugar da pílula preenchida: o estado
+                   ativo continua óbvio e o peso de cor sai da página. */
+                className={`hc-border flex min-h-[44px] shrink-0 items-center gap-2 border-b-2 px-1.5 text-sm transition-colors ${
+                  active ? 'border-primary font-semibold text-ink' : 'border-transparent text-ink-muted hover:text-ink'
                 }`}
               >
                 <span aria-hidden>{f.icon}</span>
@@ -209,7 +224,7 @@ export default function Catalog() {
         />
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          <div className="grid grid-cols-1 gap-x-7 gap-y-12 sm:grid-cols-2 xl:grid-cols-3">
             {data?.data.map((work) => <WorkCard key={work.id} work={work} />)}
           </div>
           {data && <Pagination page={data.meta.page} totalPages={data.meta.totalPages} onChange={(p) => update({ pagina: String(p) })} />}

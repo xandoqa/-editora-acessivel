@@ -4,6 +4,35 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
+### Design — etapa 1 de 4: catálogo e card da obra
+
+Primeira etapa da reforma de layout, na direção do site do Instituto Ziraldo:
+rótulo de seção em versalete, fileira sem moldura, cor vinda da arte e
+estrutura por alinhamento. Ícones, opções de cor e tipografia ficaram como
+estavam, conforme pedido.
+
+- **A capa aparece inteira e o texto desceu para a página.** O card era uma
+  caixa com borda, sombra e três etiquetas sobre a arte, com o título escrito
+  em cima da imagem. Isso exigia um gradiente preto cobrindo a capa só para o
+  título ter contraste — texto sobre imagem arbitrária não tem contraste
+  garantido. Agora a arte aparece como foi desenhada e o título fica embaixo,
+  sobre o papel: contraste previsível e a cor da página vindo das obras.
+- **Recursos assistivos viraram texto com ícone**, no lugar de etiqueta
+  colorida sobre a capa.
+- **A ação do card deixou de ser um bloco azul.** Um acento por página, não um
+  por obra: o botão preenchido ficou só para "publicar minha obra".
+- **A abertura perdeu a caixa:** rótulo pequeno, título grande e um filete
+  fechando a seção.
+- **Os filtros viraram abas com filete**, no lugar de pílulas preenchidas. O
+  estado ativo continua explícito e `aria-pressed` segue igual.
+- **A grade ganhou respiro:** `gap-6` uniforme passou a 28px na horizontal e
+  48px na vertical, que é o que separa uma obra da outra agora que não há
+  moldura.
+- Corrigido um detalhe que só apareceu ao ver renderizado: `editionLabel` e o
+  gênero às vezes são a mesma palavra, e a ficha imprimia "Ficção histórica ·
+  Ficção Histórica · 9p". A comparação agora ignora acento e caixa.
+
+
 ### Organização do repositório
 
 Nenhuma mudança de código — só de onde as coisas moram e de como se acha cada uma.

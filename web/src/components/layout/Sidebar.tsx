@@ -21,8 +21,12 @@ function Item({ item, onNavigate }: { item: NavItem; onNavigate?: () => void }) 
       end={item.end}
       onClick={onNavigate}
       className={({ isActive }) =>
-        `flex min-h-[48px] items-center gap-3 rounded-xl px-4 text-[15px] font-semibold transition-colors ${
-          isActive ? 'hc-border border border-transparent bg-primary-container text-primary' : 'text-ink-muted hover:bg-surface-high hover:text-ink'
+        /* O item ativo era um bloco de cor preenchido. Agora é um filete à
+           esquerda com o texto em tinta cheia: continua inequívoco — e o
+           aria-current do NavLink nunca dependeu da cor —, mas para de competir
+           com o conteúdo da página. */
+        `flex min-h-[48px] items-center gap-3 border-l-2 pl-4 pr-3 text-[15px] transition-colors ${
+          isActive ? 'border-primary font-semibold text-ink' : 'border-transparent font-medium text-ink-muted hover:border-outline/30 hover:text-ink'
         }`
       }
     >
@@ -75,8 +79,8 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   if (isAdmin) items.push({ to: '/admin', label: 'Administração', icon: <ShieldCheck className="h-5 w-5 text-admin" /> });
 
   return (
-    <div className="flex h-full flex-col bg-surface-low">
-      <div className="flex h-[72px] items-center border-b-2 border-outline px-5">
+    <div className="flex h-full flex-col bg-bg">
+      <div className="flex h-[72px] items-center border-b border-outline/25 px-5">
         <Logo />
       </div>
       <nav className="flex-1 space-y-1.5 overflow-y-auto px-3 py-5" aria-label="Navegação principal">
@@ -84,7 +88,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           <Item key={item.to} item={item} onNavigate={onNavigate} />
         ))}
       </nav>
-      <div className="space-y-2 border-t-2 border-outline p-3">
+      <div className="space-y-2 border-t border-outline/25 p-3">
         <div className="card-high flex items-center gap-3 px-4 py-3">
           <PersonStanding className="h-6 w-6 shrink-0 text-accent" aria-hidden />
           <p className="text-xs font-semibold leading-snug text-ink">

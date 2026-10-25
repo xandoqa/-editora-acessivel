@@ -182,7 +182,7 @@ export function Modal({ open, title, onClose, children, footer, wide }: ModalPro
     >
       {open && (
         <div className="flex max-h-[85vh] flex-col">
-          <div className="flex items-center justify-between border-b-2 border-outline px-6 py-4">
+          <div className="flex items-center justify-between border-b border-outline/25 px-6 py-4">
             <h2 id={titleId} className="text-lg font-bold">
               {title}
             </h2>
@@ -191,7 +191,7 @@ export function Modal({ open, title, onClose, children, footer, wide }: ModalPro
             </button>
           </div>
           <div className="overflow-y-auto px-6 py-5">{children}</div>
-          {footer && <div className="flex flex-wrap justify-end gap-3 border-t-2 border-outline px-6 py-4">{footer}</div>}
+          {footer && <div className="flex flex-wrap justify-end gap-3 border-t border-outline/25 px-6 py-4">{footer}</div>}
         </div>
       )}
     </dialog>

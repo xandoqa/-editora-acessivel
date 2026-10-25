@@ -12,7 +12,7 @@ import { OndaDivisoria } from '../ui/Ornamentos';
  */
 function Rodape() {
   return (
-    <footer className="mt-16 border-t-2 border-outline pt-8">
+    <footer className="mt-20 border-t border-outline/25 pt-8">
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-4 pb-10 md:flex-row md:items-center md:justify-between md:px-8">
         <p className="max-w-md text-sm leading-relaxed text-ink-muted">
           O Livrin é uma editora digital aberta: quem não tem como bancar um lançamento tradicional publica e é lido aqui. Ler é de graça e
@@ -54,14 +54,14 @@ export default function AppLayout() {
         Pular para o conteúdo
       </a>
 
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-[272px] border-r-2 border-outline lg:block">
+      <aside className="fixed inset-y-0 left-0 z-20 hidden w-[272px] border-r border-outline/30 lg:block">
         <Sidebar />
       </aside>
 
       {drawer && (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu de navegação">
           <button type="button" className="absolute inset-0 bg-black/70" onClick={() => setDrawer(false)} aria-label="Fechar menu" />
-          <div className="relative h-full w-[290px] max-w-[85vw] border-r-2 border-outline">
+          <div className="relative h-full w-[290px] max-w-[85vw] border-r border-outline/30">
             <button type="button" className="icon-btn absolute right-2 top-3 z-10" onClick={() => setDrawer(false)} aria-label="Fechar menu">
               <X className="h-5 w-5" aria-hidden />
             </button>

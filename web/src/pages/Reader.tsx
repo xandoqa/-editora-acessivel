@@ -167,10 +167,10 @@ export default function Reader() {
       )}
 
       {/* Detalhe da obra */}
-      <section className="card relative overflow-hidden bg-gradient-to-br from-surface via-surface to-primary-container/40 p-5 md:p-8" aria-labelledby="work-title">
+      <section className="relative border-b border-outline/25 pb-8" aria-labelledby="work-title">
         <div className="grid gap-8 lg:grid-cols-[340px_1fr]">
           <div>
-            <div className="relative overflow-hidden rounded-2xl bg-surface-high shadow-card">
+            <div className="relative overflow-hidden rounded-[12px_16px_12px_16px] border border-outline/70 bg-surface-high">
               {work.hasAltoContraste && (
                 <span className="chip absolute left-3 top-3 z-10 bg-black/75 text-accent">
                   <BadgeCheck className="h-4 w-4" aria-hidden /> Alto contraste

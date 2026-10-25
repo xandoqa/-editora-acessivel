@@ -125,15 +125,16 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
     setReading(!!utterance);
   };
 
-  const tool = 'inline-flex h-10 min-w-[40px] items-center justify-center rounded-lg px-2 text-sm font-bold text-ink-muted hover:bg-surface-highest hover:text-ink disabled:opacity-40';
+  const tool =
+    'inline-flex h-10 min-w-[40px] items-center justify-center rounded-full px-2 text-sm font-bold text-ink-muted hover:bg-surface-high hover:text-ink disabled:opacity-40';
 
   return (
-    <header className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b-2 border-outline bg-bg/95 px-4 backdrop-blur md:px-6">
+    <header className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b border-outline/25 bg-bg/95 px-4 backdrop-blur md:px-6">
       <button type="button" className="icon-btn lg:hidden" onClick={onOpenMenu} aria-label="Abrir menu de navegação">
         <Menu className="h-6 w-6" aria-hidden />
       </button>
 
-      <form role="search" onSubmit={onSearch} className="flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-outline bg-surface px-3 md:max-w-xl">
+      <form role="search" onSubmit={onSearch} className="flex min-w-0 flex-1 items-center gap-2 rounded-full border border-outline bg-surface px-4 md:max-w-xl">
         <Search className="h-5 w-5 shrink-0 text-ink-muted" aria-hidden />
         <label htmlFor="global-search" className="sr-only">
           Buscar obras
@@ -148,7 +149,7 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         />
       </form>
 
-      <div className="hidden items-center gap-0.5 rounded-xl border border-outline bg-surface-high p-1 sm:flex" role="group" aria-label="Recursos de acessibilidade">
+      <div className="hidden items-center gap-0.5 rounded-full border border-outline bg-surface p-1 sm:flex" role="group" aria-label="Recursos de acessibilidade">
         <button
           type="button"
           className={tool}

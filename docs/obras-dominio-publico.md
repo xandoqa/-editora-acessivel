@@ -80,6 +80,19 @@ Numa plataforma de leitura, texto inventado com nome de autor verdadeiro é fals
 
 ---
 
+## Não dá para pôr a obra na estante sem o arquivo
+
+Tentação natural: cadastrar as obras só com capa, título e sinopse, e deixar o texto para depois. **O sistema não permite**, e isso é proposital.
+
+Em `api/src/services/works.service.ts`, mudar o estado de uma obra verifica o arquivo duas vezes:
+
+- para **EM_ANALISE** — *"Envie o arquivo original da obra antes de submetê-la para análise."*
+- para **APROVADO** — *"Não é possível aprovar uma obra sem o arquivo original."*
+
+Como aprovar **é** publicar ([ADR 010](decisions/010-aprovar-e-publicar.md)), uma obra sem arquivo não pode estar no catálogo. O único estado que aceita obra sem arquivo é `RASCUNHO`, visível apenas para a própria autoria.
+
+Inserir no seed uma obra `APROVADO` sem arquivo criaria, no banco, um estado que a aplicação recusa criar pela interface — uma contradição que qualquer avaliador atento encontra, e que enfraqueceria justamente a regra de curadoria que é o centro do projeto. **Primeiro o texto, depois a estante.**
+
 ## Como adicionar, quando houver o texto
 
 O caminho já existe e está automatizado:

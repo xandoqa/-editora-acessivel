@@ -2,6 +2,29 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [Não lançado]
+
+### Organização do repositório
+
+Nenhuma mudança de código — só de onde as coisas moram e de como se acha cada uma.
+
+- **A raiz ficou limpa.** `diagramas/`, `interfaces/` e o cronograma solto saíram
+  dela e foram para `docs/`, junto do resto da documentação.
+- **Documento do trabalho e documentação técnica deixaram de se misturar.** Os
+  seis arquivos acadêmicos que estavam soltos em `docs/` foram para
+  `docs/academico/`, com um índice que diz o que é cada um.
+- **Nomes de arquivo sem espaço, acento ou parêntese.** `Plataforma de
+  Publicação e Distribuição Digital  (1).docx` virou
+  `plataforma-de-publicacao-e-distribuicao-digital.docx`. Nome com espaço
+  obriga aspas em todo comando e quebra link em markdown.
+- **Índice em cada pasta:** `docs/README.md` organiza a documentação por
+  assunto, e `docs/academico/`, `docs/design/`, `docs/diagramas/` e
+  `ferramentas/` ganharam o seu.
+- **`docs/design/` é novo**, com a direção visual escrita — o que a interface
+  quer ser, o que já é, e os itens de acessibilidade que nenhuma mudança visual
+  pode quebrar — mais a prévia interativa das paletas e tipografias.
+- Modelos de pull request e de issue em `.github/`, e selo do CI no README.
+
 ## [3.1.5] — 2026-10-24
 
 ### Corrigido

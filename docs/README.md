@@ -35,4 +35,5 @@
 | --- | --- |
 | [decisions/](decisions/) | Registro de decisões técnicas (ADRs): o que foi escolhido e por quê |
 | [pagamento-real-opcoes.md](pagamento-real-opcoes.md) | Estudo das opções para receber apoio de verdade sem orçamento, e o que faltaria no código |
+| [obras-dominio-publico.md](obras-dominio-publico.md) | Quando uma obra de terceiro pode entrar no acervo, as armadilhas de tradução e edição, e como adicionar |
 | [academico/](academico/) | Documentos do trabalho: cronograma, DAS, casos de uso, BMC |

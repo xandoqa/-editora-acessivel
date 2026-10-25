@@ -29,6 +29,16 @@ export default defineConfig(({ mode }) => {
     },
     preview: { port: 4173, proxy: { '/api': target, '/uploads': target } },
     build: {
+      /*
+       * Navegadores aceitos, declarados em vez de herdados.
+       *
+       * O padrão do Vite incluiria o Safari 14, que NÃO tem `<dialog>` com
+       * `showModal()` — e o projeto usa diálogo nativo em confirmações como
+       * "aprovar e publicar". Ali ele falharia em silêncio: o botão responde e
+       * nada aparece. O piso real é o Safari 15.4 (março de 2022), que também
+       * é quando chegam `:focus-visible` e `aspect-ratio`.
+       */
+      target: ['es2022', 'chrome90', 'firefox90', 'safari15.4', 'edge90'],
       sourcemap: false,
       chunkSizeWarningLimit: 1500,
       rollupOptions: {

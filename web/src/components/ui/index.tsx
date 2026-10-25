@@ -166,8 +166,22 @@ export function Modal({ open, title, onClose, children, footer, wide }: ModalPro
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    if (open && !el.open) el.showModal();
-    if (!open && el.open) el.close();
+    /*
+     * `showModal` não existe em navegador antigo (Safari até 15.3, por
+     * exemplo). Sem este desvio, o diálogo simplesmente não apareceria: o
+     * botão responderia e nada aconteceria na tela — a pior forma de falhar,
+     * porque não dá pista nenhuma. O `open` direto mostra o diálogo sem
+     * prender o foco; é pior que o nativo e muito melhor que o silêncio.
+     */
+    const temModal = typeof el.showModal === 'function';
+    if (open && !el.open) {
+      if (temModal) el.showModal();
+      else el.open = true;
+    }
+    if (!open && el.open) {
+      if (temModal) el.close();
+      else el.open = false;
+    }
   }, [open]);
   return (
     <dialog

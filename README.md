@@ -430,6 +430,7 @@ O índice completo, por assunto, está em **[docs/README.md](docs/README.md)**. 
 | [api.md](docs/api.md) | Todas as rotas: método, URL, autenticação, perfil, entrada, saída e erros |
 | [business-rules.md](docs/business-rules.md) | Ciclo editorial, transições, quem pode o quê |
 | [accessibility.md](docs/accessibility.md) | Recursos de acessibilidade e o que foi medido |
+| [navegadores.md](docs/navegadores.md) | Navegadores aceitos e os caminhos alternativos por motor |
 | [design/direcao-visual.md](docs/design/direcao-visual.md) | A direção visual e o que ela não pode quebrar |
 | [decisions/](docs/decisions/) | Registros de decisão arquitetural (ADR) |
 | [academico/](docs/academico/) | Documentos do trabalho: cronograma, DAS, casos de uso, BMC |

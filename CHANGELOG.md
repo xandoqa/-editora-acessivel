@@ -4,6 +4,23 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
+### Compatibilidade entre navegadores
+
+- **O piso de navegador passou a ser declarado**, não herdado: `chrome90`,
+  `firefox90`, `safari15.4`, `edge90` em `web/vite.config.ts`. O padrão do Vite
+  incluía o Safari 14, que não tem `<dialog>` com `showModal()` — e o projeto
+  usa diálogo nativo nas confirmações. Ali o botão respondia e nada aparecia.
+- **Diálogo com desvio:** sem `showModal`, o diálogo é exibido sem prender o
+  foco, em vez de não abrir em silêncio.
+- **Foco visível garantido:** navegador sem `:focus-visible` descartava a regra
+  inteira e a página ficava **sem indicador de foco** — numa plataforma de
+  acessibilidade, o pior defeito possível. Agora há uma regra `:focus` de
+  reserva, anulada por `@supports` onde o seletor moderno existe.
+- **`docs/navegadores.md`**, novo: o piso, o motivo de cada versão mínima, os
+  dois dialetos de cada API com divergência (palavra sob o cursor, PDF, voz) e
+  onde a experiência muda por conta do sistema, não do código.
+
+
 ### Leitura em voz alta: palavra sob o cursor
 
 - **Saiu a leitura da página inteira.** Ela entregava minutos de texto corrido

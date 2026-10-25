@@ -1,5 +1,7 @@
 # Editora Livrin
 
+[![CI](https://github.com/xandoqa/-editora-acessivel/actions/workflows/ci.yml/badge.svg)](https://github.com/xandoqa/-editora-acessivel/actions/workflows/ci.yml)
+
 Plataforma editorial aberta para quadrinhos e livros independentes, com acessibilidade no centro: audiodescrição página a página, tipografia inclusiva, alto contraste e leitor compatível com leitores de tela.
 
 O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. Ler é de graça; o apoio financeiro é voluntário e nunca condiciona o acesso a uma obra.
@@ -22,6 +24,7 @@ O Livrin existe para que quem não tem como bancar um lançamento tradicional co
 - [Testes](#testes)
 - [Desenvolvimento](#desenvolvimento)
 - [Solução de problemas](#solução-de-problemas)
+- [Direção visual](#direção-visual)
 - [Documentação completa](#documentação-completa)
 
 ---
@@ -236,7 +239,14 @@ livrin/
 │       ├── pages/              # Telas
 │       └── styles/             # Tokens e componentes CSS
 ├── e2e/                        # Testes de ponta a ponta (Playwright)
-├── docs/                       # Documentação técnica
+├── ferramentas/                # Geradores de conteúdo (capas, obras) e os textos-fonte
+│   └── historias/              # Contos, poemas e roteiros originais das obras
+├── docs/                       # Documentação — ver docs/README.md
+│   ├── decisions/              # ADRs: o que foi decidido e por quê
+│   ├── design/                 # Direção visual, prévia interativa e telas do protótipo
+│   ├── diagramas/              # Modelo de dados e fluxo editorial
+│   └── academico/              # Documentos do trabalho: cronograma, DAS, casos de uso, BMC
+├── .github/workflows/ci.yml    # Integração contínua
 ├── docker-compose.yml          # Produção local (padrão)
 ├── docker-compose.dev.yml      # Desenvolvimento com recarga automática
 ├── docker-compose.test.yml     # Banco efêmero para os testes
@@ -397,26 +407,32 @@ Lista completa em [docs/troubleshooting.md](docs/troubleshooting.md).
 
 ---
 
+## Direção visual
+
+A estética é editorial e artesanal — papel, traço de tinta, cor de cartaz —, inspirada no espírito das obras de Ziraldo sem reproduzir personagens ou traços de terceiros. O que isso quer dizer na prática, o que já está implementado e **o que qualquer mudança visual precisa preservar** (contraste AAA, foco visível, alvo de toque, os três temas) está em:
+
+- **[docs/design/direcao-visual.md](docs/design/direcao-visual.md)** — a referência antes de mexer em qualquer tela.
+- **[docs/design/previa-visual.html](docs/design/previa-visual.html)** — prévia interativa; abra no navegador para ver as três paletas e as opções de tipografia com os contrastes medidos.
+
+Toda a identidade vive em dois arquivos, de propósito: `web/src/styles/global.css` e `web/tailwind.config.js`. Trocar a identidade inteira não deveria exigir abrir componente nenhum.
+
+---
+
 ## Documentação completa
+
+O índice completo, por assunto, está em **[docs/README.md](docs/README.md)**. Os mais procurados:
 
 | Documento | Conteúdo |
 | --- | --- |
 | [rodar-no-linux.md](docs/rodar-no-linux.md) | **Passo a passo para rodar no Linux**, do zero ao navegador, com o que fazer em cada erro |
-| [decisions/013](docs/decisions/013-leitura-de-pdf.md) | Por que o PDF é normalizado no envio e lido em três vias |
+| [troubleshooting.md](docs/troubleshooting.md) | Problemas por sintoma |
 | [architecture.md](docs/architecture.md) | Camadas, fluxo de uma requisição, decisões estruturais |
-| [database.md](docs/database.md) | Tabelas, colunas, relacionamentos, migrations, seed |
 | [api.md](docs/api.md) | Todas as rotas: método, URL, autenticação, perfil, entrada, saída e erros |
-| [authentication.md](docs/authentication.md) | JWT, papéis, permissões, criação de administrador |
 | [business-rules.md](docs/business-rules.md) | Ciclo editorial, transições, quem pode o quê |
-| [admin.md](docs/admin.md) | Painel administrativo |
 | [accessibility.md](docs/accessibility.md) | Recursos de acessibilidade e o que foi medido |
-| [environment.md](docs/environment.md) | Cada variável de ambiente |
-| [docker.md](docs/docker.md) | Imagens, serviços, volumes |
-| [development.md](docs/development.md) | Rodar e desenvolver localmente |
-| [testing.md](docs/testing.md) | Como rodar e o que cada teste cobre |
-| [deployment.md](docs/deployment.md) | Levar para produção com segurança |
-| [troubleshooting.md](docs/troubleshooting.md) | Problemas comuns |
+| [design/direcao-visual.md](docs/design/direcao-visual.md) | A direção visual e o que ela não pode quebrar |
 | [decisions/](docs/decisions/) | Registros de decisão arquitetural (ADR) |
+| [academico/](docs/academico/) | Documentos do trabalho: cronograma, DAS, casos de uso, BMC |
 
 ---
 

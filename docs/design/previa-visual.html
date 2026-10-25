@@ -1,0 +1,650 @@
+<title>Direção Visual Livrin</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800;9..144,900&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap">
+
+<style>
+/* Layout: página única, coluna central de leitura, com os componentes reais do
+   projeto renderizados em tamanho real para serem julgados a olho. */
+:root {
+  /* Papel — tema padrão, copiado de web/src/styles/global.css */
+  --c-bg: 239 231 212;
+  --c-surface: 255 252 244;
+  --c-surface-low: 246 240 226;
+  --c-surface-high: 241 233 215;
+  --c-surface-highest: 230 219 194;
+  --c-outline: 23 22 26;
+  --c-ink: 23 22 26;
+  --c-ink-muted: 64 62 73;
+  --c-ink-subtle: 70 67 79;
+  --c-primary: 23 58 161;
+  --c-on-primary: 255 252 244;
+  --c-primary-container: 215 224 251;
+  --c-on-primary-container: 16 40 111;
+  --c-accent: 16 79 47;
+  --c-accent-container: 214 238 223;
+  --c-warn: 97 61 0;
+  --c-warn-container: 251 235 200;
+  --c-danger: 133 29 12;
+  --c-danger-container: 251 223 216;
+  --c-admin: 94 39 137;
+  --c-admin-container: 234 221 247;
+  --sombra-tinta: rgb(23 22 26);
+  --grao: 0.055;
+  --onda-cor: %2317161A;
+
+  /* Tipografia — trocada pelo seletor da página */
+  --fonte-display: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif;
+  --fonte-texto: 'Inter', system-ui, sans-serif;
+  --display-peso: 800;
+  --display-espaco: -0.02em;
+
+  color-scheme: light;
+}
+
+:root[data-tema="noite"] {
+  --c-bg: 21 20 26;
+  --c-surface: 30 28 37;
+  --c-surface-low: 25 24 33;
+  --c-surface-high: 39 36 48;
+  --c-surface-highest: 51 48 62;
+  --c-outline: 140 134 160;
+  --c-ink: 242 239 230;
+  --c-ink-muted: 214 209 224;
+  --c-ink-subtle: 198 192 212;
+  --c-primary: 175 196 255;
+  --c-on-primary: 11 31 85;
+  --c-primary-container: 42 60 114;
+  --c-on-primary-container: 222 230 255;
+  --c-accent: 123 224 172;
+  --c-accent-container: 19 67 43;
+  --c-warn: 245 200 107;
+  --c-warn-container: 69 51 12;
+  --c-danger: 255 176 160;
+  --c-danger-container: 86 32 20;
+  --c-admin: 217 180 255;
+  --c-admin-container: 62 35 89;
+  --sombra-tinta: rgb(0 0 0);
+  --grao: 0.035;
+  --onda-cor: %23B8B2C8;
+  color-scheme: dark;
+}
+
+:root[data-tema="hc"] {
+  --c-bg: 0 0 0;
+  --c-surface: 0 0 0;
+  --c-surface-low: 0 0 0;
+  --c-surface-high: 12 12 12;
+  --c-surface-highest: 24 24 24;
+  --c-outline: 255 255 0;
+  --c-ink: 255 255 0;
+  --c-ink-muted: 255 255 0;
+  --c-ink-subtle: 255 255 160;
+  --c-primary: 255 255 0;
+  --c-on-primary: 0 0 0;
+  --c-primary-container: 0 0 0;
+  --c-on-primary-container: 255 255 0;
+  --c-accent: 255 255 255;
+  --c-accent-container: 0 0 0;
+  --c-warn: 255 255 0;
+  --c-warn-container: 0 0 0;
+  --c-danger: 255 255 255;
+  --c-danger-container: 0 0 0;
+  --c-admin: 255 255 0;
+  --c-admin-container: 0 0 0;
+  --sombra-tinta: rgb(255 255 0);
+  --grao: 0;
+  --onda-cor: %23FFFF00;
+  color-scheme: dark;
+}
+
+/* No alto contraste a sombra dura vira contorno, como no projeto real. */
+:root[data-tema="hc"] .card,
+:root[data-tema="hc"] .btn,
+:root[data-tema="hc"] .sombra-dura { box-shadow: none !important; }
+
+* { box-sizing: border-box; }
+
+body {
+  background: rgb(var(--c-bg));
+  color: rgb(var(--c-ink));
+  font-family: var(--fonte-texto);
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.6;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: var(--grao);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23g)'/%3E%3C/svg%3E");
+}
+.camada { position: relative; z-index: 1; }
+
+h1, h2, h3, h4 {
+  font-family: var(--fonte-display);
+  font-weight: var(--display-peso);
+  letter-spacing: var(--display-espaco);
+  line-height: 1.12;
+  text-wrap: balance;
+  margin: 0;
+}
+
+:focus-visible { outline: 3px solid rgb(var(--c-primary)); outline-offset: 2px; border-radius: 6px; }
+:root[data-tema="noite"] :focus-visible, :root[data-tema="hc"] :focus-visible { outline-color: rgb(var(--c-ink)); }
+
+.env {
+  width: 100%;
+  max-width: 1080px;
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+section { padding-block: 44px; }
+
+.eyebrow {
+  font-family: var(--fonte-display);
+  font-size: .72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  color: rgb(var(--c-accent));
+  margin: 0 0 10px;
+}
+
+.leitura { max-width: 62ch; color: rgb(var(--c-ink-muted)); }
+
+/* --- Componentes reais do projeto ------------------------------------- */
+.card {
+  border: 2px solid rgb(var(--c-outline));
+  background: rgb(var(--c-surface));
+  border-radius: 20px 26px 20px 26px;
+  box-shadow: 5px 5px 0 var(--sombra-tinta);
+}
+.card-high {
+  border: 2px solid rgb(var(--c-outline));
+  background: rgb(var(--c-surface-high));
+  border-radius: 16px 22px 16px 22px;
+}
+.sombra-dura { box-shadow: 5px 5px 0 var(--sombra-tinta); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 44px; padding: 8px 18px;
+  border: 2px solid rgb(var(--c-outline));
+  border-radius: 14px 18px 14px 18px;
+  box-shadow: 3px 3px 0 var(--sombra-tinta);
+  font-family: var(--fonte-texto);
+  font-size: .9rem; font-weight: 700;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+}
+.btn:hover { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--sombra-tinta); }
+.btn:active { transform: translate(3px,3px); box-shadow: 0 0 0 var(--sombra-tinta); }
+.btn-primary { background: rgb(var(--c-primary)); color: rgb(var(--c-on-primary)); }
+.btn-secondary { background: rgb(var(--c-surface)); color: rgb(var(--c-ink)); }
+.btn-tonal { background: rgb(var(--c-primary-container)); color: rgb(var(--c-on-primary-container)); }
+.btn-accent { background: rgb(var(--c-accent-container)); color: rgb(var(--c-accent)); }
+.btn-danger { background: rgb(var(--c-danger)); color: rgb(var(--c-on-primary)); }
+.btn-ghost { background: transparent; border-color: transparent; box-shadow: none; color: rgb(var(--c-ink-muted)); }
+.btn-ghost:hover { background: rgb(var(--c-surface-high)); color: rgb(var(--c-ink)); transform: none; box-shadow: none; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 2px solid rgb(var(--c-outline));
+  border-radius: 999px;
+  padding: 3px 11px;
+  font-size: .72rem; font-weight: 700;
+  background: rgb(var(--c-surface));
+  color: rgb(var(--c-ink));
+}
+.chip-adesivo { transform: rotate(-1.5deg); }
+.chip-accent { background: rgb(var(--c-accent-container)); color: rgb(var(--c-accent)); }
+.chip-warn { background: rgb(var(--c-warn-container)); color: rgb(var(--c-warn)); }
+.chip-primary { background: rgb(var(--c-primary-container)); color: rgb(var(--c-on-primary-container)); }
+.chip-admin { background: rgb(var(--c-admin-container)); color: rgb(var(--c-admin)); }
+.chip-danger { background: rgb(var(--c-danger-container)); color: rgb(var(--c-danger)); }
+
+.campo {
+  width: 100%;
+  border: 2px solid rgb(var(--c-outline));
+  background: rgb(var(--c-surface));
+  color: rgb(var(--c-ink));
+  border-radius: 12px 16px 12px 16px;
+  padding: 11px 15px;
+  font-family: var(--fonte-texto);
+  font-size: 1rem;
+}
+.campo::placeholder { color: rgb(var(--c-ink-subtle)); }
+.rotulo { display: block; font-family: var(--fonte-display); font-weight: 700; font-size: .85rem; margin-bottom: 7px; }
+
+.onda {
+  height: 10px;
+  background-repeat: repeat-x;
+  background-size: 28px 10px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='10' viewBox='0 0 28 10'%3E%3Cpath d='M0 7 Q 7 0 14 7 T 28 7' fill='none' stroke='%2317161A' stroke-width='2'/%3E%3C/svg%3E");
+}
+:root[data-tema="noite"] .onda, :root[data-tema="hc"] .onda {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='10' viewBox='0 0 28 10'%3E%3Cpath d='M0 7 Q 7 0 14 7 T 28 7' fill='none' stroke='%23B8B2C8' stroke-width='2'/%3E%3C/svg%3E");
+}
+
+/* --- Barra de controles ------------------------------------------------ */
+.barra {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 10;
+  background: rgb(var(--c-surface));
+  border-bottom: 2px solid rgb(var(--c-outline));
+}
+body::after {
+  content: ''; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 11; background: rgb(var(--c-surface));
+}
+.barra-int { display: flex; flex-wrap: wrap; gap: 16px 28px; align-items: center; padding-block: 12px; }
+.grupo { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.grupo > span { font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .12em; color: rgb(var(--c-ink-subtle)); }
+.opc {
+  border: 2px solid rgb(var(--c-outline));
+  background: rgb(var(--c-surface));
+  color: rgb(var(--c-ink));
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-family: var(--fonte-texto);
+  font-size: .8rem; font-weight: 700;
+  cursor: pointer;
+  min-height: 36px;
+}
+.opc[aria-pressed="true"] { background: rgb(var(--c-primary)); color: rgb(var(--c-on-primary)); }
+
+/* --- Grades ------------------------------------------------------------ */
+.grade { display: grid; gap: 22px; }
+@media (min-width: 720px) { .grade-3 { grid-template-columns: repeat(3, 1fr); } .grade-2 { grid-template-columns: repeat(2, 1fr); } }
+
+.obra-capa {
+  aspect-ratio: 3/4;
+  border-bottom: 2px solid rgb(var(--c-outline));
+  display: grid; place-items: center;
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px 24px 0 0;
+}
+.obra-corpo { padding: 16px; display: grid; gap: 10px; }
+.obra-titulo { font-size: 1.3rem; }
+
+.selo {
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 2px solid rgb(var(--c-outline));
+  background: rgb(var(--c-accent-container));
+  color: rgb(var(--c-accent));
+  border-radius: 999px;
+  padding: 4px 12px 4px 7px;
+  font-size: .72rem; font-weight: 800;
+  letter-spacing: .02em;
+  box-shadow: 2px 2px 0 var(--sombra-tinta);
+  transform: rotate(-1.5deg);
+}
+.selo svg { flex: none; }
+
+table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 2px solid rgb(var(--c-outline) / .25); }
+th { font-family: var(--fonte-display); font-weight: 800; font-size: .72rem; text-transform: uppercase; letter-spacing: .1em; color: rgb(var(--c-ink-subtle)); }
+td { font-variant-numeric: tabular-nums; }
+.rolagem { overflow-x: auto; }
+
+.amostra { display: grid; gap: 6px; padding: 20px; }
+.amostra h3 { font-size: clamp(1.6rem, 4.4vw, 2.5rem); }
+.amostra p { margin: 0; color: rgb(var(--c-ink-muted)); font-size: .95rem; }
+.amostra .nome { font-size: .7rem; font-weight: 800; text-transform: uppercase; letter-spacing: .14em; color: rgb(var(--c-ink-subtle)); }
+.ativa { outline: 3px solid rgb(var(--c-primary)); outline-offset: 4px; }
+
+.swatch { display: flex; align-items: center; gap: 12px; padding: 9px 0; }
+.quadro { width: 42px; height: 42px; border: 2px solid rgb(var(--c-outline)); border-radius: 10px 13px 10px 13px; flex: none; }
+.swatch code { font-size: .74rem; color: rgb(var(--c-ink-subtle)); font-family: ui-monospace, monospace; }
+
+.nota { border-left: 6px solid rgb(var(--c-primary)); padding: 2px 0 2px 16px; }
+
+ul.lista { margin: 0; padding-left: 20px; color: rgb(var(--c-ink-muted)); }
+ul.lista li { margin-bottom: 7px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="camada">
+
+<div class="barra">
+  <div class="env barra-int">
+    <div class="grupo">
+      <span>Tema</span>
+      <button class="opc" data-tema-btn="papel" aria-pressed="true">Papel</button>
+      <button class="opc" data-tema-btn="noite" aria-pressed="false">Noite</button>
+      <button class="opc" data-tema-btn="hc" aria-pressed="false">Alto contraste</button>
+    </div>
+    <div class="grupo">
+      <span>Tipografia</span>
+      <button class="opc" data-fonte-btn="atual" aria-pressed="true">Atual</button>
+      <button class="opc" data-fonte-btn="a" aria-pressed="false">Opção A</button>
+      <button class="opc" data-fonte-btn="b" aria-pressed="false">Opção B</button>
+    </div>
+  </div>
+</div>
+
+<section class="env">
+  <p class="eyebrow">Prévia para aprovação · versão 3.0.0</p>
+  <h1 style="font-size: clamp(2rem, 6vw, 3.4rem)">A direção visual do Livrin</h1>
+  <p class="leitura" style="margin-top: 14px; font-size: 1.05rem">
+    Esta página usa o CSS real do projeto: as mesmas cores, as mesmas bordas de tinta, a mesma
+    sombra dura e os mesmos cantos irregulares que estão em <code>web/src/styles/global.css</code>.
+    Troque o tema e a tipografia na barra acima e julgue com os olhos.
+  </p>
+  <p class="leitura" style="margin-top: 14px">
+    <strong>A decisão que preciso de você é só uma: a tipografia.</strong> O resto da identidade já
+    saiu da estética de painel de software. A tipografia, não: continua Inter com Plus Jakarta Sans,
+    que é o par que a seção 14 da especificação manda evitar.
+  </p>
+</section>
+
+<div class="env"><div class="onda"></div></div>
+
+<section class="env">
+  <p class="eyebrow">A decisão</p>
+  <h2 style="font-size: clamp(1.5rem, 4vw, 2.1rem)">Três tipografias, o mesmo título</h2>
+  <p class="leitura" style="margin-top: 10px">
+    O texto corrido continua em Inter nas três, porque é a face mais legível em tela pequena e o
+    leitor já oferece Lexend e OpenDyslexic por cima dela. O que muda é a face dos títulos.
+  </p>
+
+  <div class="grade grade-3" style="margin-top: 24px">
+    <div class="card amostra" id="am-atual">
+      <span class="nome">Atual · Plus Jakarta Sans</span>
+      <h3 style="font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; letter-spacing: -.02em">Vozes do Mar</h3>
+      <p>Correta e neutra. É a face que aparece em quase todo site de produto feito nos últimos três anos.</p>
+    </div>
+    <div class="card amostra" id="am-a">
+      <span class="nome">Opção A · Fraunces</span>
+      <h3 style="font-family: 'Fraunces', Georgia, serif; font-weight: 900; letter-spacing: -.01em; font-variation-settings: 'SOFT' 40, 'WONK' 1">Vozes do Mar</h3>
+      <p>Serifa variável com eixos de amolecimento e irregularidade. Tem cara de capa de livro e de carimbo de editora.</p>
+    </div>
+    <div class="card amostra" id="am-b">
+      <span class="nome">Opção B · Bricolage Grotesque</span>
+      <h3 style="font-family: 'Bricolage Grotesque', 'Inter', sans-serif; font-weight: 800; letter-spacing: -.015em">Vozes do Mar</h3>
+      <p>Sem serifa com larguras propositalmente desiguais. Tem cara de fanzine e de cartaz de quadrinho.</p>
+    </div>
+  </div>
+
+  <div class="card nota" style="margin-top: 24px; padding: 18px 20px; border-left-width: 8px; border-radius: 16px 22px 16px 22px">
+    <p style="margin: 0" class="leitura">
+      As três passam igual em acessibilidade: a escolha da face de título não altera nenhum contraste,
+      e o corpo de texto não muda. É uma decisão de personalidade, não de legibilidade.
+    </p>
+  </div>
+</section>
+
+<div class="env"><div class="onda"></div></div>
+
+<section class="env">
+  <p class="eyebrow">Como fica no catálogo</p>
+  <h2 style="font-size: clamp(1.5rem, 4vw, 2.1rem)">Cards de obra</h2>
+  <p class="leitura" style="margin-top: 10px">Com o Selo Livrin que você aprovou, derivado do checklist de curadoria.</p>
+
+  <div class="grade grade-3" style="margin-top: 24px">
+
+    <article class="card">
+      <div class="obra-capa" style="background: linear-gradient(150deg, rgb(var(--c-primary-container)), rgb(var(--c-surface-highest)))">
+        <svg viewBox="0 0 120 140" width="92" aria-hidden="true" fill="none" stroke="rgb(var(--c-outline))" stroke-width="3" stroke-linejoin="round">
+          <path d="M18 118c22-9 44-9 66 0V26c-22-9-44-9-66 0z"/>
+          <path d="M84 118c6-3 12-5 18-6V20c-6 1-12 3-18 6z"/>
+          <path d="M30 48c12-4 24-4 36 0M30 66c12-4 24-4 36 0M30 84c9-3 18-3 27 0"/>
+        </svg>
+        <span class="chip chip-adesivo chip-accent" style="position: absolute; top: 12px; left: 12px">Audiodescrição</span>
+      </div>
+      <div class="obra-corpo">
+        <span class="selo">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2.6l2.6 5.5 6 .9-4.4 4.3 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9l6-.9z"/>
+          </svg>
+          Selo Livrin
+        </span>
+        <h3 class="obra-titulo">Vozes do Mar</h3>
+        <p style="margin: 0; font-size: .88rem; color: rgb(var(--c-ink-muted))">Tiago Medeiros · Zine · 4 páginas</p>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px">
+          <button class="btn btn-primary" style="flex: 1">Ler agora</button>
+          <button class="btn btn-secondary" aria-label="Ouvir sinopse">♪</button>
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="obra-capa" style="background: linear-gradient(150deg, rgb(var(--c-accent-container)), rgb(var(--c-surface-highest)))">
+        <svg viewBox="0 0 120 140" width="92" aria-hidden="true" fill="none" stroke="rgb(var(--c-outline))" stroke-width="3" stroke-linejoin="round">
+          <rect x="20" y="22" width="80" height="96" rx="6"/>
+          <path d="M34 44h24v22H34zM66 44h20v10H66zM66 58h20v8H66zM34 76h52v14H34zM34 96h34v10H34z"/>
+        </svg>
+        <span class="chip chip-adesivo chip-primary" style="position: absolute; top: 12px; left: 12px">Libras</span>
+      </div>
+      <div class="obra-corpo">
+        <span class="selo">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2.6l2.6 5.5 6 .9-4.4 4.3 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9l6-.9z"/>
+          </svg>
+          Selo Livrin
+        </span>
+        <h3 class="obra-titulo">Ecos de la Marea</h3>
+        <p style="margin: 0; font-size: .88rem; color: rgb(var(--c-ink-muted))">Marina Duarte · Webcomic · 6 páginas</p>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px">
+          <button class="btn btn-primary" style="flex: 1">Ler agora</button>
+          <button class="btn btn-secondary" aria-label="Ouvir sinopse">♪</button>
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="obra-capa" style="background: linear-gradient(150deg, rgb(var(--c-warn-container)), rgb(var(--c-surface-highest)))">
+        <svg viewBox="0 0 120 140" width="92" aria-hidden="true" fill="none" stroke="rgb(var(--c-outline))" stroke-width="3" stroke-linejoin="round">
+          <path d="M24 116V30c0-5 4-9 9-9h54c5 0 9 4 9 9v86l-18-11-18 11-18-11z"/>
+          <path d="M40 48h40M40 66h40M40 84h26"/>
+        </svg>
+      </div>
+      <div class="obra-corpo">
+        <span class="selo">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2.6l2.6 5.5 6 .9-4.4 4.3 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9l6-.9z"/>
+          </svg>
+          Selo Livrin
+        </span>
+        <h3 class="obra-titulo">Rimas</h3>
+        <p style="margin: 0; font-size: .88rem; color: rgb(var(--c-ink-muted))">Gustavo Bécquer · Livro · domínio público</p>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px">
+          <button class="btn btn-primary" style="flex: 1">Ler agora</button>
+          <button class="btn btn-secondary" aria-label="Ouvir sinopse">♪</button>
+        </div>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<div class="env"><div class="onda"></div></div>
+
+<section class="env">
+  <p class="eyebrow">Proposta aprovada</p>
+  <h2 style="font-size: clamp(1.5rem, 4vw, 2.1rem)">O que o Selo Livrin vai dizer</h2>
+  <p class="leitura" style="margin-top: 10px">
+    O selo não é um adorno: ele resume o checklist que a curadoria já preenche obra a obra. Clicar
+    nele abre a lista, para que o leitor veja o que foi conferido — e o autor saiba o que foi cobrado.
+  </p>
+
+  <div class="card" style="margin-top: 22px; padding: 22px">
+    <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 18px">
+      <span class="selo" style="font-size: .82rem; padding: 6px 15px 6px 9px">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 2.6l2.6 5.5 6 .9-4.4 4.3 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9l6-.9z"/>
+        </svg>
+        Selo Livrin
+      </span>
+      <span style="color: rgb(var(--c-ink-muted)); font-size: .92rem">Concedido em 14 de outubro de 2026 por Camila Fontes, curadoria de acessibilidade</span>
+    </div>
+    <div class="rolagem">
+      <table>
+        <thead><tr><th>Item verificado pela curadoria</th><th>Situação</th></tr></thead>
+        <tbody>
+          <tr><td>Contraste de balões e onomatopeias</td><td><span class="chip chip-accent">Aprovado</span></td></tr>
+          <tr><td>Audiodescrição das cenas de ação</td><td><span class="chip chip-accent">Aprovado</span></td></tr>
+          <tr><td>Ordem de foco para leitor de tela</td><td><span class="chip chip-accent">Aprovado</span></td></tr>
+          <tr><td>Classificação etária e sensibilidade</td><td><span class="chip chip-accent">Aprovado</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="leitura" style="margin: 16px 0 0; font-size: .9rem">
+      Nenhum número é inventado: os quatro itens são os que já existem em <code>DEFAULT_REVIEW_CHECKS</code>,
+      e o nome e a data saem de quem aprovou a obra.
+    </p>
+  </div>
+</section>
+
+<div class="env"><div class="onda"></div></div>
+
+<section class="env">
+  <p class="eyebrow">Peças</p>
+  <h2 style="font-size: clamp(1.5rem, 4vw, 2.1rem)">Componentes</h2>
+
+  <div class="grade grade-2" style="margin-top: 24px">
+    <div class="card" style="padding: 22px">
+      <h3 style="font-size: 1.15rem; margin-bottom: 14px">Botões</h3>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px">
+        <button class="btn btn-primary">Enviar para análise</button>
+        <button class="btn btn-secondary">Salvar rascunho</button>
+        <button class="btn btn-tonal">Continuar envio</button>
+        <button class="btn btn-accent">Ouvir audiodescrição</button>
+        <button class="btn btn-danger">Rejeitar</button>
+        <button class="btn btn-ghost">Cancelar</button>
+      </div>
+      <p class="leitura" style="font-size: .86rem; margin-top: 14px">
+        Ao pressionar, o botão desloca 3px e perde a sombra: encosta na página. É retorno físico,
+        não mudança de brilho. Clique em um para sentir.
+      </p>
+    </div>
+
+    <div class="card" style="padding: 22px">
+      <h3 style="font-size: 1.15rem; margin-bottom: 14px">Etiquetas e estados</h3>
+      <div style="display: flex; flex-wrap: wrap; gap: 9px">
+        <span class="chip chip-accent">No catálogo</span>
+        <span class="chip chip-warn">Em análise</span>
+        <span class="chip chip-danger">Ajustes solicitados</span>
+        <span class="chip">Rascunho</span>
+        <span class="chip chip-admin">Administração</span>
+        <span class="chip chip-primary chip-adesivo">Leitura fácil</span>
+      </div>
+      <div style="margin-top: 18px">
+        <label class="rotulo" for="exemplo-titulo">Título do livro ou HQ</label>
+        <input class="campo" id="exemplo-titulo" value="Vozes do Mar">
+      </div>
+      <p class="leitura" style="font-size: .86rem; margin-top: 12px">
+        O campo tem traço de tinta de 2px. No tema Papel isso dá 17,6:1 de contraste contra o fundo —
+        o critério WCAG 1.4.11 pede 3:1. Antes da correção, era 1,1:1.
+      </p>
+    </div>
+  </div>
+</section>
+
+<div class="env"><div class="onda"></div></div>
+
+<section class="env">
+  <p class="eyebrow">Medido, não estimado</p>
+  <h2 style="font-size: clamp(1.5rem, 4vw, 2.1rem)">Cores e contraste</h2>
+  <p class="leitura" style="margin-top: 10px">
+    Todos os pares de texto foram calculados pela fórmula da WCAG. No tema Papel, o pior par é
+    <strong>7,6:1</strong>; no Noite, <strong>7,0:1</strong>. O nível AAA pede 7:1 — passam todos, nos dois temas.
+  </p>
+
+  <div class="grade grade-2" style="margin-top: 22px">
+    <div class="card" style="padding: 20px">
+      <h3 style="font-size: 1.05rem; margin-bottom: 8px">Superfícies e tinta</h3>
+      <div class="swatch"><span class="quadro" style="background: rgb(var(--c-bg))"></span><span>Fundo<br><code>--c-bg</code></span></div>
+      <div class="swatch"><span class="quadro" style="background: rgb(var(--c-surface))"></span><span>Papel<br><code>--c-surface</code></span></div>
+      <div class="swatch"><span class="quadro" style="background: rgb(var(--c-surface-high))"></span><span>Papel sombreado<br><code>--c-surface-high</code></span></div>
+      <div class="swatch"><span class="quadro" style="background: rgb(var(--c-ink))"></span><span>Tinta<br><code>--c-ink</code> · 17,6:1</span></div>
+    </div>
+    <div class="card" style="padding: 20px">
+      <h3 style="font-size: 1.05rem; margin-bottom: 8px">Cor de cartaz</h3>
+      <div class="swatch"><span class="quadro" style="background: rgb(var(--c-primary))"></span><span>Primária<br><code>--c-primary</code> · 9,5:1</span></div>
+      <div class="swatch"><span class="quadro" style="background: rgb(var(--c-accent))"></span><span>Destaque<br><code>--c-accent</code> · 9,4:1</span></div>
+      <div class="swatch"><span class="quadro" style="background: rgb(var(--c-warn))"></span><span>Atenção<br><code>--c-warn</code> · 8,2:1</span></div>
+      <div class="swatch"><span class="quadro" style="background: rgb(var(--c-admin))"></span><span>Administração<br><code>--c-admin</code> · 7,6:1</span></div>
+    </div>
+  </div>
+</section>
+
+<div class="env"><div class="onda"></div></div>
+
+<section class="env" style="padding-bottom: 60px">
+  <p class="eyebrow">Se você escolher trocar</p>
+  <h2 style="font-size: clamp(1.5rem, 4vw, 2.1rem)">O que a troca de tipografia mexe</h2>
+  <div class="card" style="margin-top: 20px; padding: 22px">
+    <ul class="lista">
+      <li>Duas linhas em <code>web/tailwind.config.js</code> (a família <code>display</code>) e a importação da fonte em <code>web/src/main.tsx</code>.</li>
+      <li>A dependência <code>@fontsource-variable/plus-jakarta-sans</code> sai e entra a da face escolhida — isso <strong>exige que você rode <code>npm install</code> uma vez</strong> na pasta <code>web</code>, para o lockfile acompanhar.</li>
+      <li>Nada de acessibilidade muda: Lexend e OpenDyslexic continuam no leitor, e nenhum contraste se altera.</li>
+      <li>Nenhum componente, cor ou medida é tocado.</li>
+    </ul>
+    <p class="leitura" style="margin: 16px 0 0">
+      Se preferir ficar com a atual, também está respondido — e aí não mexo em nada.
+    </p>
+  </div>
+</section>
+
+</div>
+
+<script>
+(function () {
+  var raiz = document.documentElement;
+
+  var FONTES = {
+    atual: { display: "'Plus Jakarta Sans', 'Inter', system-ui, sans-serif", peso: '800', espaco: '-0.02em' },
+    a:     { display: "'Fraunces', Georgia, 'Times New Roman', serif",      peso: '900', espaco: '-0.01em' },
+    b:     { display: "'Bricolage Grotesque', 'Inter', system-ui, sans-serif", peso: '800', espaco: '-0.015em' }
+  };
+  var AMOSTRA = { atual: 'am-atual', a: 'am-a', b: 'am-b' };
+
+  function marcar(botoes, ativo, atributo) {
+    botoes.forEach(function (b) {
+      b.setAttribute('aria-pressed', String(b.dataset[atributo] === ativo));
+    });
+  }
+
+  var botoesTema = Array.prototype.slice.call(document.querySelectorAll('[data-tema-btn]'));
+  botoesTema.forEach(function (botao) {
+    botao.addEventListener('click', function () {
+      var tema = botao.dataset.temaBtn;
+      if (tema === 'papel') raiz.removeAttribute('data-tema');
+      else raiz.setAttribute('data-tema', tema);
+      marcar(botoesTema, tema, 'temaBtn');
+    });
+  });
+
+  var botoesFonte = Array.prototype.slice.call(document.querySelectorAll('[data-fonte-btn]'));
+  botoesFonte.forEach(function (botao) {
+    botao.addEventListener('click', function () {
+      var chave = botao.dataset.fonteBtn;
+      var f = FONTES[chave];
+      raiz.style.setProperty('--fonte-display', f.display);
+      raiz.style.setProperty('--display-peso', f.peso);
+      raiz.style.setProperty('--display-espaco', f.espaco);
+      marcar(botoesFonte, chave, 'fonteBtn');
+      Object.keys(AMOSTRA).forEach(function (k) {
+        var el = document.getElementById(AMOSTRA[k]);
+        if (el) el.classList.toggle('ativa', k === chave);
+      });
+    });
+  });
+
+  var inicial = document.getElementById(AMOSTRA.atual);
+  if (inicial) inicial.classList.add('ativa');
+})();
+</script>

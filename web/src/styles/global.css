@@ -207,6 +207,24 @@ p {
   outline-offset: 2px;
   border-radius: 6px;
 }
+
+/*
+ * Rede de segurança para navegador sem :focus-visible. Ali o seletor acima é
+ * descartado inteiro, e a página ficaria SEM indicador de foco — numa
+ * plataforma de acessibilidade, o pior defeito possível. Este bloco dá foco
+ * visível a todos; onde :focus-visible existe, a regra seguinte o remove do
+ * clique de mouse, que é o comportamento desejado.
+ */
+:focus {
+  outline: 3px solid rgb(var(--c-primary));
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+@supports selector(:focus-visible) {
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
 :root.tema-escuro :focus-visible,
 :root.hc :focus-visible {
   outline-color: rgb(var(--c-ink));

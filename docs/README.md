@@ -15,6 +15,7 @@
 | [authentication.md](authentication.md) | JWT, papéis e verificação no servidor |
 | [admin.md](admin.md) | Área administrativa e fluxo de curadoria |
 | [accessibility.md](accessibility.md) | Recursos de acessibilidade e os critérios WCAG atendidos |
+| [navegadores.md](navegadores.md) | Navegadores aceitos, por que esse piso, e onde há caminho alternativo |
 
 | Operação | |
 | --- | --- |

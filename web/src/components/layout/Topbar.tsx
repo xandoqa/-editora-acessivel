@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { ChevronDown, Contrast, LayoutDashboard, LogOut, Menu, Moon, Plus, Search, ShieldCheck, Sun, UserRound, Volume2, VolumeX } from 'lucide-react';
+import { ChevronDown, Contrast, LayoutDashboard, LogOut, Menu, Moon, Plus, Search, ShieldCheck, Sun, UserRound } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext';
 import { FONT_MAX, FONT_MIN, usePreferences } from '../../preferences/PreferencesContext';
 import { ROLE_LABEL } from '../../lib/labels';
-import { speak, speechSupported, stopSpeaking } from '../../lib/speech';
+import { stopSpeaking } from '../../lib/speech';
+import LeituraEmVoz from './LeituraEmVoz';
 import { Avatar } from '../ui';
 
 function UserMenu() {
@@ -96,7 +97,6 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
   const location = useLocation();
   const [params] = useSearchParams();
   const [term, setTerm] = useState(params.get('q') ?? '');
-  const [reading, setReading] = useState(false);
 
   useEffect(() => {
     if (location.pathname === '/') setTerm(params.get('q') ?? '');
@@ -105,24 +105,12 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
   useEffect(() => {
     // Interrompe a leitura em voz alta ao trocar de página.
     stopSpeaking();
-    setReading(false);
   }, [location.pathname]);
 
   const onSearch = (e: FormEvent) => {
     e.preventDefault();
     const q = term.trim();
     navigate(q ? `/?q=${encodeURIComponent(q)}` : '/');
-  };
-
-  const toggleRead = () => {
-    if (reading) {
-      stopSpeaking();
-      setReading(false);
-      return;
-    }
-    const text = document.getElementById('main-content')?.innerText ?? '';
-    const utterance = speak(text.slice(0, 4000), { onEnd: () => setReading(false), onError: () => setReading(false) });
-    setReading(!!utterance);
   };
 
   const tool =
@@ -170,17 +158,7 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         <button type="button" className={tool} onClick={prefs.increaseFont} disabled={prefs.fontScale >= FONT_MAX} aria-label="Aumentar tamanho do texto">
           A+
         </button>
-        <button
-          type="button"
-          className={tool}
-          onClick={toggleRead}
-          disabled={!speechSupported}
-          aria-pressed={reading}
-          title={speechSupported ? 'Ler a página em voz alta' : 'Seu navegador não suporta leitura em voz alta'}
-        >
-          {reading ? <VolumeX className="h-5 w-5" aria-hidden /> : <Volume2 className="h-5 w-5" aria-hidden />}
-          <span className="sr-only">{reading ? 'Parar leitura em voz alta' : 'Ler a página em voz alta'}</span>
-        </button>
+        <LeituraEmVoz classeBotao={tool} />
       </div>
 
       {isWriter && (

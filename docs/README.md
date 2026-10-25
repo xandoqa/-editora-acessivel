@@ -34,4 +34,5 @@
 | Decisões e contexto | |
 | --- | --- |
 | [decisions/](decisions/) | Registro de decisões técnicas (ADRs): o que foi escolhido e por quê |
+| [pagamento-real-opcoes.md](pagamento-real-opcoes.md) | Estudo das opções para receber apoio de verdade sem orçamento, e o que faltaria no código |
 | [academico/](academico/) | Documentos do trabalho: cronograma, DAS, casos de uso, BMC |

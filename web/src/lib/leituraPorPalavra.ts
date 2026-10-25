@@ -167,6 +167,23 @@ export function iniciarLeituraPorPalavra(raiz: HTMLElement, aoLer?: (palavra: st
     if (!cacheDePalavras) cacheDePalavras = palavrasDe(raiz);
     if (!cacheDePalavras.length) return;
     evento.preventDefault();
+    /*
+     * Enquanto a leitura por palavra está ligada, as setas pertencem a ela.
+     *
+     * O leitor de obras também escuta ← → em `window`, para virar página. Este
+     * ouvinte está em `document`, que vem antes no borbulhamento, então sem
+     * parar a propagação os dois rodavam: a seta falava a próxima palavra E
+     * virava a página — e virar a página troca o conteúdo, o que zera o índice
+     * pelo MutationObserver e joga a leitura de volta para a primeira palavra.
+     *
+     * `preventDefault` não resolvia isso: ele cancela a ação padrão do
+     * navegador, não os outros ouvintes. Quem faz isso é `stopPropagation`.
+     *
+     * A escolha é deliberada: com a leitura ligada, as setas andam palavra a
+     * palavra e não viram página. Para virar página, desligue a leitura — ou
+     * use os botões de navegação do leitor, que continuam valendo.
+     */
+    evento.stopPropagation();
 
     indiceTeclado += evento.key === 'ArrowRight' ? 1 : -1;
     if (indiceTeclado < 0) indiceTeclado = 0;

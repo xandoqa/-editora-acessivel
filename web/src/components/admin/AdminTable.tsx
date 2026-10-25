@@ -36,9 +36,14 @@ export function TableShell({ children, caption }: { children: ReactNode; caption
 export const theadClass = 'border-b border-outline/40 bg-surface-high text-xs uppercase tracking-wider text-ink-muted';
 export const rowClass = 'border-b border-outline/30 last:border-0 hover:bg-surface-high';
 
+/*
+ * Sem `focus:outline-none` no campo: ele vencia o `:focus-visible` do
+ * global.css por especificidade e deixava a busca sem indicador de foco
+ * nenhum ao chegar pelo Tab — falha do critério WCAG 2.4.7.
+ */
 export function SearchBox({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
   return (
-    <div className="flex min-w-[240px] flex-1 items-center gap-2 rounded-xl border border-outline bg-surface px-3">
+    <div className="flex min-w-[240px] flex-1 items-center gap-2 rounded-xl border border-outline bg-surface px-3 focus-within:border-primary">
       <Search className="h-4 w-4 text-ink-muted" aria-hidden />
       <input
         type="search"
@@ -46,7 +51,7 @@ export function SearchBox({ value, onChange, placeholder }: { value: string; onC
         placeholder={placeholder}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="h-11 flex-1 bg-transparent text-sm text-ink placeholder:text-ink-subtle focus:outline-none"
+        className="h-11 flex-1 bg-transparent text-sm text-ink placeholder:text-ink-subtle"
       />
     </div>
   );

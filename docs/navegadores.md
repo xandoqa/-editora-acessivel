@@ -37,6 +37,7 @@ Nada aqui depende de um navegador específico — onde há divergência, os dois
 - **Qualidade da voz.** Quem fala é o sistema operacional. No Linux a voz padrão em português costuma ser o espeak, que é robótico; no Chrome há vozes próprias, bem melhores. O painel de leitura tem seletor de voz e avisa quando não encontra nenhuma em português.
 - **PDF no iPhone e iPad.** O Safari do iOS tem limitações para exibir PDF embutido; o botão de baixar continua valendo. Para leitura acessível de verdade, DOCX e EPUB são os formatos certos — PDF digitalizado é imagem, e imagem não é lida por leitor de tela em navegador nenhum.
 - **Passar o mouse por cima.** Em tela sensível ao toque não existe "passar por cima": a leitura por palavra ali depende das setas do teclado, e a leitura é ignorada no toque de propósito, para não atrapalhar a rolagem.
+- **As setas têm um dono por vez.** Com a leitura em voz alta **ligada**, `← →` andam palavra a palavra e **não viram página** — a leitura interrompe a propagação do evento. Desligada, as setas voltam a virar página no leitor. Isso é decisão, não limitação: antes as duas coisas aconteciam na mesma tecla, e virar a página reiniciava a leitura.
 
 ## Como conferir
 

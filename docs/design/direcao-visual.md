@@ -39,9 +39,9 @@ Os três temas redefinem as mesmas variáveis. Nenhum componente sabe em qual te
 
 Esta é a parte que não é gosto. O projeto é uma plataforma de acessibilidade: layout que quebra um destes itens está errado, por mais bonito que fique.
 
-- **Contraste AAA (7:1)** em todo texto, sobre todas as superfícies, nos três temas.
+- **Contraste AAA (7:1)** em todo texto, sobre todas as superfícies, nos três temas. Medido na 3.1.6: 120 combinações de token de texto sobre superfície, pior caso 7,28:1. **O leitor tem paletas próprias** (`web/src/components/reader/readerPrefs.ts`), independentes dos tokens do site, e elas precisam da mesma medição — o `accent` de lá é cor de texto, não de borda, e estava em 6:1 até ser corrigido.
 - **Contraste 3:1 em bordas e elementos não textuais** (critério WCAG 1.4.11). O fio de 1px passa com folga porque a **cor** não mudou quando a espessura caiu — contraste é cor, não espessura.
-- **Foco sempre visível** (`:focus-visible`). Uma versão anterior do projeto aplicava `focus:outline-none` nos campos e apagava justamente o indicador de foco, numa plataforma de acessibilidade.
+- **Foco sempre visível** (`:focus-visible`). Uma versão anterior do projeto aplicava `focus:outline-none` nos campos e apagava justamente o indicador de foco, numa plataforma de acessibilidade. **Isso voltou a acontecer** nos dois campos de busca e foi pego em auditoria na 3.1.6: o utilitário do Tailwind gera `.focus\:outline-none:focus`, de especificidade 0-2-0, que vence o `:focus-visible` do `global.css`, de 0-1-0, e aplica um contorno transparente. A regra prática: **`focus:outline-none` só em alvo de foco programático** (`tabIndex={-1}` em `<main>` ou numa seção que recebe foco por código), nunca em controle alcançável por Tab. Para dar realce ao contêiner de um campo, use `focus-within`, que é reforço e não substitui o contorno.
 - **Alvo de toque de 44px** nos controles.
 - **Ordem de leitura e rótulos**: `aria-label`, `role` e a sequência do DOM continuam valendo. Mudar posição é livre; mudar rótulo quebra a suíte de ponta a ponta, que seleciona por nome acessível — e essa suíte é a rede de proteção da reforma.
 - **`prefers-reduced-motion`** e o modo Leitor Otimizado, que desliga animação e grão.

@@ -4,6 +4,43 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
+### Correções de acessibilidade encontradas em auditoria
+
+Três defeitos achados numa varredura do código, não por relato de uso. Os dois
+primeiros são falhas de critério WCAG, e os dois atingiam justamente quem
+depende dos recursos de acessibilidade do projeto.
+
+- **As setas do teclado brigavam entre si no leitor.** O leitor escuta `← →` em
+  `window` para virar página; a leitura por palavra escuta as mesmas teclas em
+  `document`, que vem antes no borbulhamento. Os dois rodavam: a seta falava a
+  próxima palavra **e** virava a página — e virar a página troca o conteúdo,
+  o que zera o índice pelo `MutationObserver` e devolve a leitura à primeira
+  palavra. Na prática, a leitura por teclado não funcionava dentro do leitor,
+  que é exatamente onde ela importa, e é a rota de quem não usa mouse
+  (critério WCAG 2.1.1). O `preventDefault()` que já existia não resolvia:
+  ele cancela a ação padrão do navegador, não os outros ouvintes.
+  Agora há `stopPropagation()`, e a regra ficou explícita: **com a leitura
+  ligada, as setas andam palavra a palavra e não viram página.** Para virar
+  página, desligue a leitura ou use os botões do leitor.
+- **Os dois campos de busca ficavam sem indicador de foco.** A busca global e
+  a busca da administração usavam `focus:outline-none`, e o contêiner em volta
+  não tinha realce de foco. O utilitário do Tailwind gera
+  `.focus\:outline-none:focus`, de especificidade 0-2-0, que vence o
+  `:focus-visible` do `global.css`, de 0-1-0, e aplica
+  `outline: 2px solid transparent`. Resultado: ao chegar pelo Tab, **nenhum
+  indicador de foco** — falha do critério WCAG 2.4.7, e a mesma regressão que
+  o comentário do `global.css` descrevia como já corrigida. O utilitário saiu
+  dos dois campos; o realce de borda em `focus-within` é reforço visual, não o
+  indicador.
+- **O `accent` do leitor reprovava no AAA que o projeto declara.** Nas paletas
+  Claro e Sépia ele ficava em 6,16:1 e 6,03:1 — aprovado em AA, reprovado nos
+  7:1 exigidos. Importa porque `accent` é cor de **texto** no leitor (rótulo de
+  audiodescrição e fala alternada), não só de borda. Passou a `#0a6134` e
+  `#6c420d`, medidos em 7,06:1 e 7,08:1.
+
+As paletas do site não foram alteradas: as 120 combinações de token de texto
+sobre superfície, nos três temas, já passavam em AAA, com pior caso 7,28:1.
+
 ### Compatibilidade entre navegadores
 
 - **O piso de navegador passou a ser declarado**, não herdado: `chrome90`,

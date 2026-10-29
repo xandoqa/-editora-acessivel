@@ -86,6 +86,20 @@ export default function Profile() {
           </div>
           {user && <p className="mt-2 text-sm text-ink-muted">{ROLE_DESCRIPTION[user.role]}</p>}
 
+          {/* O plano é informativo aqui: ativar é decisão da administração, e
+              não existe compra de assinatura — nem vai existir. */}
+          {user && (
+            <p className="mt-3 flex flex-wrap items-center gap-2 text-sm text-ink-muted">
+              <span className="eyebrow text-ink-subtle">Plano</span>
+              <Badge tone={user.plan === 'PREMIUM' ? 'accent' : 'muted'}>
+                {user.plan === 'PREMIUM' ? 'Premium' : 'Gratuito'}
+              </Badge>
+              {user.plan === 'PREMIUM'
+                ? 'Você lê as obras com publicidade sem anúncios. Obras pagas continuam exigindo aquisição.'
+                : 'As obras que a autoria monetiza por publicidade exibem anúncios. O plano é alterado pela administração.'}
+            </p>
+          )}
+
           {user?.role === 'LEITOR' && (
             <div className="mt-5 rounded-xl border border-primary/40 bg-primary-container/40 p-4">
               {redirecionado && (

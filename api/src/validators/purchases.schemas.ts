@@ -19,6 +19,28 @@ import { paymentMethodEnum } from '../db/schema';
  * ou devolvido na resposta. Como a aplicação não fala com adquirente nenhuma,
  * guardar isso não traria utilidade alguma e traria obrigação de PCI-DSS.
  */
+/**
+ * Algoritmo de Luhn.
+ *
+ * O servidor refaz esta conta porque a tela também a faz — e validação que
+ * existe só no navegador não é validação. Sem ela, "1111 1111 1111 1111"
+ * passaria: dezesseis dígitos que nenhum banco emitiria.
+ */
+function luhnValido(numero: string): boolean {
+  const d = numero.replace(/\D/g, '');
+  if (d.length < 12) return false;
+  let soma = 0;
+  for (let i = 0; i < d.length; i += 1) {
+    let n = Number(d[d.length - 1 - i]);
+    if (i % 2 === 1) {
+      n *= 2;
+      if (n > 9) n -= 9;
+    }
+    soma += n;
+  }
+  return soma % 10 === 0;
+}
+
 const cardSchema = z
   .object({
     holder: z.string().trim().min(2, 'Informe o nome do titular').max(120),
@@ -27,11 +49,17 @@ const cardSchema = z
     number: z
       .string()
       .transform((v) => v.replace(/\s+/g, ''))
-      .pipe(z.string().regex(/^\d{13,19}$/, 'Número de cartão inválido')),
+      .pipe(z.string().regex(/^\d{13,19}$/, 'Número de cartão inválido'))
+      .refine(luhnValido, 'Número de cartão inválido.'),
     expiry: z
       .string()
       .trim()
-      .regex(/^(0[1-9]|1[0-2])\/\d{2}$/, 'Validade inválida (use MM/AA)'),
+      .regex(/^(0[1-9]|1[0-2])\/\d{2}$/, 'Validade inválida (use MM/AA)')
+      // Um cartão vale até o último dia do mês impresso nele.
+      .refine((v) => {
+        const [mes, ano] = v.split('/').map(Number);
+        return new Date(2000 + ano, mes, 1) > new Date();
+      }, 'Cartão vencido.'),
     cvv: z
       .string()
       .trim()

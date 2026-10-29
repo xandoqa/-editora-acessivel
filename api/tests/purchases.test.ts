@@ -217,6 +217,27 @@ describe('Cartão de demonstração', () => {
       .send({ method: 'CARTAO', card: { holder: 'Fulana', number: '123', expiry: '13/30', cvv: 'abc' } });
     expect(invalido.status).toBe(400);
 
+    // Dezesseis dígitos que nenhum banco emitiria: passa no formato e
+    // reprova no Luhn. É o caso que separa validação de enfeite.
+    const luhnRuim = await api()
+      .post(`/api/works/${id}/purchase`)
+      .set(bearer(leitor))
+      .send({
+        method: 'CARTAO',
+        card: { holder: 'Fulana de Teste', number: '1111 1111 1111 1111', expiry: '12/30', cvv: '123' },
+      });
+    expect(luhnRuim.status).toBe(400);
+
+    // Cartão vencido também não passa.
+    const vencido = await api()
+      .post(`/api/works/${id}/purchase`)
+      .set(bearer(leitor))
+      .send({
+        method: 'CARTAO',
+        card: { holder: 'Fulana de Teste', number: '4111 1111 1111 1111', expiry: '01/20', cvv: '123' },
+      });
+    expect(vencido.status).toBe(400);
+
     const valido = await api()
       .post(`/api/works/${id}/purchase`)
       .set(bearer(leitor))

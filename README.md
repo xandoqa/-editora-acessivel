@@ -6,7 +6,7 @@ Plataforma editorial aberta para quadrinhos e livros independentes, com acessibi
 
 O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. **A autoria decide como cada obra é disponibilizada** — leitura livre, obra paga ou leitura livre com publicidade — e leitura livre continua sendo o padrão. O apoio financeiro ao projeto é voluntário e nunca condiciona o acesso a uma obra: só a obra que a própria autoria marcou como paga exige aquisição.
 
-**Versão 3.5.0** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra.
+**Versão 3.5.1** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; e a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número.
 
 ---
 
@@ -262,6 +262,21 @@ Entre com uma conta de leitor, abra uma obra paga (no seed, **Chamas de Agosto**
 | **Pix** | Nada | Copie o código de demonstração se quiser e clique em **Simular pagamento aprovado** |
 | **Cartão** | Titular qualquer, número `4111 1111 1111 1111`, validade `12/30`, código `123` | Clique em **Pagar**, depois em **Simular pagamento aprovado** |
 | **Boleto** | Nada | A linha digitável é de demonstração e não é pagável. Clique em **Simular pagamento aprovado** |
+
+**Cartões de teste, por bandeira.** A lista também aparece dentro do próprio formulário, recolhida — numa apresentação, procurar o número no README é tempo perdido na frente de quem assiste.
+
+| Bandeira | Número |
+| --- | --- |
+| Visa | `4111 1111 1111 1111` |
+| Mastercard | `5555 5555 5555 4444` |
+| Elo | `6362 9700 0045 7013` |
+| American Express | `3782 822463 10005` |
+| Hipercard | `6062 8256 2425 4001` |
+| Diners Club | `3056 930902 5904` |
+
+Validade: qualquer data futura. Código: 3 dígitos, 4 no American Express.
+
+**Não há seletor de bandeira, e isso é proposital:** o número já informa qual é, como nos checkouts reais. Nubank, Itaú e afins são **emissores**, não bandeiras — um cartão Nubank é um Mastercard ou um Visa. Todos os números acima passam no algoritmo de **Luhn**, que o servidor refaz por conta própria: sem ele, `1111 1111 1111 1111` passaria, e a validação seria enfeite.
 
 Depois de aprovada, a obra entra em **Minha biblioteca** e continua disponível ao sair e entrar de novo — a aquisição pertence à conta, não ao navegador.
 

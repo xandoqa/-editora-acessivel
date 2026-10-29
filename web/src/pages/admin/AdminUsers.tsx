@@ -199,7 +199,7 @@ export default function AdminUsers() {
               <tr>
                 <SortHeader label="Nome" field="name" sort={sort} order={order} onSort={onSort} />
                 <SortHeader label="E-mail" field="email" sort={sort} order={order} onSort={onSort} />
-                <Th>Papel</Th>
+                <Th>Papel e plano</Th>
                 <Th>Obras</Th>
                 <SortHeader label="Último acesso" field="lastLoginAt" sort={sort} order={order} onSort={onSort} />
                 <SortHeader label="Cadastro" field="createdAt" sort={sort} order={order} onSort={onSort} />
@@ -215,7 +215,12 @@ export default function AdminUsers() {
                   </td>
                   <td className="px-4 py-3 text-ink-muted">{u.email}</td>
                   <td className="px-4 py-3">
-                    <Badge tone={u.role === 'ADMIN' ? 'admin' : u.role === 'ESCRITOR' ? 'accent' : 'muted'}>{ROLE_LABEL[u.role]}</Badge>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <Badge tone={u.role === 'ADMIN' ? 'admin' : u.role === 'ESCRITOR' ? 'accent' : 'muted'}>{ROLE_LABEL[u.role]}</Badge>
+                      {/* O plano aparece na própria linha: ficava só dentro do
+                          modal de edição, e ninguém encontrava. */}
+                      {u.plan === 'PREMIUM' && <Badge tone="accent">Premium</Badge>}
+                    </div>
                   </td>
                   <td className="px-4 py-3 text-ink-muted">{u.worksCount}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-ink-muted">{formatDate(u.lastLoginAt)}</td>

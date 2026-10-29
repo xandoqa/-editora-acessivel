@@ -127,6 +127,8 @@ export const workFieldsSchema = z.object({
   ),
   ageRating: z.enum(AGE_RATINGS, { errorMap: () => ({ message: 'Classificação indicativa inválida' }) }).default('L'),
   authorNotes: optionalText(3000),
+  /** Descrição da capa, em uma ou duas frases. */
+  coverAlt: optionalText(300),
   tags: tagsSchema,
   hasAudioDesc: formBoolean.default(false),
   hasLeitorTela: formBoolean.default(false),
@@ -176,6 +178,7 @@ export const updateWorkFieldsSchema = z.object({
   isbn: workFieldsSchema.shape.isbn,
   ageRating: z.enum(AGE_RATINGS).optional(),
   authorNotes: optionalText(3000),
+  coverAlt: optionalText(300),
   tags: tagsSchema,
   hasAudioDesc: formBoolean.optional(),
   hasLeitorTela: formBoolean.optional(),

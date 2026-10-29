@@ -89,6 +89,8 @@ export function toWorkDto(row: WorkRow) {
     priceCents: w.priceCents,
     adRevenueAuthorShare: w.adRevenueAuthorShare,
     coverUrl: coverUrl(w.coverPath),
+    /** Descrição da capa: texto alternativo da imagem e primeiro trecho da audiodescrição. */
+    coverAlt: w.coverAlt,
     hasFile: !!w.filePath,
     file: w.filePath
       ? { type: w.fileType, sizeBytes: w.fileSizeBytes, originalName: w.fileOriginalName }

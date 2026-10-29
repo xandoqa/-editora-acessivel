@@ -13,6 +13,13 @@ export interface PlayerHandle {
 interface Props {
   work: Pick<Work, 'id' | 'title' | 'hasAudio' | 'audioNarrator'>;
   descriptions: AudioDescription[];
+  /**
+   * true quando `descriptions` é a descrição de reserva montada a partir da
+   * ficha da obra, e não a audiodescrição cadastrada página a página. Nesse
+   * modo o player narra sem navegar: os trechos descrevem a obra inteira, não
+   * páginas, e virar página a cada trecho seria desorientar quem ouve.
+   */
+  usandoReserva?: boolean;
   currentPage: number;
   onGoToPage: (page: number) => void;
   onUse: () => void;
@@ -36,7 +43,7 @@ export function narrationText(ad: AudioDescription): string {
  *    síntese de voz do navegador e vira as páginas do leitor em sincronia.
  */
 const AudioDescriptionPlayer = forwardRef<PlayerHandle, Props>(function AudioDescriptionPlayer(
-  { work, descriptions, currentPage, onGoToPage, onUse, onClose },
+  { work, descriptions, usandoReserva = false, currentPage, onGoToPage, onUse, onClose },
   ref,
 ) {
   const mode: 'audio' | 'tts' = work.hasAudio ? 'audio' : 'tts';
@@ -89,9 +96,12 @@ const AudioDescriptionPlayer = forwardRef<PlayerHandle, Props>(function AudioDes
   // Mantém o trecho alinhado com a página exibida quando o player está parado.
   useEffect(() => {
     if (mode !== 'tts' || playingRef.current || !items.length) return;
+    // Na reserva, todos os trechos descrevem a obra como um todo: seguir a
+    // página atual jogaria a narração para o fim antes de ela começar.
+    if (usandoReserva) return;
     const i = items.findIndex((ad) => ad.pageNumber >= currentPage);
     setIndex(i === -1 ? items.length - 1 : i);
-  }, [currentPage, items, mode]);
+  }, [currentPage, items, mode, usandoReserva]);
 
   const speakFrom = useCallback(
     (i: number) => {
@@ -102,7 +112,7 @@ const AudioDescriptionPlayer = forwardRef<PlayerHandle, Props>(function AudioDes
         return;
       }
       setIndex(i);
-      onGoToPage(ad.pageNumber);
+      if (!usandoReserva) onGoToPage(ad.pageNumber);
       speak(narrationText(ad), {
         rate: rateRef.current,
         onEnd: () => {
@@ -119,7 +129,7 @@ const AudioDescriptionPlayer = forwardRef<PlayerHandle, Props>(function AudioDes
         },
       });
     },
-    [items, onGoToPage],
+    [items, onGoToPage, usandoReserva],
   );
 
   useEffect(() => () => stopSpeaking(), []);
@@ -179,7 +189,22 @@ const AudioDescriptionPlayer = forwardRef<PlayerHandle, Props>(function AudioDes
   };
 
   const current = items[index];
-  const unavailable = mode === 'tts' ? (!speechSupported ? 'Seu navegador não suporta síntese de voz.' : !items.length ? 'Esta obra ainda não possui audiodescrição cadastrada.' : '') : audioError;
+  /*
+   * "Indisponível" ficou só para o que é de fato indisponível.
+   *
+   * Antes, obra sem audiodescrição cadastrada caía aqui e o player não fazia
+   * nada. Agora ela recebe a descrição de reserva, montada a partir da ficha,
+   * e só continua indisponível o que não tem como funcionar: navegador sem
+   * síntese de voz, ou nenhum trecho para narrar.
+   */
+  const unavailable =
+    mode === 'tts'
+      ? !speechSupported
+        ? 'Seu navegador não suporta síntese de voz.'
+        : !items.length
+          ? 'Não há nada para narrar nesta obra.'
+          : ''
+      : audioError;
   const progress = mode === 'audio' ? (duration ? (time / duration) * 100 : 0) : items.length ? ((index + (playing ? 0.5 : 0)) / items.length) * 100 : 0;
   const heading = current ? [current.chapterLabel, current.chapterTitle].filter(Boolean).join(': ') : 'Prólogo';
 
@@ -196,10 +221,19 @@ const AudioDescriptionPlayer = forwardRef<PlayerHandle, Props>(function AudioDes
           <p className="mt-1 text-sm text-ink-muted">
             {mode === 'audio'
               ? `Voz de ${work.audioNarrator ?? 'narração gravada'} • Ritmo ajustado com descrições táteis de cenários`
-              : 'Síntese de voz do navegador (pt-BR) • Narra a descrição e as falas de cada página'}
+              : usandoReserva
+                ? 'Síntese de voz do navegador (pt-BR) • Descrição básica da obra: capa, ficha, recursos e sinopse'
+                : 'Síntese de voz do navegador (pt-BR) • Narra a descrição e as falas de cada página'}
           </p>
         </div>
       </div>
+
+      {usandoReserva && (
+        <p className="mt-3 rounded-xl border-l-4 border-warn bg-surface-high p-3 text-sm text-ink">
+          Esta obra ainda não tem audiodescrição cadastrada página a página. O que você vai ouvir é uma{' '}
+          <strong>descrição básica</strong> montada a partir da ficha da obra.
+        </p>
+      )}
 
       <div className="flex-1">
         {unavailable ? (

@@ -24,6 +24,8 @@ export interface User {
   email: string;
   role: Role;
   plan: UserPlan;
+  /** Quando o plano atual passou a valer. Nulo em conta gratuita. */
+  planSince: string | null;
   headline: string | null;
   isActive: boolean;
   createdAt: string;
@@ -67,6 +69,8 @@ export interface Work extends Record<FeatureFlag, boolean> {
   /** Percentual da receita publicitária simulada destinado à autoria. */
   adRevenueAuthorShare: number;
   coverUrl: string | null;
+  /** Descrição da capa: texto alternativo da imagem e primeiro trecho da audiodescrição. */
+  coverAlt: string | null;
   hasFile: boolean;
   file: { type: FileType; sizeBytes: number; originalName: string } | null;
   hasAudio: boolean;
@@ -372,3 +376,34 @@ export interface CardInput {
  * conclua que o bloqueio não funciona ao testar com essas contas.
  */
 export type MotivoAcesso = 'LIVRE' | 'COMPRADA' | 'AUTORIA' | 'ADMINISTRACAO' | 'NEGADO';
+
+/** Uma obra no histórico de leitura. */
+export interface ItemDoHistorico {
+  work: {
+    id: number;
+    title: string;
+    subtitle: string | null;
+    coverUrl: string | null;
+    format: string;
+    pages: number;
+    monetization: Monetization;
+  };
+  author: { id: number; name: string };
+  /** Página mais distante alcançada, somando todas as sessões. */
+  lastPage: number;
+  /** Quantas vezes a pessoa voltou a esta obra. */
+  sessions: number;
+  firstReadAt: string;
+  lastReadAt: string;
+  /** 0 a 100. */
+  progresso: number;
+}
+
+/** O que a tela de planos precisa saber do servidor. */
+export interface PlanoOpcoes {
+  precoCents: number;
+  currency: string;
+  provider: string;
+  isReal: boolean;
+  methods: PaymentMethod[];
+}

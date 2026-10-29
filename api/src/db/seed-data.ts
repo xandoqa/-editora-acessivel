@@ -61,6 +61,8 @@ export interface DemoWork {
   audioNarrator?: string;
   audioReviewer?: string;
   cover?: string;
+  /** Descrição da capa: texto alternativo e abertura da audiodescrição. */
+  coverAlt?: string;
   file?: string;
   publishedDaysAgo?: number;
   submittedDaysAgo?: number;
@@ -156,6 +158,8 @@ export const DEMO_WORKS: DemoWork[] = [
     key: 'chamas',
     author: 'mduarte',
     title: 'Chamas de Agosto',
+    coverAlt:
+      'Campo vermelho-escuro com uma faixa diagonal clara atravessando do canto inferior esquerdo ao superior direito.',
     monetization: 'PAGA',
     priceCents: 1890,
     genre: 'Drama',
@@ -177,6 +181,8 @@ export const DEMO_WORKS: DemoWork[] = [
     key: 'vozes',
     author: 'tiago',
     title: 'Vozes do Mar',
+    coverAlt:
+      'Fundo azul-petróleo com três arcos concêntricos claros abertos para cima, como ondas vistas de frente.',
     monetization: 'PUBLICIDADE',
     genre: 'Poesia',
     format: 'ZINE',
@@ -304,6 +310,8 @@ export const DEMO_WORKS: DemoWork[] = [
     key: 'alfabeto',
     author: 'caua',
     title: 'O Alfabeto das Coisas Pequenas',
+    coverAlt:
+      'Campo verde-escuro com um círculo grande vazado à direita e quatro filetes horizontais claros atravessando a capa.',
     subtitle: 'Crônicas de leitura fácil',
     genre: 'Slice of Life',
     format: 'LIVRO',

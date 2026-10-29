@@ -81,6 +81,15 @@ router.post('/purchases/:id/cancel', authenticate, purchasesCtrl.cancel);
 router.get('/me/library', authenticate, purchasesCtrl.library);
 router.get('/me/purchases', authenticate, purchasesCtrl.history);
 
+/* ------------------------------ Plano premium -------------------------------- */
+router.get('/plans/options', purchasesCtrl.planOptions); // público: a tela de planos é aberta
+router.post('/me/plan/subscribe', authLimiter, authenticate, purchasesCtrl.subscribe);
+router.post('/me/plan/cancel', authenticate, purchasesCtrl.cancelPlan);
+
+/* --------------------------- Histórico de leitura ---------------------------- */
+router.get('/me/reading-history', authenticate, purchasesCtrl.readingHistory);
+router.delete('/me/reading-history', authenticate, purchasesCtrl.clearHistory);
+
 /* --------------------------- Administração ---------------------------- */
 router.use('/admin', adminRoutes);
 

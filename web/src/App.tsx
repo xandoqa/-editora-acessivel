@@ -20,6 +20,8 @@ const ReviewStatus = lazy(() => import('./pages/ReviewStatus'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Apoiar = lazy(() => import('./pages/Apoiar'));
 const Biblioteca = lazy(() => import('./pages/Biblioteca'));
+const Historico = lazy(() => import('./pages/Historico'));
+const Planos = lazy(() => import('./pages/Planos'));
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminWorks = lazy(() => import('./pages/admin/AdminWorks'));
@@ -59,12 +61,16 @@ export default function App() {
             <Route path="/leitor" element={<ReaderHome />} />
             {/* Apoio voluntário: aberto a visitantes, inclusive sem conta (seção 17). */}
             <Route path="/apoiar" element={<Apoiar />} />
+            {/* A página de planos é pública: quem ainda não tem conta precisa
+                conseguir ler o que o plano oferece antes de criar uma. */}
+            <Route path="/planos" element={<Planos />} />
             {/* Qualquer conta autenticada */}
             <Route element={<RequireAuth />}>
               <Route path="/profile" element={<Profile />} />
               {/* Biblioteca pessoal: só existe para quem tem conta, porque a
                   aquisição pertence à conta e não ao navegador. */}
               <Route path="/biblioteca" element={<Biblioteca />} />
+              <Route path="/historico" element={<Historico />} />
             </Route>
             {/* Área do escritor: leitor é redirecionado para "Meu perfil" */}
             <Route element={<RequireAuth role="ESCRITOR" />}>

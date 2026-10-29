@@ -1,10 +1,12 @@
-# Relatório Final — Livrin 3.4.0
+# Relatório Final — Livrin 3.5.0
 
 *29 de outubro de 2026*
 
 A plataforma passou a ter monetização opcional por obra (gratuita, paga ou com publicidade), aquisição vinculada à conta e plano do leitor — e uma brecha real de acesso a obra paga foi encontrada e fechada. Todo pagamento continua simulado.
 
 Depois disso, a 3.4.0 acrescentou a **janela de Libras** (VLibras, opcional e carregada sob demanda) e corrigiu uma segunda promessa que o sistema não cumpria: a marcação `hasLibras` prometia intérprete e não havia campo de vídeo.
+
+A 3.5.0 fechou a série com **histórico de leitura**, a página **Planos do Livrin** com assinatura simulada que ativa o plano de verdade e permite cancelar, e a **audiodescrição que funciona em toda obra** — antes, obra sem descrição cadastrada tinha um botão que não fazia nada.
 
 ---
 
@@ -145,7 +147,7 @@ Depois de aprovada, a obra entra em **Minha biblioteca** e continua disponível 
 | Front-end — tipos e build | passou |
 | Docker — as imagens constroem | passou |
 
-A suíte da API tem **77 casos**, dos quais 29 são novos: 18 em `purchases.test.ts` e 11 em `acesso-e-modalidades.test.ts`.
+A suíte da API tem **90 casos**, em sete arquivos. Os três criados nesta série somam 42: 18 em `purchases.test.ts`, 11 em `acesso-e-modalidades.test.ts` e 13 em `historico-e-planos.test.ts`.
 
 ### Os cenários A–L
 

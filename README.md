@@ -108,6 +108,19 @@ Todas vêm do `.env`, que é gerado a partir de `.env.example`. **São credencia
 
 Outras contas de demonstração usam a mesma senha: `lorena@`, `eloa@`, `caua@`, `tiago@`, `marina.duarte@` (escritores), `tatiane@`, `gabriel@` (leitores) e `camila@`, `rodrigo@` (administradores), todos em `@livrin.com`.
 
+**Roteiro curto de demonstração**, usando só o que já vem no seed:
+
+| O que mostrar | Como |
+| --- | --- |
+| Obra paga bloqueada | Entre como `tatiane@livrin.com` (leitor comum) e abra *Chamas de Agosto* — R$ 18,90. Leitura, download e audiodescrição ficam indisponíveis; a ficha continua visível |
+| Pagamento simulado | Clique em **Comprar obra**. Pix confirma em um clique; cartão usa `4111 1111 1111 1111`, `12/30`, `123` |
+| Publicidade na leitura | Abra *Vozes do Mar* e avance as páginas |
+| Plano premium | **Planos do Livrin** no cabeçalho → assinar. Volte a *Vozes do Mar*: os anúncios somem. *Chamas de Agosto* continua pedindo aquisição |
+| Audiodescrição sem cadastro | Abra qualquer obra sem audiodescrição e clique em **Ouvir Audiodescrição**: narra capa, ficha, recursos e sinopse, avisando que é descrição básica |
+| Histórico de leitura | Depois de abrir duas ou três obras, veja **Histórico de leitura** no menu |
+
+Use uma conta de **leitor comum** para testar bloqueio: a administração e a autoria abrem obra paga sem comprar, por ser a regra de revisão — e o leitor avisa isso na tela.
+
 **Para ver o leitor de `.docx` sem enviar nada:** entre como `caua@livrin.com` e abra *O Alfabeto das Coisas Pequenas* no painel — é um manuscrito em Word, em análise e ainda sem capa, como um texto realmente chega à curadoria. Mude a tipografia, a escala e a paleta no leitor: o texto reflui de verdade, o que um PDF não faz.
 
 ### Trocar a senha do administrador
@@ -165,7 +178,7 @@ Livros e quadrinhos (mais mangás/webcomics e zines), com capa, título, autoria
 
 ### Leitor acessível
 
-PDF, **DOCX** (leitor próprio, sem dependência nova), EPUB (epub.js) e CBZ (JSZip). CBR não renderiza no navegador e é oferecido para download. O PDF é normalizado pelo `qpdf` no envio e lido em três vias — pedaços, arquivo completo e leitor do navegador —, porque o pdf.js recusa arquivos que leitores nativos abrem (ver [ADR 013](docs/decisions/013-leitura-de-pdf.md)). O DOCX é o formato mais acessível do leitor: o texto reflui e obedece à tipografia, ao espaçamento e à escala escolhidos, ao contrário do PDF, que é página fixa. Escala, espaçamento, tipografia (Inter, Lexend, OpenDyslexic) e quatro paletas aplicadas ao conteúdo em tempo real; navegação por teclado; audiodescrição página a página narrada por faixa gravada ou por síntese de voz.
+PDF, **DOCX** (leitor próprio, sem dependência nova), EPUB (epub.js) e CBZ (JSZip). CBR não renderiza no navegador e é oferecido para download. O PDF é normalizado pelo `qpdf` no envio e lido em três vias — pedaços, arquivo completo e leitor do navegador —, porque o pdf.js recusa arquivos que leitores nativos abrem (ver [ADR 013](docs/decisions/013-leitura-de-pdf.md)). O DOCX é o formato mais acessível do leitor: o texto reflui e obedece à tipografia, ao espaçamento e à escala escolhidos, ao contrário do PDF, que é página fixa. Escala, espaçamento, tipografia (Inter, Lexend, OpenDyslexic) e quatro paletas aplicadas ao conteúdo em tempo real; navegação por teclado; audiodescrição narrada por faixa gravada ou por síntese de voz — e, nas obras sem descrição cadastrada, uma descrição básica montada a partir da ficha (ver [Audiodescrição](#audiodescrição)).
 
 ### Apoio voluntário
 
@@ -173,7 +186,7 @@ Página **Apoiar o Livrin** com valor livre ou sugerido, Pix, cartão ou boleto.
 
 O provedor padrão é o **simulado**: percorre todo o caminho de um provedor real (abre a cobrança, fica pendente, confirma) sem movimentar dinheiro — e diz isso com todas as letras na interface. Nenhum dado de cartão passa pela aplicação. Os pontos de entrada são discretos de propósito: o rodapé e um botão na página da obra, nunca um banner na frente da leitura.
 
-Apoiar **não libera obra nenhuma**: é apoio ao projeto. Quem libera obra é a aquisição, logo abaixo.
+Apoiar **não libera obra nenhuma** e **não remove anúncio**: é apoio ao projeto. Quem libera obra é a aquisição; quem remove anúncio é o [plano premium](#planos-do-livrin). São três coisas diferentes, de propósito.
 
 ### Histórico de leitura e biblioteca
 
@@ -468,6 +481,21 @@ GET /api/me/purchases      → histórico com todos os estados
 POST /api/purchases/:id/cancel  → cancela cobrança pendente; não libera a obra
 ```
 
+```
+GET  /api/plans/options         → preço do plano, meios aceitos e se o provedor é real (público)
+POST /api/me/plan/subscribe     → abre a cobrança da mensalidade
+                                  Entrada: { method, card? } — SEM campo de valor
+POST /api/me/plan/cancel        → volta a conta ao gratuito; mantém o histórico de pagamento
+
+A confirmação usa a rota comum: POST /api/purchases/:id/confirm.
+É ela que ativa o plano, no servidor — nunca a tela.
+```
+
+```
+GET    /api/me/reading-history  → obras que você abriu, com a página alcançada
+DELETE /api/me/reading-history  → desvincula suas leituras; as métricas da autoria seguem de pé
+```
+
 ---
 
 ## Testes
@@ -483,7 +511,17 @@ TEST_DATABASE_URL=postgres://livrin_test:livrin_test@localhost:5433/livrin_test 
 docker compose -f docker-compose.test.yml down -v
 ```
 
-Os 48 testes cobrem autenticação (login dos três perfis, senha inválida, acesso sem autenticação), autorização (leitor não alcança a área de escritor, escritor não alcança a administração), obras (criar, enviar arquivo e capa, alterar status, aprovar, rejeitar), catálogo (obra aprovada aparece, filtros, busca, paginação) apoio (valores, confirmação, isolamento entre pessoas) manuscrito em `.docx` (aceito com o tipo correto; recusado quando o conteúdo não é um ZIP de verdade) e PDF truncado (recusado no envio, antes de a obra entrar no catálogo).
+São **90 testes**, em sete arquivos:
+
+| Arquivo | Casos | O que protege |
+| --- | --- | --- |
+| `auth.test.ts` | 11 | Login dos três perfis, senha inválida, acesso sem autenticação, troca de senha |
+| `works.test.ts` | 20 | Criar, enviar arquivo e capa, transições de status, aprovar e rejeitar; `.docx` aceito e `.docx` falso recusado; PDF truncado recusado no envio |
+| `catalog.test.ts` | 8 | Só obra aprovada aparece; filtros, busca, paginação; curinga de SQL tratado como texto |
+| `donations.test.ts` | 9 | Valores, confirmação idempotente, isolamento entre pessoas — e que **ler não exige apoio nenhum** |
+| `purchases.test.ts` | 18 | Teto de R$ 50,00, preço lido do banco, acesso liberado só após confirmação, idempotência, cancelamento |
+| `acesso-e-modalidades.test.ts` | 11 | Os cenários A–L de acesso a obra paga, inclusive requisições forjadas direto na API |
+| `historico-e-planos.test.ts` | 13 | Histórico por conta e isolado entre contas; plano ativado só pelo servidor; premium **não** libera obra paga; cancelamento |
 
 ### Navegador (Playwright)
 
@@ -559,6 +597,9 @@ O índice completo, por assunto, está em **[docs/README.md](docs/README.md)**. 
 | [accessibility.md](docs/accessibility.md) | Recursos de acessibilidade e o que foi medido |
 | [navegadores.md](docs/navegadores.md) | Navegadores aceitos e os caminhos alternativos por motor |
 | [design/direcao-visual.md](docs/design/direcao-visual.md) | A direção visual e o que ela não pode quebrar |
+| [relatorio-final.md](docs/relatorio-final.md) | **Relatório final**: o que foi feito, testado e o que ficou pendente |
+| [pagamento-real-opcoes.md](docs/pagamento-real-opcoes.md) | Opções para receber apoio de verdade sem orçamento |
+| [obras-dominio-publico.md](docs/obras-dominio-publico.md) | Quando uma obra de terceiro pode entrar no acervo |
 | [decisions/](docs/decisions/) | Registros de decisão arquitetural (ADR) |
 | [academico/](docs/academico/) | Documentos do trabalho: cronograma, DAS, casos de uso, BMC |
 

@@ -20,3 +20,4 @@ Cada arquivo responde: o que foi escolhido, por quê, quais alternativas existia
 | [014](014-monetizacao-e-aquisicao.md) | Monetização opcional e aquisição de obras; revisa parte da 011 |
 | [015](015-publicidade-e-plano.md) | Publicidade entre unidades de leitura e plano do leitor; a brecha da audiodescrição |
 | [016](016-janela-de-libras.md) | Janela de Libras com VLibras, opcional e carregada sob demanda |
+| [017](017-bandeira-do-cartao.md) | Bandeira do cartão detectada pelo número, sem seletor; Luhn e vencimento nos dois lados |

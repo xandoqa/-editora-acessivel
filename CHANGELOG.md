@@ -32,6 +32,15 @@ A validação deixou de ser contagem de dígitos: entraram o **algoritmo de
 Luhn** e a conferência de vencimento, **nos dois lados**. Sem Luhn,
 `1111 1111 1111 1111` passava — dezesseis dígitos que nenhum banco emitiria.
 
+### Guia de pagamento simulado
+
+Novo `README-PAGAMENTO.md`, separado do README principal: todos os números de
+cartão por bandeira (21, conferidos um por um), Pix, boleto, assinatura e
+cancelamento do plano, a tabela do que falha de propósito com as mensagens
+exatas, e as perguntas prováveis da banca com resposta curta. O raciocínio
+técnico ficou na [ADR 017](docs/decisions/017-bandeira-do-cartao.md); `docs/api.md`
+passou a descrever a conferência do cartão no servidor.
+
 ## [3.5.0] — 2026-10-29
 
 ### Histórico de leitura

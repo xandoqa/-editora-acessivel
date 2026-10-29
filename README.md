@@ -15,6 +15,7 @@ O Livrin existe para que quem não tem como bancar um lançamento tradicional co
 - [Começar em um comando](#começar-em-um-comando)
 - [O que precisa estar instalado](#o-que-precisa-estar-instalado)
 - [Credenciais de desenvolvimento](#credenciais-de-desenvolvimento)
+- [Dados para simular pagamento](README-PAGAMENTO.md) — número de cartão de cada bandeira, Pix, boleto e plano, em uma página
 - [O que o sistema faz](#o-que-o-sistema-faz)
 - [Tecnologias e requisitos](#tecnologias-e-requisitos)
 - [Variáveis de ambiente](#variáveis-de-ambiente)
@@ -263,7 +264,7 @@ Entre com uma conta de leitor, abra uma obra paga (no seed, **Chamas de Agosto**
 | **Cartão** | Titular qualquer, número `4111 1111 1111 1111`, validade `12/30`, código `123` | Clique em **Pagar**, depois em **Simular pagamento aprovado** |
 | **Boleto** | Nada | A linha digitável é de demonstração e não é pagável. Clique em **Simular pagamento aprovado** |
 
-**Cartões de teste, por bandeira.** A lista também aparece dentro do próprio formulário, recolhida — numa apresentação, procurar o número no README é tempo perdido na frente de quem assiste.
+**Cartões de teste, por bandeira.** Um de cada, que é o que resolve numa demonstração. A lista também aparece dentro do próprio formulário, recolhida — numa apresentação, procurar o número no README é tempo perdido na frente de quem assiste. Mais números por bandeira, os casos que falham de propósito e as perguntas prováveis da banca estão em **[README-PAGAMENTO.md](README-PAGAMENTO.md)**.
 
 | Bandeira | Número |
 | --- | --- |
@@ -276,7 +277,7 @@ Entre com uma conta de leitor, abra uma obra paga (no seed, **Chamas de Agosto**
 
 Validade: qualquer data futura. Código: 3 dígitos, 4 no American Express.
 
-**Não há seletor de bandeira, e isso é proposital:** o número já informa qual é, como nos checkouts reais. Nubank, Itaú e afins são **emissores**, não bandeiras — um cartão Nubank é um Mastercard ou um Visa. Todos os números acima passam no algoritmo de **Luhn**, que o servidor refaz por conta própria: sem ele, `1111 1111 1111 1111` passaria, e a validação seria enfeite.
+**Não há seletor de bandeira, e isso é proposital:** o número já informa qual é, como nos checkouts reais. Nubank, Itaú e afins são **emissores**, não bandeiras — um cartão Nubank é um Mastercard ou um Visa. Todos os números acima passam no algoritmo de **Luhn**, que o servidor refaz por conta própria: sem ele, `1111 1111 1111 1111` passaria, e a validação seria enfeite. O raciocínio completo, incluindo por que a ordem das faixas importa, está na [ADR 017](docs/decisions/017-bandeira-do-cartao.md).
 
 Depois de aprovada, a obra entra em **Minha biblioteca** e continua disponível ao sair e entrar de novo — a aquisição pertence à conta, não ao navegador.
 
@@ -613,6 +614,7 @@ O índice completo, por assunto, está em **[docs/README.md](docs/README.md)**. 
 | [navegadores.md](docs/navegadores.md) | Navegadores aceitos e os caminhos alternativos por motor |
 | [design/direcao-visual.md](docs/design/direcao-visual.md) | A direção visual e o que ela não pode quebrar |
 | [relatorio-final.md](docs/relatorio-final.md) | **Relatório final**: o que foi feito, testado e o que ficou pendente |
+| [README-PAGAMENTO.md](README-PAGAMENTO.md) | Todos os dados para simular pagamento, em uma página: cartão por bandeira, Pix, boleto, plano, o que falha de propósito |
 | [pagamento-real-opcoes.md](docs/pagamento-real-opcoes.md) | Opções para receber apoio de verdade sem orçamento |
 | [obras-dominio-publico.md](docs/obras-dominio-publico.md) | Quando uma obra de terceiro pode entrar no acervo |
 | [decisions/](docs/decisions/) | Registros de decisão arquitetural (ADR) |

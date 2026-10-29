@@ -12,7 +12,7 @@ import { SeloCompacto } from './SeloLivrin';
 /** Selo superior (recurso de destaque) e etiqueta lateral, como nos cards do protótipo. */
 const TOP_BADGE: Partial<Record<FeatureFlag, { label: string; icon: ReactNode }>> = {
   hasAudioDesc: { label: 'Áudio sincronizado', icon: <AudioLines className="h-3.5 w-3.5" /> },
-  hasLibras: { label: 'Libras inclusa', icon: <Video className="h-3.5 w-3.5" /> },
+  hasLibras: { label: 'Libras no conteúdo', icon: <Video className="h-3.5 w-3.5" /> },
   hasFacilLeitura: { label: 'Fácil leitura', icon: <SpellCheck2 className="h-3.5 w-3.5" /> },
   hasLeitorTela: { label: 'Texto ampliado', icon: <Type className="h-3.5 w-3.5" /> },
   hasTextoAlt: { label: 'Descrição de cenas', icon: <Square className="h-3.5 w-3.5" /> },
@@ -21,7 +21,7 @@ const TOP_BADGE: Partial<Record<FeatureFlag, { label: string; icon: ReactNode }>
 const SIDE_TAG: Partial<Record<FeatureFlag, { label: string; icon: ReactNode; tone: string }>> = {
   hasAltoContraste: { label: 'Alto contraste', icon: <Eye className="h-3.5 w-3.5" />, tone: 'text-accent' },
   hasAudioDesc: { label: 'Audio HQ', icon: <Ear className="h-3.5 w-3.5" />, tone: 'text-primary' },
-  hasLibras: { label: 'Vídeo Libras', icon: <Video className="h-3.5 w-3.5" />, tone: 'text-primary' },
+  hasLibras: { label: 'Libras', icon: <Video className="h-3.5 w-3.5" />, tone: 'text-primary' },
   hasFacilLeitura: { label: 'Lexical', icon: <SpellCheck2 className="h-3.5 w-3.5" />, tone: 'text-primary' },
   hasLeitorTela: { label: 'Leitor de tela', icon: <PersonStanding className="h-3.5 w-3.5" />, tone: 'text-accent' },
 };

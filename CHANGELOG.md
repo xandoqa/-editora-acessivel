@@ -2,6 +2,39 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.4.0] — 2026-10-29
+
+### Janela de Libras
+
+A barra superior ganhou um botão que liga uma janela com avatar sinalizando em
+Libras o texto selecionado, pelo **VLibras** — suíte livre do governo federal
+feita com a UFPB. Mesma mecânica da leitura em voz alta: opcional, começa
+desligada, a preferência fica guardada.
+
+- **O script só é baixado ao ligar.** Enquanto desligado, a aplicação não faz
+  uma única requisição a `vlibras.gov.br`. É a única exceção à regra de não
+  carregar script de terceiro, e acontece por escolha explícita da pessoa.
+- **A falha é dita.** Serviço fora do ar ou máquina sem internet: o botão
+  avisa e volta a desligado, em vez de girar para sempre. Recurso de
+  acessibilidade que falha em silêncio é pior que um ausente.
+- **Declarada como automática.** Libras é língua com gramática própria, não
+  português sinalizado. Apresentar avatar automático como equivalente a
+  intérprete humano seria exagerar o que se entrega.
+
+Ver [ADR 016](docs/decisions/016-janela-de-libras.md).
+
+### Corrigida uma promessa que o sistema não cumpria
+
+A marcação `hasLibras` dizia *"Janela de Libras — intérprete de Libras nos
+diálogos principais"*, e **não existe campo de vídeo no sistema**: nem rota,
+nem armazenamento. O catálogo exibia o selo e o filtro funcionava, com nada
+por trás.
+
+O rótulo passou a dizer o que a marcação de fato significa — *"Libras no
+conteúdo: a autoria declara que a obra traz sinalização em Libras em suas
+páginas"* — no catálogo, no card e nos filtros. A tradução automática ficou
+onde ela é, na barra superior. São coisas diferentes e não podem se confundir.
+
 ## [3.3.0] — 2026-10-29
 
 ### Correção de segurança: audiodescrição de obra paga era acessível

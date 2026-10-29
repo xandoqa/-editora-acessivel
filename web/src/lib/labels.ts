@@ -68,7 +68,18 @@ export const FEATURES: FeatureInfo[] = [
   { flag: 'hasAudioDesc', label: 'Audiodescrição', short: 'Audio HQ', description: 'Descrição narrada de cada quadro/cena.', catalogKey: 'audiodescricao' },
   { flag: 'hasLeitorTela', label: 'Compatível com Leitores de Tela', short: 'Leitor de tela', description: 'Estrutura de títulos H1–H6 com ordem de leitura lógica.', catalogKey: 'leitor-tela' },
   { flag: 'hasTextoAlt', label: 'Texto alternativo', short: 'Texto alt.', description: 'Descrições semânticas em todos os quadros e balões.', catalogKey: 'texto-alt' },
-  { flag: 'hasLibras', label: 'Janela de Libras', short: 'Vídeo Libras', description: 'Intérprete de Libras nos diálogos principais.', catalogKey: 'libras' },
+  /*
+   * O rótulo dizia "Janela de Libras — intérprete de Libras nos diálogos
+   * principais", mas a plataforma não hospeda vídeo: não há campo, rota nem
+   * armazenamento para isso. Era uma promessa que o sistema não cumpria, e o
+   * catálogo exibia o selo para obras sem nada por trás.
+   *
+   * O que a marcação de fato significa é isto: a AUTORIA declara que a obra
+   * traz Libras no próprio conteúdo, e a curadoria confere. Quem quiser
+   * tradução para qualquer texto do site liga a janela do VLibras na barra
+   * superior — que é automática, e a interface diz isso.
+   */
+  { flag: 'hasLibras', label: 'Libras no conteúdo', short: 'Libras', description: 'A autoria declara que a obra traz sinalização em Libras em suas páginas.', catalogKey: 'libras' },
   { flag: 'hasFacilLeitura', label: 'Leitura fácil', short: 'Fácil leitura', description: 'Vocabulário simplificado e frases curtas.', catalogKey: 'facil-leitura' },
   { flag: 'hasAltoContraste', label: 'Alto contraste', short: 'Alto contraste', description: 'A autoria declara ter trabalhado o contraste da arte.', catalogKey: 'alto-contraste' },
 ];

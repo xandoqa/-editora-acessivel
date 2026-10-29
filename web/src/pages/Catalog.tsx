@@ -26,7 +26,7 @@ const FILTERS: Filter[] = [
   { key: 'manga', label: 'Mangás & Webcomics', icon: <LayoutGrid className="h-4 w-4" />, format: 'MANGA_WEBCOMIC' },
   { key: 'zines', label: 'Zines & Poesia', icon: <Feather className="h-4 w-4" />, format: 'ZINE' },
   { key: 'hq-audio', label: 'Com Audiodescrição', icon: <AudioLines className="h-4 w-4" />, feature: 'audiodescricao' },
-  { key: 'libras', label: 'Com Janela de Libras', icon: <Video className="h-4 w-4" />, feature: 'libras' },
+  { key: 'libras', label: 'Com Libras no conteúdo', icon: <Video className="h-4 w-4" />, feature: 'libras' },
   { key: 'facil', label: 'Leitura Fácil', icon: <SpellCheck2 className="h-4 w-4" />, feature: 'facil-leitura' },
 ];
 
@@ -75,7 +75,7 @@ export default function Catalog() {
     const total = data?.catalogTotal ?? 0;
     const ok = speak(
       `Catálogo editorial aberto da Livrin, com ${total} títulos inclusivos. Leituras em destaque: histórias plurais que todo mundo pode ler e sentir. ` +
-        'Use os filtros de formatos e recursos assistivos para encontrar quadrinhos com audiodescrição, ficção independente, mangás e obras com janela de Libras.',
+        'Use os filtros de formatos e recursos assistivos para encontrar quadrinhos com audiodescrição, ficção independente, mangás e obras com Libras no conteúdo.',
       { onEnd: () => setReadingIntro(false), onError: () => setReadingIntro(false) },
     );
     setReadingIntro(!!ok);
@@ -120,7 +120,7 @@ export default function Catalog() {
             <span className="font-bold text-primary" aria-hidden>A+</span> Compatível com leitores de tela
           </li>
           <li className="flex items-center gap-2">
-            <Ear className="h-4 w-4" aria-hidden /> Janela de Libras
+            <Ear className="h-4 w-4" aria-hidden /> Libras no conteúdo
           </li>
         </ul>
 

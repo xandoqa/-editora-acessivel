@@ -20,6 +20,7 @@ const userSelect = {
   name: users.name,
   email: users.email,
   role: users.role,
+  plan: users.plan,
   headline: users.headline,
   isActive: users.isActive,
   lastLoginAt: users.lastLoginAt,

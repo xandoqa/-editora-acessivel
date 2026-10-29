@@ -7,7 +7,7 @@ import { badRequest, conflict, forbidden, notFound, unprocessable } from '../uti
 import { paginated } from '../validators/common';
 import { listChecks } from './review.service';
 import type { catalogQuerySchema, WorkFields, WorkUpdate } from '../validators/works.schemas';
-import { exigirAcessoDeLeitura, temAcessoDeLeitura } from './purchases.service';
+import { exigirAcessoDeLeitura, motivoDeAcesso } from './purchases.service';
 import { absolutePath, commitUpload, removeFile, storedFileExists, type StoredFile } from './storage.service';
 import {
   ADMIN_TRANSITIONS,
@@ -93,9 +93,11 @@ export async function getWork(id: number, viewer?: AuthUser) {
    * informação para a INTERFACE: quem decide continua sendo o endpoint do
    * arquivo, que refaz a verificação por conta própria.
    */
+  const motivo = await motivoDeAcesso(row.work, viewer);
   const access = {
     required: row.work.monetization === 'PAGA',
-    granted: await temAcessoDeLeitura(row.work, viewer),
+    granted: motivo !== 'NEGADO',
+    reason: motivo,
   };
   // No detalhe da obra o selo vem com a lista do que a curadoria verificou: o
   // leitor vê no que confiar e o autor vê o que foi cobrado. É público de

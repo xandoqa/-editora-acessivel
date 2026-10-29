@@ -84,19 +84,40 @@ export async function expirarPendentesVencidas(userId?: number): Promise<number>
  * aquisição confirmada — exceto para a própria autoria e para a administração,
  * que precisam conseguir abrir a obra para revisar.
  */
-export async function temAcessoDeLeitura(
+/**
+ * Por que esta pessoa pode (ou não) ler a obra.
+ *
+ * Devolver o MOTIVO, e não só um sim/não, resolve uma confusão real: ao testar
+ * com a conta da administração, a obra paga abre — e parece que o bloqueio não
+ * funciona, quando na verdade é a regra de revisão agindo. Com o motivo na
+ * mão, a interface consegue dizer "você está lendo como administração", que é
+ * a diferença entre um sistema que falha e um que se explica.
+ */
+export type MotivoAcesso = 'LIVRE' | 'COMPRADA' | 'AUTORIA' | 'ADMINISTRACAO' | 'NEGADO';
+
+export async function motivoDeAcesso(
   work: { id: number; monetization: string; authorId: number },
   viewer?: AuthUser,
-): Promise<boolean> {
-  if (work.monetization !== 'PAGA') return true;
-  if (!viewer) return false;
-  if (viewer.role === 'ADMIN' || viewer.id === work.authorId) return true;
+): Promise<MotivoAcesso> {
+  if (work.monetization !== 'PAGA') return 'LIVRE';
+  if (!viewer) return 'NEGADO';
+  // A autoria precisa abrir a própria obra; a administração precisa abrir
+  // qualquer uma para revisar. Nenhum dos dois é uma compra.
+  if (viewer.id === work.authorId) return 'AUTORIA';
+  if (viewer.role === 'ADMIN') return 'ADMINISTRACAO';
   const [aquisicao] = await db
     .select({ id: purchases.id })
     .from(purchases)
     .where(and(eq(purchases.userId, viewer.id), eq(purchases.workId, work.id), eq(purchases.status, 'CONFIRMADA')))
     .limit(1);
-  return Boolean(aquisicao);
+  return aquisicao ? 'COMPRADA' : 'NEGADO';
+}
+
+export async function temAcessoDeLeitura(
+  work: { id: number; monetization: string; authorId: number },
+  viewer?: AuthUser,
+): Promise<boolean> {
+  return (await motivoDeAcesso(work, viewer)) !== 'NEGADO';
 }
 
 /** Abre uma cobrança para adquirir uma obra paga. */

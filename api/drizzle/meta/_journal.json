@@ -50,6 +50,13 @@
       "when": 1792796851847,
       "tag": "0006_monetizacao",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792883251847,
+      "tag": "0007_plano_do_leitor",
+      "breakpoints": true
     }
   ]
 }

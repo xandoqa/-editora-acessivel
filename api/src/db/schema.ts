@@ -72,6 +72,19 @@ export const paymentMethodEnum = pgEnum('payment_method', ['PIX', 'CARTAO', 'BOL
  */
 export const monetizationEnum = pgEnum('monetization', ['GRATUITA', 'PAGA', 'PUBLICIDADE']);
 
+/**
+ * Plano do leitor.
+ *
+ *   GRATUITO — tudo o que a plataforma oferece, com anúncios nas obras que a
+ *              autoria escolheu monetizar por publicidade.
+ *   PREMIUM  — as mesmas obras, sem anúncios.
+ *
+ * Premium NÃO desbloqueia obra paga: quem define preço é a autoria, e o
+ * dinheiro da assinatura não é dela. Misturar as duas coisas transformaria o
+ * plano num passe livre sobre o trabalho dos outros.
+ */
+export const userPlanEnum = pgEnum('user_plan', ['GRATUITO', 'PREMIUM']);
+
 /** Situação de uma aquisição. Espelha a da doação, mais EXPIRADA (boleto/PIX vencido). */
 export const purchaseStatusEnum = pgEnum('purchase_status', [
   'PENDENTE',
@@ -103,6 +116,8 @@ export const users = pgTable(
     email: varchar('email', { length: 255 }).notNull(),
     passwordHash: text('password_hash').notNull(),
     role: userRoleEnum('role').notNull().default('LEITOR'),
+    /** Assinatura simulada: só muda a exibição de anúncios. Ver ADR 015. */
+    plan: userPlanEnum('plan').notNull().default('GRATUITO'),
     isActive: boolean('is_active').notNull().default(true),
     /** Descrição curta exibida em avaliações/notas: ex. "Baixa Visão · Leitor de Tela". */
     headline: varchar('headline', { length: 160 }),
@@ -420,6 +435,7 @@ export type WorkFormat = (typeof workFormatEnum.enumValues)[number];
 export type FileType = (typeof fileTypeEnum.enumValues)[number];
 export type CheckStatus = (typeof checkStatusEnum.enumValues)[number];
 export type UserRole = (typeof userRoleEnum.enumValues)[number];
+export type UserPlan = (typeof userPlanEnum.enumValues)[number];
 export type AudioDescription = typeof audioDescriptions.$inferSelect;
 export type ReviewCheck = typeof reviewChecks.$inferSelect;
 export type Feedback = typeof feedbacks.$inferSelect;

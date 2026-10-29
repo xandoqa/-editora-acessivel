@@ -8,7 +8,7 @@ import { useDebounced } from '../../hooks/useDebounced';
 import { api, errorMessage, fieldErrors } from '../../lib/api';
 import { formatDate, formatDateTime } from '../../lib/format';
 import { ROLE_DESCRIPTION, ROLE_LABEL } from '../../lib/labels';
-import type { AdminUser, Role } from '../../types/api';
+import type { AdminUser, Role, UserPlan } from '../../types/api';
 import { SearchBox, SortHeader, TableShell, Th, rowClass, theadClass } from '../../components/admin/AdminTable';
 import { Badge, ConfirmDialog, ErrorState, LoadingState, Modal, PageHeader, Pagination, SelectInput, StatusBadge, TextInput } from '../../components/ui';
 import { useToast } from '../../components/ui/Toast';
@@ -18,6 +18,7 @@ interface UserDraft {
   name: string;
   email: string;
   role: Role;
+  plan: UserPlan;
   headline: string;
   isActive: boolean;
   password: string;
@@ -106,7 +107,7 @@ export default function AdminUsers() {
 
   const save = useMutation({
     mutationFn: async (d: UserDraft) => {
-      const body = { name: d.name, email: d.email, role: d.role, headline: d.headline, isActive: d.isActive };
+      const body = { name: d.name, email: d.email, role: d.role, plan: d.plan, headline: d.headline, isActive: d.isActive };
       return d.id ? api.patch(`/admin/users/${d.id}`, body) : api.post('/admin/users', { ...body, password: d.password });
     },
     onSuccess: () => {
@@ -166,7 +167,7 @@ export default function AdminUsers() {
         title="Usuários"
         description="Autores, leitores e administradores. Contas com obras não podem ser excluídas: desative-as para bloquear o acesso."
         actions={
-          <button type="button" className="btn-primary" onClick={() => setDraft({ name: '', email: '', role: 'LEITOR', headline: '', isActive: true, password: '' })}>
+          <button type="button" className="btn-primary" onClick={() => setDraft({ name: '', email: '', role: 'LEITOR', plan: 'GRATUITO', headline: '', isActive: true, password: '' })}>
             <Plus className="h-4 w-4" aria-hidden /> Novo usuário
           </button>
         }
@@ -228,7 +229,7 @@ export default function AdminUsers() {
                         type="button"
                         className="icon-btn"
                         aria-label={`Editar ${u.name}`}
-                        onClick={() => setDraft({ id: u.id, name: u.name, email: u.email, role: u.role, headline: u.headline ?? '', isActive: u.isActive, password: '' })}
+                        onClick={() => setDraft({ id: u.id, name: u.name, email: u.email, role: u.role, plan: u.plan, headline: u.headline ?? '', isActive: u.isActive, password: '' })}
                       >
                         <Pencil className="h-4 w-4" aria-hidden />
                       </button>
@@ -302,6 +303,15 @@ export default function AdminUsers() {
               <option value="LEITOR">Leitor</option>
               <option value="ESCRITOR">Escritor</option>
               <option value="ADMIN">Administrador</option>
+            </SelectInput>
+            <SelectInput
+              label="Plano"
+              value={draft.plan}
+              onChange={(e) => setDraft({ ...draft, plan: e.target.value as UserPlan })}
+              hint="Assinatura simulada: o premium apenas esconde os anúncios nas obras monetizadas por publicidade. Não libera obra paga."
+            >
+              <option value="GRATUITO">Gratuito</option>
+              <option value="PREMIUM">Premium</option>
             </SelectInput>
             <TextInput label="Apresentação" value={draft.headline} onChange={(e) => setDraft({ ...draft, headline: e.target.value })} maxLength={160} />
             <label className="flex items-center gap-2 text-sm text-ink">

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import * as authCtrl from '../controllers/auth.controller';
 import * as donationsCtrl from '../controllers/donations.controller';
 import * as meCtrl from '../controllers/me.controller';
+import * as purchasesCtrl from '../controllers/purchases.controller';
 import * as worksCtrl from '../controllers/works.controller';
 import { authenticate, optionalAuth, requireWriter } from '../middlewares/auth';
 import { authLimiter, sessionLimiter } from '../middlewares/rate-limit';
@@ -68,6 +69,17 @@ router.get('/donations/options', donationsCtrl.options); // público
 router.post('/donations', authLimiter, optionalAuth, donationsCtrl.create); // público (apoio anônimo permitido)
 router.post('/donations/:id/confirm', optionalAuth, donationsCtrl.confirm);
 router.get('/me/donations', authenticate, donationsCtrl.mine);
+
+/* ---------------------------- Aquisições ------------------------------ */
+// Todas exigem conta: aquisição pertence a uma pessoa, não a um navegador.
+// O limitador do fluxo de autenticação é reaproveitado na abertura da
+// cobrança — é o caminho que cria registro financeiro e merece freio.
+router.post('/works/:id/purchase', authLimiter, authenticate, purchasesCtrl.create);
+router.get('/purchases/:id', authenticate, purchasesCtrl.show);
+router.post('/purchases/:id/confirm', authenticate, purchasesCtrl.confirm);
+router.post('/purchases/:id/cancel', authenticate, purchasesCtrl.cancel);
+router.get('/me/library', authenticate, purchasesCtrl.library);
+router.get('/me/purchases', authenticate, purchasesCtrl.history);
 
 /* --------------------------- Administração ---------------------------- */
 router.use('/admin', adminRoutes);

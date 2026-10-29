@@ -7,6 +7,7 @@ import { badRequest, conflict, forbidden, notFound, unprocessable } from '../uti
 import { paginated } from '../validators/common';
 import { listChecks } from './review.service';
 import type { catalogQuerySchema, WorkFields, WorkUpdate } from '../validators/works.schemas';
+import { exigirAcessoDeLeitura } from './purchases.service';
 import { absolutePath, commitUpload, removeFile, storedFileExists, type StoredFile } from './storage.service';
 import {
   ADMIN_TRANSITIONS,
@@ -96,6 +97,10 @@ export async function getWork(id: number, viewer?: AuthUser) {
 export async function getWorkFileInfo(id: number, viewer?: AuthUser) {
   const work = await findWork(id);
   if (!canView(work, viewer)) throw notFound('Obra não encontrada.');
+  // Obra paga exige aquisição confirmada. A verificação é aqui, no caminho do
+  // ARQUIVO, e não só na tela: é este endpoint que entrega o conteúdo, e é ele
+  // que precisa recusar. Autoria e administração passam direto.
+  await exigirAcessoDeLeitura(work, viewer);
   if (!work.filePath || !work.fileType) throw notFound('Esta obra ainda não possui arquivo enviado.');
   if (!storedFileExists(work.filePath)) {
     throw notFound(
@@ -113,6 +118,10 @@ export async function getWorkFileInfo(id: number, viewer?: AuthUser) {
 export async function getWorkAudioInfo(id: number, viewer?: AuthUser) {
   const work = await findWork(id);
   if (!canView(work, viewer)) throw notFound('Obra não encontrada.');
+  // A faixa de audiodescrição É a obra, para quem depende dela. Deixá-la aberta
+  // numa obra paga seria uma porta dos fundos justamente para o público que a
+  // plataforma existe para servir.
+  await exigirAcessoDeLeitura(work, viewer);
   if (!work.audioPath) throw notFound('Esta obra não possui faixa de audiodescrição.');
   if (!storedFileExists(work.audioPath)) {
     throw notFound('A faixa de audiodescrição está registrada no banco, mas não está no volume de uploads. Reenvie o arquivo.');

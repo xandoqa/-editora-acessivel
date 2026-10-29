@@ -43,6 +43,13 @@
       "when": 1792710451847,
       "tag": "0005_docx",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1792796851847,
+      "tag": "0006_monetizacao",
+      "breakpoints": true
     }
   ]
 }

@@ -28,8 +28,24 @@ export function canView(work: Pick<Work, 'status' | 'authorId'>, user?: AuthUser
 export const AUTHOR_FULL_EDIT: WorkStatus[] = ['RASCUNHO', 'REJEITADO'];
 /** Status em que o autor só pode editar metadados de divulgação ("Editar Metadados"). */
 export const AUTHOR_METADATA_EDIT: WorkStatus[] = ['APROVADO'];
-/** Campos considerados "metadados" (não exigem nova curadoria). */
-export const METADATA_FIELDS = ['subtitle', 'synopsis', 'authorNotes', 'tags', 'editionLabel'] as const;
+/**
+ * Campos considerados "metadados" (não exigem nova curadoria).
+ *
+ * A monetização entra aqui porque é decisão comercial da autoria, não
+ * conteúdo: mudar o preço de uma obra já aprovada não altera o que a curadoria
+ * examinou, e portanto não derruba o Selo Livrin. O contrário também vale —
+ * escolher um preço nunca publica nem aprova nada (ver ADR 014).
+ */
+export const METADATA_FIELDS = [
+  'subtitle',
+  'synopsis',
+  'authorNotes',
+  'tags',
+  'editionLabel',
+  'monetization',
+  'priceCents',
+  'adRevenueAuthorShare',
+] as const;
 /** Status em que o autor pode manter a audiodescrição página a página. */
 export const AUTHOR_AUDIO_DESC_EDIT: WorkStatus[] = ['RASCUNHO', 'REJEITADO', 'EM_ANALISE'];
 /** Status em que o autor pode excluir a obra. */

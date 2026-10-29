@@ -172,6 +172,11 @@ async function seedDemoRecords(
           ageRating: w.ageRating ?? 'L',
           authorNotes: w.authorNotes,
           tags: w.tags ?? [],
+          // Preço só existe em obra PAGA — é a mesma regra do CHECK no banco,
+          // e escrever assim evita que uma entrada de demonstração mal
+          // preenchida derrube o seed inteiro.
+          monetization: w.monetization ?? 'GRATUITA',
+          priceCents: w.monetization === 'PAGA' ? (w.priceCents ?? null) : null,
           ...w.flags,
           audioDescriber: w.audioDescriber,
           audioNarrator: w.audioNarrator,

@@ -24,7 +24,7 @@ import {
   genreUpdateSchema,
 } from '../../validators/admin.schemas';
 import { idParam, idParams, parse } from '../../validators/common';
-import { reviewNoteSchema, updateWorkSchema } from '../../validators/works.schemas';
+import { reviewNoteSchema, updateWorkFieldsSchema, validaMonetizacao } from '../../validators/works.schemas';
 import { filesFrom } from '../works.controller';
 
 const id = (req: Request) => parse(idParams, req.params).id;
@@ -70,7 +70,12 @@ export async function createWork(req: Request, res: Response) {
   res.status(201).json(await worksService.createWorkAsAdmin(parse(adminCreateWorkSchema, req.body), filesFrom(req), currentUser(req)));
 }
 export async function updateWork(req: Request, res: Response) {
-  const patch = parse(updateWorkSchema.extend({ authorId: idParam.optional() }), req.body);
+  // O refinamento de monetização é aplicado DEPOIS do extend: `.superRefine`
+  // devolve um ZodEffects, que não tem `.extend`.
+  const patch = parse(
+    updateWorkFieldsSchema.extend({ authorId: idParam.optional() }).superRefine(validaMonetizacao),
+    req.body,
+  );
   res.json(await worksService.updateWorkAsAdmin(id(req), patch, filesFrom(req)));
 }
 export async function changeStatus(req: Request, res: Response) {

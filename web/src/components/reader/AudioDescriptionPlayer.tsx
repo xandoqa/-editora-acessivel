@@ -209,117 +209,130 @@ const AudioDescriptionPlayer = forwardRef<PlayerHandle, Props>(function AudioDes
   const heading = current ? [current.chapterLabel, current.chapterTitle].filter(Boolean).join(': ') : 'Prólogo';
 
   return (
-    <section className="card flex flex-col gap-5 p-5 md:flex-row md:items-center md:gap-8 md:p-6" aria-labelledby="player-title">
-      <div className="flex min-w-0 items-start gap-4 md:w-[34%]">
-        <span className="hc-border inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-transparent bg-accent-container text-accent" aria-hidden>
-          <Headphones className="h-7 w-7" />
-        </span>
-        <div className="min-w-0">
-          <h2 id="player-title" className="text-lg font-semibold leading-snug text-ink">
-            Audiodescrição Narrada: {heading}
-          </h2>
-          <p className="mt-1 text-sm text-ink-muted">
-            {mode === 'audio'
-              ? `Voz de ${work.audioNarrator ?? 'narração gravada'} • Ritmo ajustado com descrições táteis de cenários`
-              : usandoReserva
-                ? 'Síntese de voz do navegador (pt-BR) • Descrição básica da obra: capa, ficha, recursos e sinopse'
-                : 'Síntese de voz do navegador (pt-BR) • Narra a descrição e as falas de cada página'}
-          </p>
+    <section className="card flex flex-col gap-4 p-5 md:p-6" aria-labelledby="player-title">
+      {/*
+       * O aviso de descrição básica fica FORA desta linha.
+       *
+       * Ele foi escrito aqui dentro por engano e virou um terceiro item do
+       * flex: roubou largura das outras duas colunas e o cabeçalho passou a
+       * quebrar uma palavra por linha. Agora a seção é uma coluna, esta linha
+       * é um filho dela, e o aviso é outro — em largura inteira.
+       */}
+      <div className="flex flex-col gap-5 md:flex-row md:items-center md:gap-8">
+          <div className="flex min-w-0 items-start gap-4 md:w-[34%]">
+          <span className="hc-border inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-transparent bg-accent-container text-accent" aria-hidden>
+            <Headphones className="h-7 w-7" />
+          </span>
+          <div className="min-w-0">
+            <h2 id="player-title" className="text-lg font-semibold leading-snug text-ink">
+              Audiodescrição Narrada: {heading}
+            </h2>
+            <p className="mt-1 text-sm text-ink-muted">
+              {mode === 'audio'
+                ? `Voz de ${work.audioNarrator ?? 'narração gravada'} • Ritmo ajustado com descrições táteis de cenários`
+                : usandoReserva
+                  ? 'Síntese de voz do navegador (pt-BR) • Descrição básica da obra: capa, ficha, recursos e sinopse'
+                  : 'Síntese de voz do navegador (pt-BR) • Narra a descrição e as falas de cada página'}
+            </p>
+          </div>
+        </div>
+
+          <div className="flex-1">
+          {unavailable ? (
+            <p className="text-sm text-ink-muted" role="status">
+              {unavailable}
+            </p>
+          ) : mode === 'audio' && !audioUrl ? (
+            <p className="text-sm text-ink-muted" role="status">
+              Carregando a faixa de audiodescrição...
+            </p>
+          ) : (
+            <>
+              <div className="mb-3 flex items-center justify-center gap-4">
+                <button type="button" className="icon-btn" onClick={() => skip(-10)} aria-label={mode === 'audio' ? 'Voltar 10 segundos' : 'Trecho anterior'}>
+                  <RotateCcw className="h-6 w-6" aria-hidden />
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-on hover:brightness-110"
+                  onClick={toggle}
+                  aria-label={playing ? 'Pausar audiodescrição' : 'Reproduzir audiodescrição'}
+                >
+                  {playing ? <Pause className="h-6 w-6 fill-current" aria-hidden /> : <Play className="ml-0.5 h-6 w-6 fill-current" aria-hidden />}
+                </button>
+                <button type="button" className="icon-btn" onClick={() => skip(10)} aria-label={mode === 'audio' ? 'Avançar 10 segundos' : 'Próximo trecho'}>
+                  <RotateCw className="h-6 w-6" aria-hidden />
+                </button>
+              </div>
+              <div className="flex items-center gap-3 text-sm tabular-nums text-ink-muted">
+                <span className="w-14 text-right">{mode === 'audio' ? formatDuration(time) : `${index + 1}`}</span>
+                {mode === 'audio' ? (
+                  <input
+                    type="range"
+                    min={0}
+                    max={duration || 0}
+                    step={1}
+                    value={time}
+                    onChange={(e) => {
+                      if (audioRef.current) audioRef.current.currentTime = Number(e.target.value);
+                    }}
+                    className="h-2 flex-1 accent-[rgb(var(--c-primary))]"
+                    aria-label="Posição da audiodescrição"
+                    aria-valuetext={`${formatDuration(time)} de ${formatDuration(duration)}`}
+                  />
+                ) : (
+                  <div
+                    className="h-2 flex-1 overflow-hidden rounded-full bg-surface-highest"
+                    role="progressbar"
+                    aria-label="Progresso da audiodescrição"
+                    aria-valuemin={0}
+                    aria-valuemax={items.length}
+                    aria-valuenow={index + 1}
+                    aria-valuetext={`Trecho ${index + 1} de ${items.length}`}
+                  >
+                    <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
+                  </div>
+                )}
+                <span className="w-14">{mode === 'audio' ? formatDuration(duration) : `${items.length}`}</span>
+              </div>
+              {mode === 'tts' && current && (
+                <p className="mt-2 text-center text-xs text-ink-subtle" aria-live="polite">
+                  {/* Na reserva os trechos descrevem a obra, não páginas:
+                      dizer "página 1" em todos eles seria informação falsa. */}
+                  Trecho {index + 1} de {items.length}
+                  {!usandoReserva && ` — página ${current.pageNumber}`}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+
+        <div className="flex items-center justify-end gap-3">
+          <div className="flex rounded-xl bg-surface-high p-1" role="group" aria-label="Velocidade de reprodução">
+            {RATES.map((r) => (
+              <button
+                key={r}
+                type="button"
+                aria-pressed={rate === r}
+                onClick={() => changeRate(r)}
+                className={`min-h-[40px] rounded-lg px-3 text-sm font-semibold ${rate === r ? 'bg-surface-highest text-ink' : 'text-ink-muted hover:text-ink'}`}
+              >
+                {RATE_LABEL[r]}
+              </button>
+            ))}
+          </div>
+          <button type="button" className="icon-btn" onClick={close} aria-label="Fechar player de audiodescrição">
+            <X className="h-5 w-5" aria-hidden />
+          </button>
         </div>
       </div>
 
       {usandoReserva && (
-        <p className="mt-3 rounded-xl border-l-4 border-warn bg-surface-high p-3 text-sm text-ink">
+        <p className="rounded-xl border-l-4 border-warn bg-surface-high p-3 text-sm text-ink">
           Esta obra ainda não tem audiodescrição cadastrada página a página. O que você vai ouvir é uma{' '}
           <strong>descrição básica</strong> montada a partir da ficha da obra.
         </p>
       )}
-
-      <div className="flex-1">
-        {unavailable ? (
-          <p className="text-sm text-ink-muted" role="status">
-            {unavailable}
-          </p>
-        ) : mode === 'audio' && !audioUrl ? (
-          <p className="text-sm text-ink-muted" role="status">
-            Carregando a faixa de audiodescrição...
-          </p>
-        ) : (
-          <>
-            <div className="mb-3 flex items-center justify-center gap-4">
-              <button type="button" className="icon-btn" onClick={() => skip(-10)} aria-label={mode === 'audio' ? 'Voltar 10 segundos' : 'Trecho anterior'}>
-                <RotateCcw className="h-6 w-6" aria-hidden />
-              </button>
-              <button
-                type="button"
-                className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-on hover:brightness-110"
-                onClick={toggle}
-                aria-label={playing ? 'Pausar audiodescrição' : 'Reproduzir audiodescrição'}
-              >
-                {playing ? <Pause className="h-6 w-6 fill-current" aria-hidden /> : <Play className="ml-0.5 h-6 w-6 fill-current" aria-hidden />}
-              </button>
-              <button type="button" className="icon-btn" onClick={() => skip(10)} aria-label={mode === 'audio' ? 'Avançar 10 segundos' : 'Próximo trecho'}>
-                <RotateCw className="h-6 w-6" aria-hidden />
-              </button>
-            </div>
-            <div className="flex items-center gap-3 text-sm tabular-nums text-ink-muted">
-              <span className="w-14 text-right">{mode === 'audio' ? formatDuration(time) : `${index + 1}`}</span>
-              {mode === 'audio' ? (
-                <input
-                  type="range"
-                  min={0}
-                  max={duration || 0}
-                  step={1}
-                  value={time}
-                  onChange={(e) => {
-                    if (audioRef.current) audioRef.current.currentTime = Number(e.target.value);
-                  }}
-                  className="h-2 flex-1 accent-[rgb(var(--c-primary))]"
-                  aria-label="Posição da audiodescrição"
-                  aria-valuetext={`${formatDuration(time)} de ${formatDuration(duration)}`}
-                />
-              ) : (
-                <div
-                  className="h-2 flex-1 overflow-hidden rounded-full bg-surface-highest"
-                  role="progressbar"
-                  aria-label="Progresso da audiodescrição"
-                  aria-valuemin={0}
-                  aria-valuemax={items.length}
-                  aria-valuenow={index + 1}
-                  aria-valuetext={`Trecho ${index + 1} de ${items.length}`}
-                >
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${progress}%` }} />
-                </div>
-              )}
-              <span className="w-14">{mode === 'audio' ? formatDuration(duration) : `${items.length}`}</span>
-            </div>
-            {mode === 'tts' && current && (
-              <p className="mt-2 text-center text-xs text-ink-subtle" aria-live="polite">
-                Trecho {index + 1} de {items.length} — página {current.pageNumber}
-              </p>
-            )}
-          </>
-        )}
-      </div>
-
-      <div className="flex items-center justify-end gap-3">
-        <div className="flex rounded-xl bg-surface-high p-1" role="group" aria-label="Velocidade de reprodução">
-          {RATES.map((r) => (
-            <button
-              key={r}
-              type="button"
-              aria-pressed={rate === r}
-              onClick={() => changeRate(r)}
-              className={`min-h-[40px] rounded-lg px-3 text-sm font-semibold ${rate === r ? 'bg-surface-highest text-ink' : 'text-ink-muted hover:text-ink'}`}
-            >
-              {RATE_LABEL[r]}
-            </button>
-          ))}
-        </div>
-        <button type="button" className="icon-btn" onClick={close} aria-label="Fechar player de audiodescrição">
-          <X className="h-5 w-5" aria-hidden />
-        </button>
-      </div>
 
       {mode === 'audio' && audioUrl && (
         <audio

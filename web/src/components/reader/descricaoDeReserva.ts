@@ -26,7 +26,10 @@ function trecho(pageNumber: number, label: string, texto: string | null | undefi
     id: -pageNumber,
     workId: 0,
     pageNumber,
-    chapterLabel: 'Descrição da obra',
+    // Sem rótulo de capítulo: o player já escreve "Audiodescrição Narrada:"
+    // antes do título, e um "Descrição da obra" no meio produzia um cabeçalho
+    // com dois 'dois-pontos' seguidos.
+    chapterLabel: null,
     chapterTitle: label,
     panelLabel: label,
     description: limpo,

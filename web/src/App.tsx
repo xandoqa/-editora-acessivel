@@ -19,6 +19,7 @@ const ReviewList = lazy(() => import('./pages/ReviewList'));
 const ReviewStatus = lazy(() => import('./pages/ReviewStatus'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Apoiar = lazy(() => import('./pages/Apoiar'));
+const Biblioteca = lazy(() => import('./pages/Biblioteca'));
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminWorks = lazy(() => import('./pages/admin/AdminWorks'));
@@ -61,6 +62,9 @@ export default function App() {
             {/* Qualquer conta autenticada */}
             <Route element={<RequireAuth />}>
               <Route path="/profile" element={<Profile />} />
+              {/* Biblioteca pessoal: só existe para quem tem conta, porque a
+                  aquisição pertence à conta e não ao navegador. */}
+              <Route path="/biblioteca" element={<Biblioteca />} />
             </Route>
             {/* Área do escritor: leitor é redirecionado para "Meu perfil" */}
             <Route element={<RequireAuth role="ESCRITOR" />}>

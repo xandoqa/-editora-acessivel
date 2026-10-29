@@ -7,7 +7,7 @@ import { badRequest, conflict, forbidden, notFound, unprocessable } from '../uti
 import { paginated } from '../validators/common';
 import { listChecks } from './review.service';
 import type { catalogQuerySchema, WorkFields, WorkUpdate } from '../validators/works.schemas';
-import { exigirAcessoDeLeitura } from './purchases.service';
+import { exigirAcessoDeLeitura, temAcessoDeLeitura } from './purchases.service';
 import { absolutePath, commitUpload, removeFile, storedFileExists, type StoredFile } from './storage.service';
 import {
   ADMIN_TRANSITIONS,
@@ -85,12 +85,24 @@ export async function getWork(id: number, viewer?: AuthUser) {
   const row = await findWorkRow(id);
   if (!canView(row.work, viewer)) throw notFound('Obra não encontrada.');
   const dto = toWorkDto(row);
+  /*
+   * Se esta pessoa já pode ler a obra.
+   *
+   * Vai no detalhe para que a tela saiba o que oferecer — "ler" ou "adquirir"
+   * — antes de tentar baixar o arquivo e esbarrar num 403. Note que isto é
+   * informação para a INTERFACE: quem decide continua sendo o endpoint do
+   * arquivo, que refaz a verificação por conta própria.
+   */
+  const access = {
+    required: row.work.monetization === 'PAGA',
+    granted: await temAcessoDeLeitura(row.work, viewer),
+  };
   // No detalhe da obra o selo vem com a lista do que a curadoria verificou: o
   // leitor vê no que confiar e o autor vê o que foi cobrado. É público de
   // propósito — um selo cujo critério ninguém pode ler não vale nada.
-  if (!dto.seal.granted) return dto;
+  if (!dto.seal.granted) return { ...dto, access };
   const checks = await listChecks(id);
-  return { ...dto, seal: { ...dto.seal, checks } };
+  return { ...dto, access, seal: { ...dto.seal, checks } };
 }
 
 /** Arquivo original da obra (para o leitor e para download). */

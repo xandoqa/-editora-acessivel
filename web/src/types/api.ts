@@ -52,6 +52,12 @@ export interface Work extends Record<FeatureFlag, boolean> {
   audioDescriber: string | null;
   audioNarrator: string | null;
   audioReviewer: string | null;
+  /** Como a autoria escolheu disponibilizar a obra. */
+  monetization: Monetization;
+  /** Em centavos. Só existe quando `monetization` é `PAGA`. */
+  priceCents: number | null;
+  /** Percentual da receita publicitária simulada destinado à autoria. */
+  adRevenueAuthorShare: number;
   coverUrl: string | null;
   hasFile: boolean;
   file: { type: FileType; sizeBytes: number; originalName: string } | null;
@@ -76,6 +82,13 @@ export interface Work extends Record<FeatureFlag, boolean> {
     reviewer: string | null;
     checks?: ReviewCheck[];
   };
+  /**
+   * Se esta pessoa já pode ler a obra. Só vem no detalhe (GET /works/:id).
+   *
+   * É informação para a INTERFACE decidir o que oferecer. Quem autoriza de
+   * verdade continua sendo o endpoint do arquivo, que refaz a verificação.
+   */
+  access?: { required: boolean; granted: boolean };
 }
 
 export interface MyWork extends Work {
@@ -257,4 +270,88 @@ export interface AdminDonationStats {
   apoiadores: number;
   provider: string;
   isReal: boolean;
+}
+
+/* ----------------------------- Monetização ------------------------------ */
+
+/**
+ * Como a autoria disponibiliza a obra.
+ *
+ *   GRATUITA     — leitura livre. É o padrão e a opção coerente com a
+ *                  proposta social da livraria.
+ *   PAGA         — exige aquisição. Preço definido pela autoria, com teto.
+ *   PUBLICIDADE  — leitura livre, com espaços publicitários simulados.
+ */
+export type Monetization = 'GRATUITA' | 'PAGA' | 'PUBLICIDADE';
+
+/** Teto de preço, em centavos — a mesma regra vale no servidor e no banco. */
+export const MAX_PRECO_CENTAVOS = 5_000;
+export const MIN_PRECO_CENTAVOS = 100;
+
+export type PurchaseStatus = 'PENDENTE' | 'CONFIRMADA' | 'FALHOU' | 'CANCELADA' | 'EXPIRADA';
+
+export interface Purchase {
+  id: number;
+  workId: number;
+  priceCents: number;
+  currency: string;
+  method: PaymentMethod;
+  status: PurchaseStatus;
+  provider: string;
+  createdAt: string;
+  confirmedAt: string | null;
+  expiresAt: string | null;
+}
+
+/** O que a tela precisa para conduzir o pagamento simulado. */
+export interface PurchaseCheckout {
+  code?: string;
+  instruction?: string;
+  checkoutUrl?: string;
+  isReal: boolean;
+}
+
+export interface PurchaseResult {
+  purchase: Purchase;
+  checkout: PurchaseCheckout | null;
+  /** true quando o clique reaproveitou uma cobrança já aberta. */
+  reaproveitada: boolean;
+}
+
+/** Uma obra na biblioteca pessoal. */
+export interface LibraryItem {
+  purchaseId: number;
+  priceCents: number;
+  method: PaymentMethod;
+  confirmedAt: string | null;
+  work: {
+    id: number;
+    title: string;
+    subtitle: string | null;
+    coverUrl: string | null;
+    format: WorkFormat;
+    pages: number;
+    monetization: Monetization;
+  };
+  author: { id: number; name: string };
+}
+
+/** Uma linha do histórico de compras. */
+export interface PurchaseHistoryItem {
+  id: number;
+  priceCents: number;
+  method: PaymentMethod;
+  status: PurchaseStatus;
+  createdAt: string;
+  confirmedAt: string | null;
+  expiresAt: string | null;
+  work: { id: number; title: string };
+}
+
+/** Dados do cartão de demonstração. Nunca saem da requisição. */
+export interface CardInput {
+  holder: string;
+  number: string;
+  expiry: string;
+  cvv: string;
 }

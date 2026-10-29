@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { BookOpenText, ClipboardList, LayoutDashboard, LibraryBig, LogOut, PersonStanding, ShieldCheck, SquarePlus, UserRoundCog } from 'lucide-react';
+import { BookOpenText, ClipboardList, LayoutDashboard, Library, LibraryBig, LogOut, PersonStanding, ShieldCheck, SquarePlus, UserRoundCog } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import { useMySummary } from '../../hooks/queries';
@@ -73,6 +73,10 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     badge: <span className="chip bg-accent-container text-accent">Áudio</span>,
   });
 
+  // A biblioteca só existe para quem tem conta: aquisição pertence à conta.
+  if (user) {
+    items.push({ to: '/biblioteca', label: 'Minha biblioteca', icon: <Library className="h-5 w-5" /> });
+  }
   if (user && !isWriter) {
     items.push({ to: '/profile', label: 'Quero publicar', icon: <SquarePlus className="h-5 w-5" /> });
   }

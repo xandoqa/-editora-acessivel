@@ -5,6 +5,7 @@ import type { AuthUser } from '../middlewares/auth';
 import { badRequest, conflict, forbidden, notFound } from '../utils/http-error';
 import { logger } from '../utils/logger';
 import { formatBRL, provedorAtual } from './payments/payment.service';
+import { coverUrl } from './storage.service';
 
 /**
  * Aquisição de obras pagas.
@@ -302,7 +303,12 @@ export async function listMyLibrary(userId: number) {
     .innerJoin(users, eq(users.id, works.authorId))
     .where(and(eq(purchases.userId, userId), eq(purchases.status, 'CONFIRMADA')))
     .orderBy(desc(purchases.confirmedAt));
-  return linhas;
+  // O caminho interno do arquivo nunca sai da API: a tela recebe a URL pública
+  // da capa, como no resto do catálogo.
+  return linhas.map(({ work, ...resto }) => ({
+    ...resto,
+    work: { ...work, coverPath: undefined, coverUrl: coverUrl(work.coverPath) },
+  }));
 }
 
 /** Histórico de compras, com todos os estados. */

@@ -3,6 +3,14 @@ import { AlertTriangle, Copy, CreditCard, FileText, Loader2, QrCode, ShieldAlert
 import { Modal, TextInput } from '../ui';
 import { errorMessage } from '../../lib/api';
 import { formatCents } from '../../lib/format';
+import {
+  CARTOES_DE_TESTE,
+  apenasDigitos,
+  detectarBandeira,
+  formatarNumero,
+  validarCartao,
+  type ErrosDoCartao,
+} from '../../lib/cartao';
 import type { CardInput, PaymentMethod, Purchase, PurchaseCheckout } from '../../types/api';
 
 /**
@@ -32,6 +40,12 @@ const METODOS: { valor: PaymentMethod; rotulo: string; icone: typeof QrCode; aju
 ];
 
 const CARTAO_VAZIO: CardInput = { holder: '', number: '', expiry: '', cvv: '' };
+
+/** Insere a barra da validade sozinha, para não exigir que a pessoa digite. */
+function mascaraDeValidade(valor: string): string {
+  const d = valor.replace(/\D/g, '').slice(0, 4);
+  return d.length <= 2 ? d : `${d.slice(0, 2)}/${d.slice(2)}`;
+}
 
 export interface LinhaDoResumo {
   rotulo: string;
@@ -78,6 +92,10 @@ export default function PagamentoSimuladoDialog({
   const [erro, setErro] = useState('');
   const [copiado, setCopiado] = useState(false);
   const [ocupado, setOcupado] = useState(false);
+  const [errosDoCartao, setErrosDoCartao] = useState<ErrosDoCartao>({});
+
+  /** Recalculada a cada tecla: é o número que diz a bandeira. */
+  const bandeira = detectarBandeira(cartao.number);
 
   const fechar = () => {
     setEtapa('metodo');
@@ -87,6 +105,7 @@ export default function PagamentoSimuladoDialog({
     setErro('');
     setCopiado(false);
     setOcupado(false);
+    setErrosDoCartao({});
     onClose();
   };
 
@@ -225,7 +244,16 @@ export default function PagamentoSimuladoDialog({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            void abrir(cartao);
+            /*
+             * Confere antes de enviar — por conveniência, não por segurança:
+             * o servidor refaz a mesma verificação, inclusive o Luhn. Isto
+             * existe para a pessoa ver o erro no campo, e não num alerta
+             * genérico depois da viagem de ida e volta.
+             */
+            const erros = validarCartao(cartao.number, cartao.expiry, cartao.cvv);
+            setErrosDoCartao(erros);
+            if (Object.keys(erros).length) return;
+            void abrir({ ...cartao, number: apenasDigitos(cartao.number) });
           }}
         >
           <p className="mb-3 text-sm text-ink-muted">
@@ -244,8 +272,23 @@ export default function PagamentoSimuladoDialog({
             inputMode="numeric"
             autoComplete="off"
             placeholder="4111 1111 1111 1111"
-            hint="Use um número de teste. 4111 1111 1111 1111 serve."
-            value={cartao.number}
+            error={errosDoCartao.number}
+            /* A bandeira é DETECTADA pelo número, não escolhida numa lista:
+               é o próprio número que a informa, e pedir para escolher só
+               criaria divergência entre o que a pessoa marca e o que digita.
+               Nubank, Itaú e afins são emissores, não bandeiras. */
+            maxLength={23}
+            /* Com a bandeira identificada, a etiqueta ao lado do rótulo já
+               diz qual é: repetir no texto de ajuda seria dizer duas vezes. */
+            hint={bandeira ? undefined : 'A bandeira é identificada pelo número enquanto você digita.'}
+            aside={
+              bandeira ? (
+                <span className="chip bg-surface-highest text-ink">
+                  <CreditCard className="h-3.5 w-3.5" aria-hidden /> {bandeira.nome}
+                </span>
+              ) : undefined
+            }
+            value={formatarNumero(cartao.number)}
             onChange={(e) => setCartao({ ...cartao, number: e.target.value })}
           />
           <div className="grid gap-3 sm:grid-cols-2">
@@ -254,19 +297,42 @@ export default function PagamentoSimuladoDialog({
               required
               placeholder="MM/AA"
               autoComplete="off"
+              maxLength={5}
+              error={errosDoCartao.expiry}
               value={cartao.expiry}
-              onChange={(e) => setCartao({ ...cartao, expiry: e.target.value })}
+              onChange={(e) => setCartao({ ...cartao, expiry: mascaraDeValidade(e.target.value) })}
             />
             <TextInput
               label="Código de segurança"
               required
               inputMode="numeric"
               autoComplete="off"
-              placeholder="123"
+              placeholder={bandeira?.tamanhoCvv === 4 ? '1234' : '123'}
+              maxLength={bandeira?.tamanhoCvv ?? 4}
+              error={errosDoCartao.cvv}
+              hint={bandeira?.tamanhoCvv === 4 ? 'American Express usa 4 dígitos.' : undefined}
               value={cartao.cvv}
-              onChange={(e) => setCartao({ ...cartao, cvv: e.target.value })}
+              onChange={(e) => setCartao({ ...cartao, cvv: apenasDigitos(e.target.value) })}
             />
           </div>
+
+          {/* A lista de cartões de teste fica na própria tela: numa
+              demonstração, procurar o número no README é tempo perdido na
+              frente de quem assiste. Todos passam no Luhn. */}
+          <details className="mt-4 rounded-xl bg-surface-high p-3 text-sm">
+            <summary className="cursor-pointer font-semibold text-ink">Cartões de teste por bandeira</summary>
+            <ul className="mt-2 space-y-1 text-ink-muted">
+              {CARTOES_DE_TESTE.map((c) => (
+                <li key={c.numero} className="flex flex-wrap justify-between gap-2">
+                  <span>{c.bandeira}</span>
+                  <code className="font-mono text-xs text-ink">{c.numero}</code>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-xs text-ink-subtle">
+              Validade: qualquer data futura. Código: 3 dígitos (4 no American Express).
+            </p>
+          </details>
           <div className="mt-4 flex flex-wrap gap-2">
             <button type="submit" className="btn-primary" disabled={ocupado}>
               {ocupado && <Loader2 className="h-4 w-4 animate-spin" aria-hidden />} Pagar {formatCents(precoCents)}

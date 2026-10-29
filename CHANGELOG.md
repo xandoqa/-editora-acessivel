@@ -2,6 +2,36 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.5.1] — 2026-10-29
+
+### Layout do player de audiodescrição
+
+O aviso de "descrição básica" tinha sido escrito dentro da linha flex do
+cabeçalho e virou um terceiro item dela, roubando largura das outras duas
+colunas: título e subtítulo passaram a quebrar uma palavra por linha. A seção
+virou coluna, com a linha de controles e o aviso como filhos.
+
+Junto, dois acertos de texto: o cabeçalho dizia "Audiodescrição Narrada:
+Descrição da obra: Capa", com dois 'dois-pontos' seguidos, e a linha de
+progresso dizia "página 1" nos seis trechos da descrição de reserva — que
+descrevem a obra, não páginas.
+
+### Bandeira do cartão identificada pelo número
+
+O formulário de pagamento passa a **identificar a bandeira enquanto se
+digita** — Visa, Mastercard, Elo, American Express, Hipercard e Diners —, a
+formatar o número em grupos, a ajustar o tamanho do código de segurança (4 no
+American Express) e a trazer a lista de cartões de teste na própria tela.
+
+**Não há seletor de bandeira**, porque o número já informa qual é: pedir que a
+pessoa escolha criaria divergência entre o que ela marca e o que digita.
+Bandeira também não se confunde com emissor — Nubank, Itaú e afins emitem
+cartões Visa ou Mastercard.
+
+A validação deixou de ser contagem de dígitos: entraram o **algoritmo de
+Luhn** e a conferência de vencimento, **nos dois lados**. Sem Luhn,
+`1111 1111 1111 1111` passava — dezesseis dígitos que nenhum banco emitiria.
+
 ## [3.5.0] — 2026-10-29
 
 ### Histórico de leitura

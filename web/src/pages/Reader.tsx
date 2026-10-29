@@ -13,15 +13,16 @@ import {
   Download,
   Eye,
   FileText,
-  Headphones,
   Hand,
   HandHeart,
+  Headphones,
+  Info,
   PersonStanding,
   Play,
+  ShoppingBag,
   SpellCheck2,
   Table2,
   Volume2,
-  ShoppingBag,
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { useAudioDescriptions, useWork } from '../hooks/queries';
@@ -32,6 +33,12 @@ import { usePreferences } from '../preferences/PreferencesContext';
 import AudioDescriptionPlayer, { type PlayerHandle } from '../components/reader/AudioDescriptionPlayer';
 import DocumentViewer from '../components/reader/DocumentViewer';
 import AquisicaoDialog from '../components/works/AquisicaoDialog';
+import {
+  BlocoPublicitario,
+  PAGINAS_POR_ANUNCIO,
+  cabeAnuncioAntes,
+  cabeAnuncioDepois,
+} from '../components/reader/Publicidade';
 import { EspacoPublicitario } from '../components/works/Modalidade';
 import { formatCents } from '../lib/format';
 import ReaderPreferencesPanel from '../components/reader/ReaderPreferencesPanel';
@@ -133,7 +140,13 @@ export default function Reader() {
     if (location.hash === '#aquisicao' && bloqueadaPorAquisicao && user) setComprando(true);
   }, [location.hash, bloqueadaPorAquisicao, user]);
 
-  const comPublicidade = work?.monetization === 'PUBLICIDADE';
+  /*
+   * Anúncios aparecem só onde as três condições se encontram: a obra foi
+   * configurada para publicidade PELA AUTORIA, a pessoa não é assinante
+   * premium, e há leitura acontecendo. Obra gratuita comum e obra paga não
+   * exibem anúncio nenhum — a modalidade é de cada obra, não da plataforma.
+   */
+  const comPublicidade = work?.monetization === 'PUBLICIDADE' && user?.plan !== 'PREMIUM';
 
   const currentAd = descriptions.find((d) => d.pageNumber === page);
   const chapterAd = useMemo(
@@ -268,14 +281,65 @@ export default function Reader() {
               ))}
             </ul>
 
+            {/*
+             * Obra paga aberta sem compra: diz por quê.
+             *
+             * Sem este aviso, quem testasse com a conta da administração veria
+             * a obra paga abrir e concluiria que o bloqueio não funciona. Ele
+             * funciona — e esta linha é a diferença entre um sistema que
+             * parece falhar e um que se explica.
+             */}
+            {work.access?.required && (work.access.reason === 'ADMINISTRACAO' || work.access.reason === 'AUTORIA') && (
+              <p className="mt-6 flex gap-2 rounded-xl border-l-4 border-warn bg-surface-high p-3 text-sm text-ink">
+                <Info className="mt-0.5 h-5 w-5 shrink-0 text-warn" aria-hidden />
+                <span>
+                  Esta obra é paga ({formatCents(work.priceCents ?? 0)}) e você está lendo{' '}
+                  {work.access.reason === 'AUTORIA' ? 'por ser a autoria' : 'pela conta de administração'}, sem compra.
+                  Um leitor comum precisa adquiri-la.
+                </span>
+              </p>
+            )}
+
             <div className="mt-7 flex flex-wrap gap-3">
-              <button type="button" className="btn-primary px-6 py-3 text-base" onClick={startReading}>
-                <Play className="h-5 w-5 fill-current" aria-hidden /> Iniciar Leitura Acessível
-              </button>
-              <button type="button" className="btn-accent px-6 py-3 text-base" onClick={listen}>
-                <Volume2 className="h-5 w-5" aria-hidden /> Ouvir Audiodescrição
-              </button>
-              {work.hasFile && (
+              {/*
+               * Obra paga sem aquisição não mostra ação de leitura nem de
+               * download. Não é por segurança — o servidor recusa de qualquer
+               * jeito — é por honestidade: oferecer um botão que vai falhar é
+               * prometer o que não se cumpre.
+               */}
+              {bloqueadaPorAquisicao ? (
+                <>
+                  {user ? (
+                    <button
+                      type="button"
+                      className="btn-primary px-6 py-3 text-base"
+                      onClick={() => setComprando(true)}
+                    >
+                      <ShoppingBag className="h-5 w-5" aria-hidden /> Comprar obra ·{' '}
+                      {formatCents(work.priceCents ?? 0)}
+                    </button>
+                  ) : (
+                    <Link to="/login" className="btn-primary px-6 py-3 text-base">
+                      <ShoppingBag className="h-5 w-5" aria-hidden /> Entrar para comprar ·{' '}
+                      {formatCents(work.priceCents ?? 0)}
+                    </Link>
+                  )}
+                  <p className="w-full text-sm text-ink-muted">
+                    A leitura e o download ficam disponíveis assim que o pagamento for aprovado. Você continua podendo
+                    ver capa, sinopse, ficha técnica e avaliações.
+                  </p>
+                </>
+              ) : (
+                <>
+                  <button type="button" className="btn-primary px-6 py-3 text-base" onClick={startReading}>
+                    <Play className="h-5 w-5 fill-current" aria-hidden /> Iniciar Leitura Acessível
+                  </button>
+                  <button type="button" className="btn-accent px-6 py-3 text-base" onClick={listen}>
+                    <Volume2 className="h-5 w-5" aria-hidden /> Ouvir Audiodescrição
+                  </button>
+                </>
+              )}
+              {work.hasFile && !bloqueadaPorAquisicao && (
                 <div className="relative">
                   <button type="button" className="btn-secondary px-5 py-3" aria-expanded={downloadOpen} aria-haspopup="menu" onClick={() => setDownloadOpen((o) => !o)}>
                     <Download className="h-5 w-5" aria-hidden /> Baixar Obra <ChevronDown className="h-4 w-4" aria-hidden />
@@ -367,6 +431,12 @@ export default function Reader() {
               </nav>
             </div>
 
+            {/* Anúncio de abertura: antes da primeira página, nunca por cima
+                dela. Some assim que a leitura avança. */}
+            {comPublicidade && !bloqueadaPorAquisicao && cabeAnuncioAntes(page) && (
+              <BlocoPublicitario indice={0} palette={palette} rotulo="abertura da leitura" />
+            )}
+
             <div className="relative rounded-xl p-2" style={{ background: palette.surface }}>
               {bloqueadaPorAquisicao ? (
                 /*
@@ -415,6 +485,17 @@ export default function Reader() {
                 </span>
               )}
             </div>
+
+            {/* Anúncio entre trechos: depois da página, a cada bloco de
+                páginas e ao fim da leitura. Nunca parte uma frase ao meio,
+                porque só aparece quando a página já terminou. */}
+            {comPublicidade && !bloqueadaPorAquisicao && cabeAnuncioDepois(page, totalPages) && (
+              <BlocoPublicitario
+                indice={Math.ceil(page / PAGINAS_POR_ANUNCIO)}
+                palette={palette}
+                rotulo={page >= totalPages ? 'fim da leitura' : 'intervalo entre trechos'}
+              />
+            )}
 
             {currentAd ? (
               <div className="mt-5 space-y-4" style={textStyle(prefs)}>
@@ -531,9 +612,9 @@ export default function Reader() {
         </aside>
       </div>
 
-      {/* Espaço publicitário simulado: fora do corpo da leitura, no fim da
-          página, para não atrapalhar quem está lendo. */}
-      {comPublicidade && <EspacoPublicitario share={work.adRevenueAuthorShare} />}
+      {/* A nota sobre a divisão de receita fica no rodapé da página, longe da
+          leitura: é informação sobre o modelo, não publicidade. */}
+      {work.monetization === 'PUBLICIDADE' && <EspacoPublicitario share={work.adRevenueAuthorShare} />}
 
       {work.monetization === 'PAGA' && user && (
         <AquisicaoDialog work={work} open={comprando} onClose={() => setComprando(false)} />

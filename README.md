@@ -203,6 +203,20 @@ Depois de aprovada, a obra entra em **Minha biblioteca** e continua disponível 
 
 Para ver o caminho que **não** libera a obra: clique em **Cancelar cobrança**, ou deixe a cobrança expirar (Pix 30min, cartão 15min, boleto 3 dias). Em ambos os casos a obra continua bloqueada.
 
+#### Publicidade e plano do leitor
+
+Obra com modalidade **publicidade** é gratuita para o leitor e mostra um bloco publicitário na abertura da leitura, a cada quatro páginas e ao fim — sempre **entre** páginas, nunca por cima do texto. No seed, **Vozes do Mar** está nessa modalidade.
+
+Os anunciantes são fictícios e cada bloco diz que é demonstração. Não há rede publicitária integrada, script de terceiro nem rastreamento.
+
+O **plano do leitor** é `GRATUITO` por padrão. Em **Administração → Usuários**, dá para mudar uma conta para `PREMIUM`: os anúncios somem. O premium **não** desbloqueia obra paga — quem define preço é a autoria, e o dinheiro de uma assinatura não é dela.
+
+#### Por que a obra paga abre para você
+
+Se você entrar como **administração** ou como a **autoria da obra**, a obra paga abre sem compra. Isso é a regra de revisão, não uma falha: a curadoria precisa conseguir abrir qualquer obra.
+
+O leitor avisa isso na tela, e o detalhe da obra devolve o motivo do acesso (`COMPRADA`, `AUTORIA`, `ADMINISTRACAO`, `NEGADO`). **Para testar o bloqueio, use uma conta de leitor comum** — por exemplo `tatiane@livrin.com`.
+
 O que **não** funciona, de propósito: alterar o preço pelo navegador. A requisição de compra não tem campo de valor e o schema é estrito — mandar `priceCents` devolve erro 400. O preço cobrado é sempre o que está no banco.
 
 ---

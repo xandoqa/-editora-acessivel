@@ -11,11 +11,19 @@ export type WorkFormat = 'QUADRINHO' | 'LIVRO' | 'MANGA_WEBCOMIC' | 'ZINE';
 export type FileType = 'PDF' | 'DOCX' | 'EPUB' | 'CBZ' | 'CBR';
 export type CheckStatus = 'PENDENTE' | 'EM_ANDAMENTO' | 'APROVADO' | 'REPROVADO';
 
+/**
+ * Plano do leitor. `PREMIUM` esconde os anúncios nas obras monetizadas por
+ * publicidade — e **não** desbloqueia obra paga: quem define preço é a
+ * autoria, e o dinheiro de uma assinatura não é dela.
+ */
+export type UserPlan = 'GRATUITO' | 'PREMIUM';
+
 export interface User {
   id: number;
   name: string;
   email: string;
   role: Role;
+  plan: UserPlan;
   headline: string | null;
   isActive: boolean;
   createdAt: string;
@@ -88,7 +96,7 @@ export interface Work extends Record<FeatureFlag, boolean> {
    * É informação para a INTERFACE decidir o que oferecer. Quem autoriza de
    * verdade continua sendo o endpoint do arquivo, que refaz a verificação.
    */
-  access?: { required: boolean; granted: boolean };
+  access?: { required: boolean; granted: boolean; reason: MotivoAcesso };
 }
 
 export interface MyWork extends Work {
@@ -355,3 +363,12 @@ export interface CardInput {
   expiry: string;
   cvv: string;
 }
+
+/**
+ * Por que a pessoa pode (ou não) ler a obra.
+ *
+ * `AUTORIA` e `ADMINISTRACAO` abrem uma obra paga sem compra — é a regra de
+ * revisão, não uma falha. A interface diz isso em voz alta para que ninguém
+ * conclua que o bloqueio não funciona ao testar com essas contas.
+ */
+export type MotivoAcesso = 'LIVRE' | 'COMPRADA' | 'AUTORIA' | 'ADMINISTRACAO' | 'NEGADO';

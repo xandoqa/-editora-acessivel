@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { checkStatusEnum, userRoleEnum, workFormatEnum, workStatusEnum } from '../db/schema';
+import { checkStatusEnum, userPlanEnum, userRoleEnum, workFormatEnum, workStatusEnum } from '../db/schema';
 import { emailSchema, passwordSchema } from './auth.schemas';
 import { formBoolean, idParam, optionalText, paginationSchema, requiredText, searchTerm } from './common';
 import { validaMonetizacao, workFieldsSchema } from './works.schemas';
@@ -32,6 +32,11 @@ export const adminUpdateUserSchema = z
     name: requiredText('Nome', 2, 120).optional(),
     email: emailSchema.optional(),
     role: z.enum(userRoleEnum.enumValues).optional(),
+    /**
+     * Plano do leitor. É a única via de ativação do premium: não há compra de
+     * assinatura, e não vai haver — a administração ativa para demonstrar.
+     */
+    plan: z.enum(userPlanEnum.enumValues).optional(),
     headline: optionalText(160),
     isActive: z.boolean().optional(),
   })

@@ -5,6 +5,7 @@ import { audioDescriptions } from '../db/schema';
 import type { AuthUser } from '../middlewares/auth';
 import { forbidden, notFound } from '../utils/http-error';
 import type { audioDescriptionSchema } from '../validators/works.schemas';
+import { exigirAcessoDeLeitura } from './purchases.service';
 import { AUTHOR_AUDIO_DESC_EDIT, canView, isAdmin, isOwner } from './work-policy';
 import { findWork } from './work-queries';
 
@@ -14,6 +15,19 @@ type AudioDescriptionInput = z.infer<typeof audioDescriptionSchema>;
 export async function listAudioDescriptions(workId: number, viewer?: AuthUser) {
   const work = await findWork(workId);
   if (!canView(work, viewer)) throw notFound('Obra não encontrada.');
+  /*
+   * A audiodescrição É o conteúdo da obra, em texto.
+   *
+   * Num quadrinho ela traz a descrição de cada quadro e as falas de cada
+   * personagem — ou seja, quem baixasse só este JSON leria a história inteira
+   * sem abrir o arquivo. Sem esta verificação, `/works/:id/audio-descriptions`
+   * era uma porta dos fundos para obra paga: o endpoint do arquivo recusava,
+   * e este entregava o mesmo conteúdo em outro formato.
+   *
+   * Pior: era uma porta dos fundos que atingia justamente o público que mais
+   * depende da audiodescrição.
+   */
+  await exigirAcessoDeLeitura(work, viewer);
   return db
     .select()
     .from(audioDescriptions)

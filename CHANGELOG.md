@@ -4,6 +4,63 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
+### Correção de segurança: audiodescrição de obra paga era acessível
+
+`GET /works/:id/audio-descriptions` verificava apenas a visibilidade por
+status, **não a aquisição**. A audiodescrição traz a descrição de cada quadro
+e as falas de cada personagem — num quadrinho, é a obra em texto. O endpoint
+do arquivo recusava corretamente, e este entregava o mesmo conteúdo em outro
+formato.
+
+Pior que o vazamento: era uma porta dos fundos que atingia exatamente quem
+mais depende da audiodescrição. A verificação passou a ser a mesma dos outros
+caminhos de conteúdo.
+
+Fica a lição registrada na [ADR 015](docs/decisions/015-publicidade-e-plano.md):
+a pergunta não é "quais endpoints servem arquivos", é **"por quais caminhos o
+conteúdo pode sair"**. Num projeto de acessibilidade, o mesmo conteúdo existe
+de propósito em mais de uma forma.
+
+### O acesso de autoria e administração passou a ser declarado
+
+Obra paga sempre abriu para a autoria e para a administração — é o que
+permite revisar. Mas isso ficava invisível, e testar com a conta de
+administração dava a impressão de que o bloqueio não funcionava.
+
+O detalhe da obra agora devolve `access.reason` (`LIVRE`, `COMPRADA`,
+`AUTORIA`, `ADMINISTRACAO`, `NEGADO`), e o leitor avisa quando a obra paga foi
+aberta sem compra. O acesso não mudou; o que mudou é que ele se explica.
+
+### Obra paga deixa de oferecer botões que não funcionam
+
+No leitor, obra paga sem aquisição não mostra mais ler, ouvir e baixar: mostra
+o preço e a opção de comprar. O servidor já recusava — oferecer um botão que
+vai falhar é prometer o que não se cumpre.
+
+### Publicidade dentro da experiência de leitura
+
+Antes era uma faixa no rodapé da página. Agora o bloco aparece na abertura da
+leitura, a cada quatro páginas e ao fim — **entre** unidades de leitura, nunca
+dentro delas: o anúncio só surge quando a página terminou, então não parte
+frase, parágrafo ou diálogo.
+
+Sem pop-up, sem sobreposição, sem movimento, sem script de terceiro e sem
+rastreamento. O bloco segue a paleta escolhida no leitor, porque um anúncio
+que ignorasse o alto contraste seria ele próprio uma barreira. Os anunciantes
+são fictícios e cada bloco declara que é demonstração.
+
+Aparece **somente** em obra cuja autoria escolheu a modalidade publicidade.
+
+### Plano do leitor
+
+`GRATUITO` (padrão) e `PREMIUM`, ativado pela administração em
+Administração → Usuários. O premium faz uma coisa: esconder os anúncios.
+
+**Ele não desbloqueia obra paga.** Quem define preço é a autoria, e o dinheiro
+de uma assinatura da plataforma não é dela — um passe livre sobre obras pagas
+seria a plataforma vendendo trabalho de terceiros.
+
+
 ### Monetização opcional e aquisição de obras
 
 A autoria passa a escolher como disponibiliza cada obra: **gratuita**, **paga**

@@ -2,7 +2,7 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
-## [Não lançado]
+## [3.3.0] — 2026-10-29
 
 ### Correção de segurança: audiodescrição de obra paga era acessível
 
@@ -61,6 +61,8 @@ de uma assinatura da plataforma não é dela — um passe livre sobre obras paga
 seria a plataforma vendendo trabalho de terceiros.
 
 
+## [3.2.0] — 2026-10-29
+
 ### Monetização opcional e aquisição de obras
 
 A autoria passa a escolher como disponibiliza cada obra: **gratuita**, **paga**
@@ -108,6 +110,8 @@ justamente para não parecer uma regra aprovada.
 Novidades na interface: seletor de modalidade no formulário de publicação,
 indicação de modalidade e preço na estante, fluxo de cartão/Pix/boleto, e a
 **biblioteca pessoal** (`/biblioteca`), ligada à conta e não ao navegador.
+
+## [3.1.6] — 2026-10-25
 
 ### Correções de acessibilidade encontradas em auditoria
 

@@ -4,9 +4,9 @@
 
 Plataforma editorial aberta para quadrinhos e livros independentes, com acessibilidade no centro: audiodescrição página a página, tipografia inclusiva, alto contraste e leitor compatível com leitores de tela.
 
-O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. Ler é de graça; o apoio financeiro é voluntário e nunca condiciona o acesso a uma obra.
+O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. **A autoria decide como cada obra é disponibilizada** — leitura livre, obra paga ou leitura livre com publicidade — e leitura livre continua sendo o padrão. O apoio financeiro ao projeto é voluntário e nunca condiciona o acesso a uma obra: só a obra que a própria autoria marcou como paga exige aquisição.
 
-**Versão 3.1.5** — veja o [CHANGELOG](CHANGELOG.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF.
+**Versão 3.3.0** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor.
 
 ---
 
@@ -185,7 +185,7 @@ Ao publicar ou editar uma obra, a autoria escolhe em **Como disponibilizar**:
 | --- | --- |
 | **Leitura livre** | Qualquer pessoa lê sem pagar. É o padrão |
 | **Obra paga** | Exige aquisição. Preço definido pela autoria, de R$ 1,00 a **R$ 50,00** |
-| **Livre, com publicidade** | Leitura gratuita, com um espaço publicitário **de demonstração** ao fim da página |
+| **Livre, com publicidade** | Leitura gratuita, com blocos publicitários **de demonstração** entre as páginas da leitura |
 
 A escolha **não influencia a curadoria**: definir preço não publica a obra nem concede o Selo Livrin, e obra fora do catálogo não pode ser adquirida. O preço pode ser alterado depois da aprovação — é decisão comercial, não conteúdo.
 

@@ -5,6 +5,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { FONT_MAX, FONT_MIN, usePreferences } from '../../preferences/PreferencesContext';
 import { ROLE_LABEL } from '../../lib/labels';
 import { stopSpeaking } from '../../lib/speech';
+import JanelaDeLibras from './JanelaDeLibras';
 import LeituraEmVoz from './LeituraEmVoz';
 import { Avatar } from '../ui';
 
@@ -151,7 +152,7 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         />
       </form>
 
-      <div className="hidden items-center gap-0.5 rounded-full border border-outline bg-surface p-1 sm:flex" role="group" aria-label="Recursos de acessibilidade">
+      <div className="relative hidden items-center gap-0.5 rounded-full border border-outline bg-surface p-1 sm:flex" role="group" aria-label="Recursos de acessibilidade">
         <button
           type="button"
           className={tool}
@@ -173,6 +174,7 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
           A+
         </button>
         <LeituraEmVoz classeBotao={tool} />
+        <JanelaDeLibras classeBotao={tool} />
       </div>
 
       {isWriter && (

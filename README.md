@@ -173,6 +173,38 @@ Página **Apoiar o Livrin** com valor livre ou sugerido, Pix, cartão ou boleto.
 
 O provedor padrão é o **simulado**: percorre todo o caminho de um provedor real (abre a cobrança, fica pendente, confirma) sem movimentar dinheiro — e diz isso com todas as letras na interface. Nenhum dado de cartão passa pela aplicação. Os pontos de entrada são discretos de propósito: o rodapé e um botão na página da obra, nunca um banner na frente da leitura.
 
+Apoiar **não libera obra nenhuma**: é apoio ao projeto. Quem libera obra é a aquisição, logo abaixo.
+
+### Monetização e aquisição
+
+> **Todo pagamento é simulado.** Nenhum dinheiro é movimentado, nenhuma cobrança é emitida, e a interface avisa isso antes de qualquer campo. Use apenas dados fictícios. Ver [ADR 014](docs/decisions/014-monetizacao-e-aquisicao.md).
+
+Ao publicar ou editar uma obra, a autoria escolhe em **Como disponibilizar**:
+
+| Modalidade | O que acontece |
+| --- | --- |
+| **Leitura livre** | Qualquer pessoa lê sem pagar. É o padrão |
+| **Obra paga** | Exige aquisição. Preço definido pela autoria, de R$ 1,00 a **R$ 50,00** |
+| **Livre, com publicidade** | Leitura gratuita, com um espaço publicitário **de demonstração** ao fim da página |
+
+A escolha **não influencia a curadoria**: definir preço não publica a obra nem concede o Selo Livrin, e obra fora do catálogo não pode ser adquirida. O preço pode ser alterado depois da aprovação — é decisão comercial, não conteúdo.
+
+#### Como testar cada meio de pagamento
+
+Entre com uma conta de leitor, abra uma obra paga (no seed, **Chamas de Agosto**, R$ 18,90) e clique em **Adquirir**.
+
+| Meio | O que preencher | Como concluir |
+| --- | --- | --- |
+| **Pix** | Nada | Copie o código de demonstração se quiser e clique em **Simular pagamento aprovado** |
+| **Cartão** | Titular qualquer, número `4111 1111 1111 1111`, validade `12/30`, código `123` | Clique em **Pagar**, depois em **Simular pagamento aprovado** |
+| **Boleto** | Nada | A linha digitável é de demonstração e não é pagável. Clique em **Simular pagamento aprovado** |
+
+Depois de aprovada, a obra entra em **Minha biblioteca** e continua disponível ao sair e entrar de novo — a aquisição pertence à conta, não ao navegador.
+
+Para ver o caminho que **não** libera a obra: clique em **Cancelar cobrança**, ou deixe a cobrança expirar (Pix 30min, cartão 15min, boleto 3 dias). Em ambos os casos a obra continua bloqueada.
+
+O que **não** funciona, de propósito: alterar o preço pelo navegador. A requisição de compra não tem campo de valor e o schema é estrito — mandar `priceCents` devolve erro 400. O preço cobrado é sempre o que está no banco.
+
 ---
 
 ## Tecnologias e requisitos
@@ -339,6 +371,36 @@ Entrada (multipart/form-data):
 
 Saída:  201 — obra criada com status EM_ANALISE (ou RASCUNHO, com action=draft)
 Erros:  400 dados inválidos · 401 sem token · 403 perfil LEITOR · 422 falta o arquivo
+```
+
+```
+POST /api/works/:id/purchase
+Autenticação: SIM        Perfil necessário: qualquer conta
+
+Entrada (JSON):
+  method: "PIX" | "CARTAO" | "BOLETO"
+  card:   { holder, number, expiry, cvv }   — só quando method = CARTAO
+
+  NÃO existe campo de valor. O preço é lido da obra, no servidor. O schema é
+  estrito: enviar priceCents devolve 400, em vez de ser ignorado em silêncio.
+
+Saída:  201 — cobrança aberta · 200 — cobrança pendente reaproveitada (idempotência)
+Erros:  400 obra de leitura livre ou cartão inválido · 401 sem token
+        404 obra inexistente ou fora do catálogo · 409 já adquirida
+```
+
+```
+POST /api/purchases/:id/confirm
+Autenticação: SIM
+
+Saída:  200 — situação da cobrança. CONFIRMADA libera a obra; qualquer outra, não.
+Erros:  404 cobrança de outra pessoa · 409 expirada ou não está mais pendente
+```
+
+```
+GET /api/me/library        → obras adquiridas (aquisição confirmada)
+GET /api/me/purchases      → histórico com todos os estados
+POST /api/purchases/:id/cancel  → cancela cobrança pendente; não libera a obra
 ```
 
 ---

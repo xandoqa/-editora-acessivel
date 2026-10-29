@@ -20,3 +20,5 @@
 **Posicionamento na interface.** A seção 19 pede discrição: o convite mora no rodapé e num botão na página da obra, nunca num banner. Ler nunca passa por uma tela de doação, e nenhuma obra fica atrás de pagamento.
 
 **Se um dia for trocar.** As opções de provedor real, com taxa, exigência de cadastro e esforço de integração de cada uma, estão levantadas em [pagamento-real-opcoes.md](../pagamento-real-opcoes.md). Esta decisão segue valendo: o simulado permanece o padrão, e qualquer provedor novo entra ao lado dele, escolhido por `PAYMENT_PROVIDER`.
+
+> **Revisto em parte pela [014](014-monetizacao-e-aquisicao.md).** A afirmação "nenhuma obra fica atrás de pagamento" deixou de valer para a modalidade `PAGA`, criada a pedido da especificação de outubro de 2026. Todo o resto — provedor simulado como padrão, `isReal: false`, dinheiro em centavos, discrição do convite ao apoio — continua valendo, e a doação continua não liberando obra nenhuma.

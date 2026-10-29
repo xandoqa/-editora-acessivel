@@ -1,6 +1,6 @@
 {
   "name": "livrin-api",
-  "version": "3.1.6",
+  "version": "3.2.0",
   "private": true,
   "description": "API REST da Editora Livrin (Express 5 + TypeScript + Drizzle ORM + PostgreSQL)",
   "type": "commonjs",

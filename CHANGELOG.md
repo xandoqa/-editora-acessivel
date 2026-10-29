@@ -4,6 +4,54 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). 
 
 ## [Não lançado]
 
+### Monetização opcional e aquisição de obras
+
+A autoria passa a escolher como disponibiliza cada obra: **gratuita**, **paga**
+(preço próprio, até R$ 50,00) ou **com publicidade** (leitura livre, espaços
+publicitários simulados). Obra paga exige aquisição confirmada para ser lida.
+
+Isso **revisa parte da ADR 011**, que dizia que nenhuma obra ficaria atrás de
+pagamento. A mudança é deliberada e está registrada na
+[ADR 014](docs/decisions/014-monetizacao-e-aquisicao.md). Gratuita continua
+sendo o padrão, e nenhuma obra existente mudou de modalidade.
+
+**As regras moram no servidor**, não na tela:
+
+- **O preço vem do banco.** A requisição de compra não tem campo de valor, e o
+  schema é estrito: mandar `priceCents` é erro 400, não um campo ignorado em
+  silêncio. Alterar o preço no navegador deixa de ser um ataque possível.
+- **Preço existe se, e somente se, a obra é paga**, e dentro do teto —
+  validado na API e por `CHECK` no banco.
+- **Uma pessoa, uma aquisição confirmada por obra**, garantida por índice único
+  parcial. Dois cliques simultâneos não viram duas compras porque o banco
+  recusa a segunda, não porque a aplicação lembrou de verificar. A confirmação
+  segue a mesma ideia: o `UPDATE` exige que a linha ainda esteja pendente.
+- **A autorização é verificada na entrega do conteúdo**, em `getWorkFileInfo` e
+  `getWorkAudioInfo`. A faixa de audiodescrição entra na guarda de propósito:
+  para quem depende dela, ela **é** a obra, e deixá-la aberta seria uma porta
+  dos fundos contra o público que a plataforma existe para servir.
+
+**Cobrança pendente expira** (PIX 30min, cartão 15min, boleto 3 dias). Sem
+isso, uma cobrança abandonada ficaria "aguardando pagamento" para sempre e
+bloquearia nova tentativa — o estado que quase todo trabalho acadêmico esquece.
+
+**Nenhum dado de cartão é armazenado.** O formulário valida formato e o
+servidor descarta: nada de número, validade ou código de segurança em banco,
+log ou resposta.
+
+**Monetização não substitui curadoria.** Definir preço não publica a obra nem
+concede o Selo Livrin, e obra fora do catálogo não pode ser adquirida. Na
+estante, a modalidade aparece ao lado do selo, nunca dentro dele.
+
+**Publicidade é demonstração declarada:** faixa identificada, fora do corpo do
+texto, sem script de terceiro, sem rastreamento e sem coleta de dado algum. O
+percentual de divisão (padrão 70% para a autoria) é configurável por obra
+justamente para não parecer uma regra aprovada.
+
+Novidades na interface: seletor de modalidade no formulário de publicação,
+indicação de modalidade e preço na estante, fluxo de cartão/Pix/boleto, e a
+**biblioteca pessoal** (`/biblioteca`), ligada à conta e não ao navegador.
+
 ### Correções de acessibilidade encontradas em auditoria
 
 Três defeitos achados numa varredura do código, não por relato de uso. Os dois

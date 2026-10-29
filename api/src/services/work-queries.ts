@@ -81,6 +81,13 @@ export function toWorkDto(row: WorkRow) {
     audioDescriber: w.audioDescriber,
     audioNarrator: w.audioNarrator,
     audioReviewer: w.audioReviewer,
+    /**
+     * Modalidade escolhida pela autoria. `priceCents` só existe em obra PAGA —
+     * é o mesmo par de regras garantido por CHECK no banco.
+     */
+    monetization: w.monetization,
+    priceCents: w.priceCents,
+    adRevenueAuthorShare: w.adRevenueAuthorShare,
     coverUrl: coverUrl(w.coverPath),
     hasFile: !!w.filePath,
     file: w.filePath

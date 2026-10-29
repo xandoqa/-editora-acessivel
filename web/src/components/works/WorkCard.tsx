@@ -1,10 +1,12 @@
 import { Link } from 'react-router-dom';
-import { AudioLines, BookOpen, Ear, Eye, Headphones, Info, PersonStanding, SpellCheck2, Square, Type, Video } from 'lucide-react';
+import { AudioLines, BookOpen, Ear, Eye, Headphones, Info, PersonStanding, ShoppingBag, SpellCheck2, Square, Type, Video } from 'lucide-react';
 import { useState, type ReactNode } from 'react';
 import type { FeatureFlag, Work } from '../../types/api';
+import { formatCents } from '../../lib/format';
 import { FORMAT_SHORT } from '../../lib/labels';
 import { speak, speechSupported, stopSpeaking } from '../../lib/speech';
 import { Cover } from '../ui';
+import { Modalidade } from './Modalidade';
 import { SeloCompacto } from './SeloLivrin';
 
 /** Selo superior (recurso de destaque) e etiqueta lateral, como nos cards do protótipo. */
@@ -130,12 +132,33 @@ export default function WorkCard({ work }: { work: Work }) {
 
         <p className="mt-2 line-clamp-2 flex-1 text-sm leading-relaxed text-ink-muted">{work.synopsis}</p>
 
-        <SeloCompacto work={work} className="mt-3 self-start" />
+        <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+          <SeloCompacto work={work} />
+          {/* A modalidade fica ao lado do selo, e não dentro dele: o selo diz
+              o que a curadoria verificou, a modalidade diz como a obra é
+              disponibilizada. Misturar os dois faria parecer que pagar
+              concede selo — exatamente o que a ADR 014 proíbe. */}
+          <Modalidade monetization={work.monetization} priceCents={work.priceCents} />
+        </div>
 
         <div className="mt-3 flex items-center gap-2 border-t border-outline/25 pt-3">
-          <Link to={`/reader/${work.id}`} className="btn-secondary flex-1" aria-label={`Ler agora: ${work.title}`}>
-            <BookOpen className="h-4 w-4" aria-hidden /> Ler agora
-          </Link>
+          {/* Obra paga abre a página da obra, onde o preço e o fluxo de
+              aquisição ficam visíveis. Levar direto ao leitor só para esbarrar
+              num aviso de "adquira primeiro" seria prometer o que não se
+              cumpre. Obra de leitura livre segue direto, como sempre. */}
+          {work.monetization === 'PAGA' ? (
+            <Link
+              to={`/reader/${work.id}#aquisicao`}
+              className="btn-secondary flex-1"
+              aria-label={`Adquirir ${work.title} por ${formatCents(work.priceCents ?? 0)}`}
+            >
+              <ShoppingBag className="h-4 w-4" aria-hidden /> Adquirir
+            </Link>
+          ) : (
+            <Link to={`/reader/${work.id}`} className="btn-secondary flex-1" aria-label={`Ler agora: ${work.title}`}>
+              <BookOpen className="h-4 w-4" aria-hidden /> Ler agora
+            </Link>
+          )}
           <button
             type="button"
             className="icon-btn"

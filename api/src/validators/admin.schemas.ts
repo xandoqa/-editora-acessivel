@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { checkStatusEnum, userRoleEnum, workFormatEnum, workStatusEnum } from '../db/schema';
 import { emailSchema, passwordSchema } from './auth.schemas';
 import { formBoolean, idParam, optionalText, paginationSchema, requiredText, searchTerm } from './common';
-import { workFieldsSchema } from './works.schemas';
+import { validaMonetizacao, workFieldsSchema } from './works.schemas';
 
 const sortOrder = z.enum(['asc', 'desc']).default('desc');
 const booleanQuery = z.enum(['true', 'false']).transform((v) => v === 'true').optional();
@@ -53,10 +53,12 @@ export const adminWorkListSchema = paginationSchema.extend({
 });
 
 /** Criação pela administração: escolhe o autor e o status inicial. */
-export const adminCreateWorkSchema = workFieldsSchema.extend({
-  authorId: idParam,
-  status: z.enum(workStatusEnum.enumValues).default('EM_ANALISE'),
-});
+export const adminCreateWorkSchema = workFieldsSchema
+  .extend({
+    authorId: idParam,
+    status: z.enum(workStatusEnum.enumValues).default('EM_ANALISE'),
+  })
+  .superRefine(validaMonetizacao);
 
 export const adminStatusSchema = z
   .object({

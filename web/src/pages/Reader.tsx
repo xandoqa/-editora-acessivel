@@ -21,6 +21,7 @@ import {
   SpellCheck2,
   Table2,
   Volume2,
+  ShoppingBag,
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import { useAudioDescriptions, useWork } from '../hooks/queries';
@@ -30,6 +31,9 @@ import { STATUS_LABEL, ageRatingLabel } from '../lib/labels';
 import { usePreferences } from '../preferences/PreferencesContext';
 import AudioDescriptionPlayer, { type PlayerHandle } from '../components/reader/AudioDescriptionPlayer';
 import DocumentViewer from '../components/reader/DocumentViewer';
+import AquisicaoDialog from '../components/works/AquisicaoDialog';
+import { EspacoPublicitario } from '../components/works/Modalidade';
+import { formatCents } from '../lib/format';
 import ReaderPreferencesPanel from '../components/reader/ReaderPreferencesPanel';
 import { PALETTES, textStyle, useReaderPrefs } from '../components/reader/readerPrefs';
 import { useReadingSession } from '../components/reader/useReadingSession';
@@ -57,6 +61,7 @@ export default function Reader() {
   const { data: descriptions = [] } = useAudioDescriptions(work ? workId : undefined);
   const [prefs, setPrefs] = useReaderPrefs();
   const [page, setPage] = useState(1);
+  const [comprando, setComprando] = useState(false);
   const [fileTotal, setFileTotal] = useState(0);
   const [playerOpen, setPlayerOpen] = useState(true);
   const [downloadOpen, setDownloadOpen] = useState(false);
@@ -112,6 +117,23 @@ export default function Reader() {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [goTo, page]);
+
+  /*
+   * Obra paga que esta pessoa ainda não adquiriu.
+   *
+   * `access` vem do detalhe da obra e serve para a tela decidir o que mostrar.
+   * A autorização de verdade continua no servidor: mesmo que alguém force
+   * este valor no navegador, o endpoint do arquivo recusa do mesmo jeito.
+   */
+  const bloqueadaPorAquisicao = Boolean(work?.access?.required && !work.access.granted);
+
+  // O card do catálogo manda para cá com #aquisicao quando a obra é paga:
+  // quem clicou em "Adquirir" não deveria ter que clicar de novo ao chegar.
+  useEffect(() => {
+    if (location.hash === '#aquisicao' && bloqueadaPorAquisicao && user) setComprando(true);
+  }, [location.hash, bloqueadaPorAquisicao, user]);
+
+  const comPublicidade = work?.monetization === 'PUBLICIDADE';
 
   const currentAd = descriptions.find((d) => d.pageNumber === page);
   const chapterAd = useMemo(
@@ -346,7 +368,32 @@ export default function Reader() {
             </div>
 
             <div className="relative rounded-xl p-2" style={{ background: palette.surface }}>
-              {work.hasFile && work.file ? (
+              {bloqueadaPorAquisicao ? (
+                /*
+                 * Obra paga sem aquisição. O bloqueio REAL está no servidor —
+                 * este painel existe para explicar e oferecer o caminho, em
+                 * vez de deixar o leitor tentar abrir e receber um erro seco.
+                 */
+                <div className="p-8 text-center" style={{ color: palette.text }}>
+                  <ShoppingBag className="mx-auto h-8 w-8 opacity-70" aria-hidden />
+                  <p className="mt-3 font-display text-xl font-semibold">Esta obra é paga</p>
+                  <p className="mx-auto mt-2 max-w-prose text-sm" style={{ color: palette.muted }}>
+                    Adquira <strong>{work.title}</strong> por {formatCents(work.priceCents ?? 0)} para ler. A obra fica
+                    na sua biblioteca e continua disponível quando você voltar.
+                  </p>
+                  <div className="mt-5 flex flex-wrap justify-center gap-2">
+                    {user ? (
+                      <button type="button" className="btn-primary" onClick={() => setComprando(true)}>
+                        <ShoppingBag className="h-4 w-4" aria-hidden /> Adquirir por {formatCents(work.priceCents ?? 0)}
+                      </button>
+                    ) : (
+                      <Link to="/login" className="btn-primary">
+                        Entrar para adquirir
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              ) : work.hasFile && work.file ? (
                 <DocumentViewer
                   workId={work.id}
                   fileType={work.file.type}
@@ -483,6 +530,14 @@ export default function Reader() {
           <FeedbackSection work={work} />
         </aside>
       </div>
+
+      {/* Espaço publicitário simulado: fora do corpo da leitura, no fim da
+          página, para não atrapalhar quem está lendo. */}
+      {comPublicidade && <EspacoPublicitario share={work.adRevenueAuthorShare} />}
+
+      {work.monetization === 'PAGA' && user && (
+        <AquisicaoDialog work={work} open={comprando} onClose={() => setComprando(false)} />
+      )}
     </div>
   );
 }

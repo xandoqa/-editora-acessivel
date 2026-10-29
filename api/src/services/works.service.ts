@@ -7,6 +7,7 @@ import { badRequest, conflict, forbidden, notFound, unprocessable } from '../uti
 import { paginated } from '../validators/common';
 import { listChecks } from './review.service';
 import type { catalogQuerySchema, WorkFields, WorkUpdate } from '../validators/works.schemas';
+import { exigirAcessoDeLeitura, temAcessoDeLeitura } from './purchases.service';
 import { absolutePath, commitUpload, removeFile, storedFileExists, type StoredFile } from './storage.service';
 import {
   ADMIN_TRANSITIONS,
@@ -84,18 +85,34 @@ export async function getWork(id: number, viewer?: AuthUser) {
   const row = await findWorkRow(id);
   if (!canView(row.work, viewer)) throw notFound('Obra não encontrada.');
   const dto = toWorkDto(row);
+  /*
+   * Se esta pessoa já pode ler a obra.
+   *
+   * Vai no detalhe para que a tela saiba o que oferecer — "ler" ou "adquirir"
+   * — antes de tentar baixar o arquivo e esbarrar num 403. Note que isto é
+   * informação para a INTERFACE: quem decide continua sendo o endpoint do
+   * arquivo, que refaz a verificação por conta própria.
+   */
+  const access = {
+    required: row.work.monetization === 'PAGA',
+    granted: await temAcessoDeLeitura(row.work, viewer),
+  };
   // No detalhe da obra o selo vem com a lista do que a curadoria verificou: o
   // leitor vê no que confiar e o autor vê o que foi cobrado. É público de
   // propósito — um selo cujo critério ninguém pode ler não vale nada.
-  if (!dto.seal.granted) return dto;
+  if (!dto.seal.granted) return { ...dto, access };
   const checks = await listChecks(id);
-  return { ...dto, seal: { ...dto.seal, checks } };
+  return { ...dto, access, seal: { ...dto.seal, checks } };
 }
 
 /** Arquivo original da obra (para o leitor e para download). */
 export async function getWorkFileInfo(id: number, viewer?: AuthUser) {
   const work = await findWork(id);
   if (!canView(work, viewer)) throw notFound('Obra não encontrada.');
+  // Obra paga exige aquisição confirmada. A verificação é aqui, no caminho do
+  // ARQUIVO, e não só na tela: é este endpoint que entrega o conteúdo, e é ele
+  // que precisa recusar. Autoria e administração passam direto.
+  await exigirAcessoDeLeitura(work, viewer);
   if (!work.filePath || !work.fileType) throw notFound('Esta obra ainda não possui arquivo enviado.');
   if (!storedFileExists(work.filePath)) {
     throw notFound(
@@ -113,6 +130,10 @@ export async function getWorkFileInfo(id: number, viewer?: AuthUser) {
 export async function getWorkAudioInfo(id: number, viewer?: AuthUser) {
   const work = await findWork(id);
   if (!canView(work, viewer)) throw notFound('Obra não encontrada.');
+  // A faixa de audiodescrição É a obra, para quem depende dela. Deixá-la aberta
+  // numa obra paga seria uma porta dos fundos justamente para o público que a
+  // plataforma existe para servir.
+  await exigirAcessoDeLeitura(work, viewer);
   if (!work.audioPath) throw notFound('Esta obra não possui faixa de audiodescrição.');
   if (!storedFileExists(work.audioPath)) {
     throw notFound('A faixa de audiodescrição está registrada no banco, mas não está no volume de uploads. Reenvie o arquivo.');

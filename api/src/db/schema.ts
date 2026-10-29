@@ -54,8 +54,32 @@ export const checkStatusEnum = pgEnum('check_status', ['PENDENTE', 'EM_ANDAMENTO
 /** Situação de uma doação (ver services/payments). */
 export const donationStatusEnum = pgEnum('donation_status', ['PENDENTE', 'CONFIRMADA', 'FALHOU', 'CANCELADA']);
 
-/** Meios de pagamento oferecidos na tela de apoio. */
+/** Meios de pagamento oferecidos na tela de apoio e na aquisição de obras. */
 export const paymentMethodEnum = pgEnum('payment_method', ['PIX', 'CARTAO', 'BOLETO']);
+
+/**
+ * Como o autor decidiu disponibilizar a obra.
+ *
+ *   GRATUITA     — leitura livre, sem cobrança. É o padrão, e continua sendo a
+ *                  opção coerente com a proposta social da livraria.
+ *   PAGA         — exige aquisição para ler. Preço definido pelo autor, com
+ *                  teto validado no servidor (ver MAX_PRECO_CENTAVOS).
+ *   PUBLICIDADE  — leitura livre, com espaços publicitários simulados; a
+ *                  receita é demonstrativa e a divisão é configurável.
+ *
+ * A modalidade NÃO substitui a curadoria: escolher um preço não publica a obra
+ * nem concede o Selo Livrin. Ver ADR 014.
+ */
+export const monetizationEnum = pgEnum('monetization', ['GRATUITA', 'PAGA', 'PUBLICIDADE']);
+
+/** Situação de uma aquisição. Espelha a da doação, mais EXPIRADA (boleto/PIX vencido). */
+export const purchaseStatusEnum = pgEnum('purchase_status', [
+  'PENDENTE',
+  'CONFIRMADA',
+  'FALHOU',
+  'CANCELADA',
+  'EXPIRADA',
+]);
 
 /* -------------------------------------------------------------------------- */
 /*                                   TABELAS                                  */
@@ -126,6 +150,17 @@ export const works = pgTable(
     authorNotes: text('author_notes'),
     tags: text('tags').array().notNull().default(sql`'{}'::text[]`),
 
+    /**
+     * Monetização escolhida pelo autor. O preço vive em centavos inteiros, como
+     * o resto do dinheiro no projeto, e só existe quando a modalidade é PAGA —
+     * há um CHECK no banco garantindo os dois sentidos dessa regra, para que
+     * nem um bug de aplicação consiga gravar preço em obra gratuita.
+     */
+    monetization: monetizationEnum('monetization').notNull().default('GRATUITA'),
+    priceCents: integer('price_cents'),
+    /** Percentual da receita publicitária simulada destinado ao autor (0–100). */
+    adRevenueAuthorShare: integer('ad_revenue_author_share').notNull().default(70),
+
     // Recursos de acessibilidade declarados pelo autor / validados pela curadoria
     hasAudioDesc: boolean('has_audio_desc').notNull().default(false),
     hasLeitorTela: boolean('has_leitor_tela').notNull().default(false),
@@ -161,6 +196,15 @@ export const works = pgTable(
     index('works_genre_idx').on(t.genreId),
     index('works_published_at_idx').on(t.publishedAt),
     check('works_pages_positive', sql`${t.pages} > 0`),
+    // Preço existe se, e somente se, a obra é PAGA — e dentro do teto de R$ 50.
+    // A regra também está na validação da API; aqui ela fica garantida mesmo
+    // que alguém escreva direto no banco.
+    check(
+      'works_price_matches_monetization',
+      sql`(${t.monetization} = 'PAGA' AND ${t.priceCents} IS NOT NULL AND ${t.priceCents} > 0 AND ${t.priceCents} <= 5000)
+          OR (${t.monetization} <> 'PAGA' AND ${t.priceCents} IS NULL)`,
+    ),
+    check('works_ad_share_range', sql`${t.adRevenueAuthorShare} BETWEEN 0 AND 100`),
   ],
 );
 
@@ -311,6 +355,57 @@ export const donations = pgTable(
   ],
 );
 
+/**
+ * Aquisição de uma obra paga.
+ *
+ * Publicar na estante e adquirir são estados diferentes: a obra aprovada fica
+ * visível para todos, e a aquisição é o direito de UMA pessoa lê-la. Por isso
+ * esta tabela existe separada de `works` e de `donations` — uma doação apoia o
+ * projeto e não libera nada; uma aquisição libera uma obra e não é doação.
+ *
+ * O preço é gravado no momento da compra (`priceCents`), e não lido de `works`
+ * depois: se o autor mudar o preço amanhã, o histórico de quem já comprou não
+ * pode mudar junto.
+ */
+export const purchases = pgTable(
+  'purchases',
+  {
+    id: serial('id').primaryKey(),
+    /** Aquisição é sempre de uma conta: nunca de uma sessão ou de um navegador. */
+    userId: integer('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    workId: integer('work_id')
+      .notNull()
+      .references(() => works.id, { onDelete: 'cascade' }),
+    /** Preço cobrado, congelado no instante da compra. */
+    priceCents: integer('price_cents').notNull(),
+    currency: varchar('currency', { length: 3 }).notNull().default('BRL'),
+    method: paymentMethodEnum('method').notNull(),
+    provider: varchar('provider', { length: 40 }).notNull(),
+    providerRef: varchar('provider_ref', { length: 80 }).notNull(),
+    status: purchaseStatusEnum('status').notNull().default('PENDENTE'),
+    confirmedAt: timestamp('confirmed_at', { withTimezone: true }),
+    /** Cobrança pendente não fica pendente para sempre. */
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
+    ...timestamps,
+  },
+  (t) => [
+    index('purchases_user_idx').on(t.userId),
+    index('purchases_work_idx').on(t.workId),
+    index('purchases_status_idx').on(t.status),
+    // Impede registrar a mesma cobrança duas vezes.
+    uniqueIndex('purchases_provider_ref_unique').on(t.provider, t.providerRef),
+    // Uma pessoa só pode ter UMA aquisição confirmada por obra. É isto que
+    // transforma a idempotência numa garantia do banco, e não numa promessa da
+    // aplicação: dois cliques simultâneos não geram duas compras.
+    uniqueIndex('purchases_one_confirmed_per_user_work')
+      .on(t.userId, t.workId)
+      .where(sql`status = 'CONFIRMADA'`),
+    check('purchases_price_positive', sql`${t.priceCents} > 0`),
+  ],
+);
+
 /* -------------------------------------------------------------------------- */
 /*                                    TIPOS                                   */
 /* -------------------------------------------------------------------------- */
@@ -332,3 +427,7 @@ export type Donation = typeof donations.$inferSelect;
 export type NewDonation = typeof donations.$inferInsert;
 export type DonationStatus = (typeof donationStatusEnum.enumValues)[number];
 export type PaymentMethod = (typeof paymentMethodEnum.enumValues)[number];
+export type Monetization = (typeof monetizationEnum.enumValues)[number];
+export type Purchase = typeof purchases.$inferSelect;
+export type NewPurchase = typeof purchases.$inferInsert;
+export type PurchaseStatus = (typeof purchaseStatusEnum.enumValues)[number];

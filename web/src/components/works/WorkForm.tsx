@@ -1,9 +1,10 @@
 import { useMemo, useState, type FormEvent, type ReactNode } from 'react';
-import { ListChecks, Lock, NotebookPen, PersonStanding, Send, Settings2 } from 'lucide-react';
+import { Coins, ListChecks, Lock, NotebookPen, PersonStanding, Send, Settings2 } from 'lucide-react';
 import { useGenres } from '../../hooks/queries';
 import { AGE_RATINGS, FEATURES, FORMAT_LABEL, ageRatingLabel } from '../../lib/labels';
 import { formatBytes } from '../../lib/format';
-import type { FeatureFlag, Work, WorkFormat } from '../../types/api';
+import type { FeatureFlag, Monetization, Work, WorkFormat } from '../../types/api';
+import { MAX_PRECO_CENTAVOS, MIN_PRECO_CENTAVOS } from '../../types/api';
 import { SelectInput, TextArea, TextInput } from '../ui';
 import FileDropzone from './FileDropzone';
 
@@ -30,7 +31,18 @@ interface Props {
   showProcess?: boolean;
 }
 
-const METADATA_FIELDS = new Set(['subtitle', 'synopsis', 'authorNotes', 'tags', 'editionLabel']);
+// A monetização é editável mesmo em obra já aprovada: é decisão comercial da
+// autoria, não conteúdo — mudar o preço não altera o que a curadoria examinou.
+const METADATA_FIELDS = new Set([
+  'subtitle',
+  'synopsis',
+  'authorNotes',
+  'tags',
+  'editionLabel',
+  'monetization',
+  'precoReais',
+  'adRevenueAuthorShare',
+]);
 const WORK_EXTS = ['pdf', 'docx', 'epub', 'cbz', 'cbr'];
 const MAX_MB = Number(import.meta.env.VITE_MAX_UPLOAD_MB) || 180;
 
@@ -49,6 +61,10 @@ type FormState = {
   audioDescriber: string;
   audioNarrator: string;
   audioReviewer: string;
+  monetization: Monetization;
+  /** Em reais, como a pessoa digita. Convertido em centavos no envio. */
+  precoReais: string;
+  adRevenueAuthorShare: string;
 } & Record<FeatureFlag, boolean>;
 
 function initialState(w?: Work): FormState {
@@ -67,6 +83,9 @@ function initialState(w?: Work): FormState {
     audioDescriber: w?.audioDescriber ?? '',
     audioNarrator: w?.audioNarrator ?? '',
     audioReviewer: w?.audioReviewer ?? '',
+    monetization: w?.monetization ?? 'GRATUITA',
+    precoReais: w?.priceCents != null ? (w.priceCents / 100).toFixed(2) : '',
+    adRevenueAuthorShare: String(w?.adRevenueAuthorShare ?? 70),
     hasAudioDesc: w?.hasAudioDesc ?? false,
     hasLeitorTela: w?.hasLeitorTela ?? false,
     hasTextoAlt: w?.hasTextoAlt ?? false,
@@ -105,13 +124,34 @@ export default function WorkForm({ initial, metadataOnly, errors, busy, uploadPr
       document.getElementById('work-file-zone')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
+    /*
+     * Conferência de preço no navegador — por conveniência, não por segurança.
+     * A regra que vale é a do servidor (e o CHECK no banco). Isto existe só
+     * para a pessoa saber do erro antes de enviar o arquivo inteiro.
+     */
+    if (form.monetization === 'PAGA') {
+      const centavos = Math.round(Number(form.precoReais.replace(',', '.')) * 100);
+      if (!Number.isFinite(centavos) || centavos < MIN_PRECO_CENTAVOS || centavos > MAX_PRECO_CENTAVOS) {
+        setLocalErrors({
+          precoReais: `Defina um preço entre R$ ${(MIN_PRECO_CENTAVOS / 100).toFixed(2)} e R$ ${(MAX_PRECO_CENTAVOS / 100).toFixed(2)}.`,
+        });
+        return;
+      }
+    }
     setLocalErrors({});
     const fd = new FormData();
     const tags = form.tags.split(',').map((t) => t.trim().replace(/^#/, '')).filter(Boolean);
     for (const [key, value] of Object.entries(form)) {
       if (locked(key)) continue;
       if (key === 'tags') fd.append('tags', JSON.stringify(tags));
-      else fd.append(key, typeof value === 'boolean' ? String(value) : value);
+      // `precoReais` é um campo só da tela: o servidor trabalha em centavos
+      // inteiros, e a conversão acontece aqui, uma vez. Obra que não é paga
+      // manda o preço vazio, e o servidor o guarda como nulo — "sem preço" e
+      // "de graça" são estados diferentes.
+      else if (key === 'precoReais') {
+        const centavos = form.monetization === 'PAGA' ? Math.round(Number(form.precoReais.replace(',', '.')) * 100) : null;
+        fd.append('priceCents', centavos !== null && Number.isFinite(centavos) ? String(centavos) : '');
+      } else fd.append(key, typeof value === 'boolean' ? String(value) : value);
     }
     if (file && !metadataOnly) fd.append('file', file);
     if (audio && !metadataOnly) fd.append('audio', audio);
@@ -202,6 +242,74 @@ export default function WorkForm({ initial, metadataOnly, errors, busy, uploadPr
           aside={`Recomendado: 100 a 800 caracteres · ${form.synopsis.length}`}
           {...text('synopsis')}
         />
+      </section>
+
+      <section className="card space-y-5 p-5 md:p-7" aria-labelledby="monetizacao-title">
+        <div>
+          <h2 id="monetizacao-title" className="flex items-center gap-2 text-2xl font-semibold text-ink">
+            <Coins className="h-5 w-5 text-ink-muted" aria-hidden /> Como disponibilizar
+          </h2>
+          <p className="mt-1 text-sm text-ink-muted">
+            Esta escolha é sua e pode mudar depois. Ela <strong className="text-ink">não</strong> influencia a
+            curadoria: definir um preço não publica a obra nem concede o Selo Livrin.
+          </p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-3" role="radiogroup" aria-label="Modalidade de publicação">
+          {(
+            [
+              { v: 'GRATUITA', t: 'Leitura livre', d: 'Qualquer pessoa lê sem pagar.' },
+              { v: 'PAGA', t: 'Obra paga', d: `Leitor adquire para ler. Até R$ ${(MAX_PRECO_CENTAVOS / 100).toFixed(2)}.` },
+              { v: 'PUBLICIDADE', t: 'Livre, com publicidade', d: 'Leitura gratuita, com espaços publicitários.' },
+            ] as const
+          ).map((op) => {
+            const ativo = form.monetization === op.v;
+            return (
+              <button
+                key={op.v}
+                type="button"
+                role="radio"
+                aria-checked={ativo}
+                disabled={locked('monetization') || busy}
+                onClick={() => set('monetization', op.v as Monetization)}
+                className={`flex min-h-[44px] flex-col gap-1 rounded-xl border p-3 text-left transition disabled:opacity-50 ${
+                  ativo ? 'border-primary bg-primary-container' : 'border-outline/60 hover:bg-surface-high'
+                }`}
+              >
+                <span className="font-semibold text-ink">{op.t}</span>
+                <span className="text-xs text-ink-muted">{op.d}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {form.monetization === 'PAGA' && (
+          <TextInput
+            label="Preço da obra (R$)"
+            required
+            inputMode="decimal"
+            placeholder="18,90"
+            hint={`Entre R$ ${(MIN_PRECO_CENTAVOS / 100).toFixed(2)} e R$ ${(MAX_PRECO_CENTAVOS / 100).toFixed(2)}. O leitor vê o valor antes de pagar.`}
+            {...text('precoReais')}
+          />
+        )}
+
+        {form.monetization === 'PUBLICIDADE' && (
+          <>
+            <TextInput
+              label="Percentual da receita para você (%)"
+              type="number"
+              min={0}
+              max={100}
+              hint="Percentual de demonstração: não há integração publicitária real nem receita de verdade."
+              {...text('adRevenueAuthorShare')}
+            />
+            <p className="rounded-xl border-l-4 border-warn bg-surface-high p-3 text-sm text-ink">
+              Não existe anunciante conectado a esta plataforma. Os espaços publicitários são demonstrativos, e
+              impressões e repasses são fictícios.
+            </p>
+          </>
+        )}
       </section>
 
       <section className="card p-5 md:p-7" aria-labelledby="a11y-title">

@@ -64,6 +64,10 @@ export interface DemoWork {
   file?: string;
   publishedDaysAgo?: number;
   submittedDaysAgo?: number;
+  /** Modalidade escolhida pela autoria. Ausente significa GRATUITA. */
+  monetization?: 'GRATUITA' | 'PAGA' | 'PUBLICIDADE';
+  /** Em centavos, só em obra PAGA, teto de 5000 (R$ 50,00). */
+  priceCents?: number;
 }
 
 export const DEMO_WORKS: DemoWork[] = [
@@ -152,6 +156,8 @@ export const DEMO_WORKS: DemoWork[] = [
     key: 'chamas',
     author: 'mduarte',
     title: 'Chamas de Agosto',
+    monetization: 'PAGA',
+    priceCents: 1890,
     genre: 'Drama',
     format: 'QUADRINHO',
     pages: 9,
@@ -171,6 +177,7 @@ export const DEMO_WORKS: DemoWork[] = [
     key: 'vozes',
     author: 'tiago',
     title: 'Vozes do Mar',
+    monetization: 'PUBLICIDADE',
     genre: 'Poesia',
     format: 'ZINE',
     pages: 12,

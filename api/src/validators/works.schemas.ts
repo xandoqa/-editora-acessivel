@@ -1,8 +1,75 @@
 import { z } from 'zod';
-import { workFormatEnum } from '../db/schema';
+import { monetizationEnum, workFormatEnum } from '../db/schema';
 import { formBoolean, idParam, optionalText, paginationSchema, requiredText, searchTerm } from './common';
 
 export const AGE_RATINGS = ['L', '10', '12', '14', '16', '18'] as const;
+
+/** Teto e piso do preço definido pelo autor, em centavos (R$ 1,00 a R$ 50,00). */
+export const MAX_PRECO_CENTAVOS = 5_000;
+export const MIN_PRECO_CENTAVOS = 100;
+
+/**
+ * Preço em centavos, vindo de form-data (portanto, texto).
+ *
+ * Campo vazio vira `null`, e não `0`: "sem preço" e "de graça" são estados
+ * diferentes, e só o primeiro é válido fora da modalidade PAGA.
+ */
+const precoCentavosSchema = z.preprocess(
+  (v) => {
+    if (v === undefined) return undefined;
+    if (v === null) return null;
+    if (typeof v === 'string') {
+      const s = v.trim();
+      if (s === '') return null;
+      const n = Number(s);
+      return Number.isNaN(n) ? s : n;
+    }
+    return v;
+  },
+  z
+    .number({ invalid_type_error: 'Preço inválido' })
+    .int('O preço deve estar em centavos, sem casas decimais')
+    .min(MIN_PRECO_CENTAVOS, `O preço mínimo é de ${MIN_PRECO_CENTAVOS / 100} real`)
+    .max(MAX_PRECO_CENTAVOS, `O preço máximo permitido é de R$ ${MAX_PRECO_CENTAVOS / 100},00`)
+    .nullable()
+    .optional(),
+);
+
+/** Percentual da receita publicitária simulada que fica com a autoria. */
+const adShareSchema = z.preprocess(
+  (v) => (typeof v === 'string' && v.trim() !== '' ? Number(v) : v),
+  z.number().int().min(0, 'Percentual inválido').max(100, 'Percentual inválido').optional(),
+);
+
+/**
+ * Coerência entre modalidade e preço, verificada no SERVIDOR.
+ *
+ * O mesmo par de regras existe como CHECK no banco. Aqui ela devolve uma
+ * mensagem legível para o formulário; lá, ela impede que qualquer caminho —
+ * inclusive um bug futuro — grave a combinação inválida.
+ */
+export function validaMonetizacao(
+  valor: { monetization?: string; priceCents?: number | null },
+  ctx: z.RefinementCtx,
+): void {
+  if (valor.monetization === 'PAGA') {
+    if (valor.priceCents === null || valor.priceCents === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['priceCents'],
+        message: 'Defina o preço da obra para publicá-la como obra paga.',
+      });
+    }
+    return;
+  }
+  if (valor.monetization !== undefined && valor.priceCents !== null && valor.priceCents !== undefined) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['priceCents'],
+      message: 'Só obras pagas têm preço. Escolha "obra paga" ou deixe o preço em branco.',
+    });
+  }
+}
 
 /** Aceita tags como array JSON, lista separada por vírgula ou repetida no form-data. */
 const tagsSchema = z.preprocess(
@@ -70,17 +137,35 @@ export const workFieldsSchema = z.object({
   audioDescriber: optionalText(120),
   audioNarrator: optionalText(120),
   audioReviewer: optionalText(160),
+
+  // Monetização escolhida pela autoria. Não substitui a curadoria: definir um
+  // preço não publica a obra nem concede o Selo Livrin (ver ADR 014).
+  monetization: z
+    .enum(monetizationEnum.enumValues, { errorMap: () => ({ message: 'Modalidade de publicação inválida' }) })
+    .default('GRATUITA'),
+  priceCents: precoCentavosSchema,
+  adRevenueAuthorShare: adShareSchema,
 });
 
 export type WorkFields = z.infer<typeof workFieldsSchema>;
 
 /** Criação pelo autor: `action=draft` salva rascunho; `action=submit` envia para análise. */
-export const createWorkSchema = workFieldsSchema.extend({
-  action: z.enum(['draft', 'submit']).default('submit'),
-});
+export const createWorkSchema = workFieldsSchema
+  .extend({
+    action: z.enum(['draft', 'submit']).default('submit'),
+  })
+  .superRefine(validaMonetizacao);
 
-/** Atualização parcial: todos os campos opcionais (sem defaults para não sobrescrever valores). */
-export const updateWorkSchema = z.object({
+/**
+ * Atualização parcial: todos os campos opcionais (sem defaults para não
+ * sobrescrever valores).
+ *
+ * Fica exportado como OBJETO, sem o refinamento de monetização, porque a
+ * administração precisa estendê-lo (`.extend({ authorId })`) — e `.extend` não
+ * existe depois de um `.superRefine`. Quem consome aplica o refinamento no
+ * final; o schema pronto para uso é `updateWorkSchema`, logo abaixo.
+ */
+export const updateWorkFieldsSchema = z.object({
   title: requiredText('Título', 1, 120).optional(),
   subtitle: optionalText(160),
   genreId: idParam.optional(),
@@ -103,7 +188,13 @@ export const updateWorkSchema = z.object({
   audioReviewer: optionalText(160),
   removeCover: formBoolean.optional(),
   removeAudio: formBoolean.optional(),
+  monetization: z.enum(monetizationEnum.enumValues).optional(),
+  priceCents: precoCentavosSchema,
+  adRevenueAuthorShare: adShareSchema,
 });
+
+/** O schema de atualização pronto para uso, já com a coerência de monetização. */
+export const updateWorkSchema = updateWorkFieldsSchema.superRefine(validaMonetizacao);
 
 export type WorkUpdate = z.infer<typeof updateWorkSchema>;
 

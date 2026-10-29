@@ -196,9 +196,17 @@ describe('K — permissões sobrevivem a sair e entrar de novo', () => {
     const id = await publicar({ monetization: 'PAGA', priceCents: '1250' });
     expect(await comprar(id, leitor)).toBe('CONFIRMADA');
 
-    // "Sair e entrar" é exatamente isto: outro token, mesma conta.
+    /*
+     * "Sair e entrar" é exatamente isto: autenticar de novo e usar o token
+     * resultante.
+     *
+     * Não dá para exigir que o token NOVO seja diferente do anterior: o `iat`
+     * do JWT tem resolução de um segundo, então dois logins da mesma conta no
+     * mesmo segundo produzem exatamente a mesma string. Isso não é defeito, e
+     * o que este teste precisa provar é outra coisa — que o acesso vem da
+     * aquisição registrada no banco, e não de algo guardado na sessão.
+     */
     const novoToken = await login('leitor.acesso@teste.com');
-    expect(novoToken).not.toBe(leitor);
     expect((await api().get(`/api/works/${id}/file`).set(bearer(novoToken))).status).toBe(200);
 
     const biblioteca = await api().get('/api/me/library').set(bearer(novoToken));

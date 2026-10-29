@@ -21,6 +21,7 @@ const userSelect = {
   email: users.email,
   role: users.role,
   plan: users.plan,
+  planSince: users.planSince,
   headline: users.headline,
   isActive: users.isActive,
   lastLoginAt: users.lastLoginAt,

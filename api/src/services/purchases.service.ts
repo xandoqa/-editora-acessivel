@@ -1,6 +1,6 @@
 import { and, desc, eq, inArray, lt } from 'drizzle-orm';
 import { db } from '../db/client';
-import { purchases, users, works, type Purchase, type PaymentMethod } from '../db/schema';
+import { purchases, users, works, type PaymentMethod, type Purchase } from '../db/schema';
 import type { AuthUser } from '../middlewares/auth';
 import { badRequest, conflict, forbidden, notFound } from '../utils/http-error';
 import { logger } from '../utils/logger';
@@ -28,6 +28,16 @@ import { coverUrl } from './storage.service';
  * descarta: nada de número, validade ou CVV entra em banco, log ou resposta.
  */
 
+/**
+ * Mensalidade do plano premium, em centavos.
+ *
+ * Valor de demonstração: não há cobrança real, nem renovação automática, nem
+ * meio de receber dinheiro. Vive aqui, numa constante, porque inventar uma
+ * tabela de preços de planos seria construir a burocracia de um produto que
+ * não existe.
+ */
+export const PRECO_PLANO_CENTAVOS = 990;
+
 /** Teto de preço definido pelo autor: R$ 50,00, em centavos. */
 export const MAX_PRECO_CENTAVOS = 5_000;
 /** Piso: abaixo disso a cobrança não se paga nem em provedor real. */
@@ -44,6 +54,7 @@ function toPurchaseDto(p: Purchase) {
   return {
     id: p.id,
     workId: p.workId,
+    kind: p.kind,
     priceCents: p.priceCents,
     currency: p.currency,
     method: p.method,
@@ -108,7 +119,14 @@ export async function motivoDeAcesso(
   const [aquisicao] = await db
     .select({ id: purchases.id })
     .from(purchases)
-    .where(and(eq(purchases.userId, viewer.id), eq(purchases.workId, work.id), eq(purchases.status, 'CONFIRMADA')))
+    .where(
+      and(
+        eq(purchases.userId, viewer.id),
+        eq(purchases.kind, 'OBRA'),
+        eq(purchases.workId, work.id),
+        eq(purchases.status, 'CONFIRMADA'),
+      ),
+    )
     .limit(1);
   return aquisicao ? 'COMPRADA' : 'NEGADO';
 }
@@ -160,6 +178,7 @@ export async function createPurchase(workId: number, method: PaymentMethod, view
     .where(
       and(
         eq(purchases.userId, viewer.id),
+        eq(purchases.kind, 'OBRA'),
         eq(purchases.workId, workId),
         inArray(purchases.status, ['CONFIRMADA', 'PENDENTE']),
       ),
@@ -189,6 +208,7 @@ export async function createPurchase(workId: number, method: PaymentMethod, view
     .values({
       userId: viewer.id,
       workId,
+      kind: 'OBRA',
       priceCents: precoCentavos,
       currency: 'BRL',
       method,
@@ -265,7 +285,20 @@ export async function confirmPurchase(id: number, viewer: AuthUser) {
     return toPurchaseDto(atual);
   }
   if (novoStatus === 'CONFIRMADA') {
-    logger.info(`Aquisição #${id} confirmada: obra ${registro.workId} liberada para o usuário ${registro.userId}.`);
+    if (registro.kind === 'PLANO') {
+      /*
+       * O plano é ativado AQUI, ao confirmar o pagamento — não na tela.
+       * É a mesma regra das obras: o acesso é consequência de uma aprovação
+       * do servidor, nunca de o cliente dizer que deu certo.
+       */
+      await db
+        .update(users)
+        .set({ plan: 'PREMIUM', planSince: new Date() })
+        .where(eq(users.id, registro.userId));
+      logger.info(`Plano premium ativado para o usuário ${registro.userId} (aquisição #${id}).`);
+    } else {
+      logger.info(`Aquisição #${id} confirmada: obra ${registro.workId} liberada para o usuário ${registro.userId}.`);
+    }
   }
   return toPurchaseDto(atualizado);
 }
@@ -322,7 +355,7 @@ export async function listMyLibrary(userId: number) {
     .from(purchases)
     .innerJoin(works, eq(works.id, purchases.workId))
     .innerJoin(users, eq(users.id, works.authorId))
-    .where(and(eq(purchases.userId, userId), eq(purchases.status, 'CONFIRMADA')))
+    .where(and(eq(purchases.userId, userId), eq(purchases.kind, 'OBRA'), eq(purchases.status, 'CONFIRMADA')))
     .orderBy(desc(purchases.confirmedAt));
   // O caminho interno do arquivo nunca sai da API: a tela recebe a URL pública
   // da capa, como no resto do catálogo.
@@ -344,10 +377,14 @@ export async function listMyPurchases(userId: number) {
       createdAt: purchases.createdAt,
       confirmedAt: purchases.confirmedAt,
       expiresAt: purchases.expiresAt,
+      kind: purchases.kind,
       work: { id: works.id, title: works.title },
     })
     .from(purchases)
-    .innerJoin(works, eq(works.id, purchases.workId))
+    // `leftJoin` porque a mensalidade do plano não tem obra: com `innerJoin`
+    // ela sumiria do histórico, e o histórico financeiro é justamente o que
+    // não pode esconder nada.
+    .leftJoin(works, eq(works.id, purchases.workId))
     .where(eq(purchases.userId, userId))
     .orderBy(desc(purchases.createdAt))
     .limit(100);
@@ -365,4 +402,121 @@ export async function exigirAcessoDeLeitura(
       ? 'Esta obra é paga e ainda não está na sua biblioteca. Adquira a obra para ler.'
       : 'Esta obra é paga. Entre na sua conta e adquira a obra para ler.',
   );
+}
+
+/* ------------------------------- Plano premium ------------------------------ */
+
+/**
+ * Abre a cobrança da mensalidade do plano.
+ *
+ * Reaproveita inteiro o caminho da aquisição de obra: mesmo provedor, mesma
+ * idempotência, mesma expiração, mesma tabela. O que muda é `kind` e a
+ * ausência de obra.
+ */
+export async function assinarPlano(method: PaymentMethod, viewer: AuthUser) {
+  const provedor = provedorAtual();
+  if (!provedor.methods.includes(method)) {
+    throw badRequest(`O meio de pagamento ${method} não está disponível nesta instalação.`);
+  }
+
+  const [conta] = await db.select({ plan: users.plan }).from(users).where(eq(users.id, viewer.id));
+  if (!conta) throw notFound('Conta não encontrada.');
+  if (conta.plan === 'PREMIUM') throw conflict('Sua conta já está no plano premium.');
+
+  await expirarPendentesVencidas(viewer.id);
+
+  // Clique repetido reaproveita a cobrança aberta, em vez de abrir outra.
+  const [pendente] = await db
+    .select()
+    .from(purchases)
+    .where(
+      and(
+        eq(purchases.userId, viewer.id),
+        eq(purchases.kind, 'PLANO'),
+        eq(purchases.method, method),
+        eq(purchases.status, 'PENDENTE'),
+      ),
+    )
+    .orderBy(desc(purchases.createdAt));
+  if (pendente) return { purchase: toPurchaseDto(pendente), checkout: null, reaproveitada: true as const };
+
+  const cobranca = await provedor.createCharge({
+    amountCents: PRECO_PLANO_CENTAVOS,
+    currency: 'BRL',
+    method,
+    donorName: viewer.name ?? null,
+    message: 'Assinatura do plano premium do Livrin',
+  });
+
+  const [registro] = await db
+    .insert(purchases)
+    .values({
+      userId: viewer.id,
+      workId: null,
+      kind: 'PLANO',
+      priceCents: PRECO_PLANO_CENTAVOS,
+      currency: 'BRL',
+      method,
+      provider: provedor.name,
+      providerRef: cobranca.providerRef,
+      status: cobranca.status === 'CONFIRMADA' ? 'CONFIRMADA' : 'PENDENTE',
+      confirmedAt: cobranca.status === 'CONFIRMADA' ? new Date() : null,
+      expiresAt: new Date(Date.now() + VALIDADE_MS[method]),
+    })
+    .returning();
+
+  // Cobrança já confirmada na abertura: ativa na hora, como faz o confirm.
+  if (registro.status === 'CONFIRMADA') {
+    await db.update(users).set({ plan: 'PREMIUM', planSince: new Date() }).where(eq(users.id, viewer.id));
+  }
+
+  logger.info(`Assinatura #${registro.id} aberta para o usuário ${viewer.id} (${method}).`);
+  return {
+    purchase: toPurchaseDto(registro),
+    checkout: {
+      code: cobranca.code,
+      instruction: cobranca.instruction,
+      checkoutUrl: cobranca.checkoutUrl,
+      isReal: provedor.isReal,
+    },
+    reaproveitada: false as const,
+  };
+}
+
+/**
+ * Cancela o plano.
+ *
+ * Volta a conta para o gratuito e **mantém o histórico de pagamento**: cancelar
+ * uma assinatura não apaga o que foi pago, nem aqui nem em lugar nenhum.
+ */
+export async function cancelarPlano(viewer: AuthUser) {
+  const [conta] = await db.select({ plan: users.plan }).from(users).where(eq(users.id, viewer.id));
+  if (!conta) throw notFound('Conta não encontrada.');
+  if (conta.plan !== 'PREMIUM') throw conflict('Sua conta já está no plano gratuito.');
+
+  // Cobrança de plano ainda pendente perde o sentido depois do cancelamento.
+  await db
+    .update(purchases)
+    .set({ status: 'CANCELADA' })
+    .where(and(eq(purchases.userId, viewer.id), eq(purchases.kind, 'PLANO'), eq(purchases.status, 'PENDENTE')));
+
+  const [atualizado] = await db
+    .update(users)
+    .set({ plan: 'GRATUITO', planSince: null })
+    .where(eq(users.id, viewer.id))
+    .returning({ plan: users.plan, planSince: users.planSince });
+  logger.info(`Plano premium cancelado pelo usuário ${viewer.id}.`);
+  return atualizado;
+}
+
+/** O que a tela de planos precisa saber. */
+export function descreverPlanos() {
+  const p = provedorAtual();
+  return {
+    precoCents: PRECO_PLANO_CENTAVOS,
+    currency: 'BRL',
+    provider: p.name,
+    isReal: p.isReal,
+    methods: p.methods,
+  };
 }

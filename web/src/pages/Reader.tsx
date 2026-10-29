@@ -31,6 +31,7 @@ import { formatBytes, formatMonthYear, pad2 } from '../lib/format';
 import { STATUS_LABEL, ageRatingLabel } from '../lib/labels';
 import { usePreferences } from '../preferences/PreferencesContext';
 import AudioDescriptionPlayer, { type PlayerHandle } from '../components/reader/AudioDescriptionPlayer';
+import { descricaoDeReserva } from '../components/reader/descricaoDeReserva';
 import DocumentViewer from '../components/reader/DocumentViewer';
 import AquisicaoDialog from '../components/works/AquisicaoDialog';
 import {
@@ -148,6 +149,20 @@ export default function Reader() {
    */
   const comPublicidade = work?.monetization === 'PUBLICIDADE' && user?.plan !== 'PREMIUM';
 
+  /*
+   * Quando a obra não tem audiodescrição cadastrada, o player narra uma
+   * descrição montada a partir da ficha — capa, autoria, formato, recursos e
+   * sinopse. Antes, nesse caso, o botão não fazia absolutamente nada.
+   *
+   * A reserva vai SÓ para o player: `descriptions` segue como está, para não
+   * mudar o que aparece ao lado da página nem a contagem de páginas.
+   */
+  const semAudiodescricao = descriptions.length === 0;
+  const descricoesNarradas = useMemo(
+    () => (semAudiodescricao && work ? descricaoDeReserva(work) : descriptions),
+    [semAudiodescricao, work, descriptions],
+  );
+
   const currentAd = descriptions.find((d) => d.pageNumber === page);
   const chapterAd = useMemo(
     () => [...descriptions].filter((d) => d.pageNumber <= page).sort((a, b) => b.pageNumber - a.pageNumber)[0] ?? descriptions[0],
@@ -211,7 +226,15 @@ export default function Reader() {
                   <BadgeCheck className="h-4 w-4" aria-hidden /> Alto contraste
                 </span>
               )}
-              <Cover url={work.coverUrl} title={work.title} className="aspect-[3/4] w-full" />
+              <Cover
+                url={work.coverUrl}
+                title={work.title}
+                /* A descrição escrita pela autoria é o texto alternativo.
+                   Sem ela, resta o título — melhor que nada, pior que uma
+                   descrição de verdade. */
+                alt={work.coverAlt ?? undefined}
+                className="aspect-[3/4] w-full"
+              />
               <div className="absolute inset-x-0 bottom-0 flex justify-between bg-gradient-to-t from-black/90 to-transparent p-3 pt-10 text-sm font-semibold text-white">
                 <span className="flex items-center gap-1.5">
                   <BookOpen className="h-4 w-4" aria-hidden /> {work.pages} páginas
@@ -387,7 +410,8 @@ export default function Reader() {
         <AudioDescriptionPlayer
           ref={playerRef}
           work={work}
-          descriptions={descriptions}
+          descriptions={descricoesNarradas}
+          usandoReserva={semAudiodescricao}
           currentPage={page}
           onGoToPage={goTo}
           onUse={() => track({ usedAudioDesc: true })}

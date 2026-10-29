@@ -2,6 +2,72 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.5.0] — 2026-10-29
+
+### Histórico de leitura
+
+Nova área em **Histórico de leitura**, com as obras que a pessoa de fato
+abriu, da mais recente para a mais antiga, com a página alcançada e o
+progresso.
+
+**Sem tabela nova.** O sistema já registrava cada sessão em
+`reading_sessions`, com obra, conta, última página e horário — esses dados
+alimentavam só as métricas da autoria. O histórico é a mesma informação lida
+do outro lado, por quem leu. Guardar duas vezes o mesmo fato criaria o risco
+de os dois registros discordarem.
+
+Agrupa por obra e guarda a **página mais distante**, não a da última sessão:
+reler o começo não deve fazer o histórico dizer que a pessoa regrediu.
+
+Apagar o histórico **desvincula** as sessões em vez de excluí-las: a leitura
+sai do histórico de quem leu e a contagem da autoria continua de pé, como
+acontece com um visitante sem conta.
+
+### Planos do Livrin
+
+Página pública em **Planos do Livrin**, no cabeçalho ao lado de "Publique sua
+obra" e no menu lateral. Mostra o gratuito e o premium lado a lado, com os
+benefícios — e, na mesma lista, **o que o premium não faz**: não libera obra
+paga, porque quem define o preço de uma obra é a autoria e o dinheiro de uma
+assinatura não é dela.
+
+A assinatura é simulada e **funciona de verdade**: o pagamento usa o mesmo
+fluxo da compra de obra, o plano é ativado pelo servidor ao confirmar a
+cobrança, e há cancelamento em um clique. Cancelar devolve a conta ao
+gratuito e **mantém o histórico de pagamento**.
+
+A mensalidade reaproveita a tabela `purchases` em vez de ganhar uma própria:
+mesmo ciclo, mesma idempotência, mesmo provedor. `work_id` passou a aceitar
+nulo e um `CHECK` garante que OBRA exige obra e PLANO exige a ausência dela.
+
+O diálogo de pagamento virou um componente só, usado pela compra de obra e
+pela assinatura — manter duas cópias significaria mantê-las concordando para
+sempre.
+
+### Audiodescrição que funciona em toda obra
+
+Antes, obra sem audiodescrição cadastrada tinha um botão que **não fazia
+nada**. Um botão que não faz nada é pior que um botão ausente: promete um
+recurso de acessibilidade e não entrega.
+
+Agora, quando não há descrição página a página, o player narra uma
+**descrição de reserva** montada a partir do que o sistema de fato sabe:
+descrição da capa, ficha (formato, páginas, gênero, classificação), recursos
+declarados, sinopse e notas da autoria. Nada é inventado, e onde falta
+informação a narração diz que falta. A tela avisa que é descrição básica.
+
+Iniciar, pausar e parar continuam sendo os mesmos controles — a reserva entra
+no player existente, que não precisa saber a diferença.
+
+### Descrição da capa
+
+Campo novo na publicação: **descrição da capa**, escrita pela autoria. Serve
+para duas coisas ao mesmo tempo — é o texto alternativo da imagem e é o
+primeiro trecho narrado pela audiodescrição. Uma capa sem descrição é, para
+quem não a enxerga, uma caixa vazia.
+
+É editável depois da aprovação, junto com os metadados de divulgação.
+
 ## [3.4.0] — 2026-10-29
 
 ### Janela de Libras

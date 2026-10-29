@@ -181,6 +181,7 @@ async function seedDemoRecords(
           audioDescriber: w.audioDescriber,
           audioNarrator: w.audioNarrator,
           audioReviewer: w.audioReviewer,
+          coverAlt: w.coverAlt,
           coverPath: cover?.relativePath,
           filePath: file?.relativePath,
           fileType: file?.fileType,

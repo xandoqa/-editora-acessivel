@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { BookOpenText, ClipboardList, LayoutDashboard, Library, LibraryBig, LogOut, PersonStanding, ShieldCheck, SquarePlus, UserRoundCog } from 'lucide-react';
+import { BookOpenText, ClipboardList, Crown, History, LayoutDashboard, Library, LibraryBig, LogOut, PersonStanding, ShieldCheck, SquarePlus, UserRoundCog } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import { useMySummary } from '../../hooks/queries';
@@ -73,10 +73,15 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
     badge: <span className="chip bg-accent-container text-accent">Áudio</span>,
   });
 
-  // A biblioteca só existe para quem tem conta: aquisição pertence à conta.
+  // A biblioteca e o histórico só existem para quem tem conta: os dois
+  // pertencem à conta, não ao navegador.
   if (user) {
     items.push({ to: '/biblioteca', label: 'Minha biblioteca', icon: <Library className="h-5 w-5" /> });
+    items.push({ to: '/historico', label: 'Histórico de leitura', icon: <History className="h-5 w-5" /> });
   }
+  // Planos aparece para todo mundo: no cabeçalho ele some em tela pequena, e
+  // é aqui que quem usa celular vai encontrá-lo.
+  items.push({ to: '/planos', label: 'Planos do Livrin', icon: <Crown className="h-5 w-5" /> });
   if (user && !isWriter) {
     items.push({ to: '/profile', label: 'Quero publicar', icon: <SquarePlus className="h-5 w-5" /> });
   }

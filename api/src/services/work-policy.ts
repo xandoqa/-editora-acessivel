@@ -42,6 +42,7 @@ export const METADATA_FIELDS = [
   'authorNotes',
   'tags',
   'editionLabel',
+  'coverAlt',
   'monetization',
   'priceCents',
   'adRevenueAuthorShare',

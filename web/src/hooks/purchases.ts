@@ -3,6 +3,8 @@ import { api } from '../lib/api';
 import { useAuth } from '../auth/AuthContext';
 import type {
   CardInput,
+  ItemDoHistorico,
+  PlanoOpcoes,
   LibraryItem,
   PaymentMethod,
   Purchase,
@@ -75,6 +77,53 @@ export function useCancelarCobranca() {
     mutationFn: async (purchaseId: number) => (await api.post<Purchase>(`/purchases/${purchaseId}/cancel`)).data,
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['me', 'purchases'] });
+    },
+  });
+}
+
+/* ----------------------------- Histórico de leitura ---------------------------- */
+
+export function useReadingHistory() {
+  const { user } = useAuth();
+  return useQuery({
+    queryKey: ['me', 'reading-history', user?.id],
+    queryFn: async () => (await api.get<ItemDoHistorico[]>('/me/reading-history')).data,
+    enabled: !!user,
+  });
+}
+
+export function useApagarHistorico() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => (await api.delete<{ removidas: number }>('/me/reading-history')).data,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['me', 'reading-history'] });
+    },
+  });
+}
+
+/* -------------------------------- Plano premium -------------------------------- */
+
+export function usePlanoOpcoes() {
+  return useQuery({
+    queryKey: ['plans', 'options'],
+    queryFn: async () => (await api.get<PlanoOpcoes>('/plans/options')).data,
+  });
+}
+
+export function useAssinarPlano() {
+  return useMutation({
+    mutationFn: async (input: { method: PaymentMethod; card?: CardInput }) =>
+      (await api.post<PurchaseResult>('/me/plan/subscribe', input)).data,
+  });
+}
+
+export function useCancelarPlano() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async () => (await api.post<{ plan: string }>('/me/plan/cancel')).data,
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ['me'] });
     },
   });
 }

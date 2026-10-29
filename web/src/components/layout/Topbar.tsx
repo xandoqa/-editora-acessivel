@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { ChevronDown, Contrast, LayoutDashboard, LogOut, Menu, Moon, Plus, Search, ShieldCheck, Sun, UserRound } from 'lucide-react';
+import { ChevronDown, Contrast, Crown, LayoutDashboard, LogOut, Menu, Moon, Plus, Search, ShieldCheck, Sun, UserRound } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext';
 import { FONT_MAX, FONT_MIN, usePreferences } from '../../preferences/PreferencesContext';
 import { ROLE_LABEL } from '../../lib/labels';
@@ -176,6 +176,13 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         <LeituraEmVoz classeBotao={tool} />
         <JanelaDeLibras classeBotao={tool} />
       </div>
+
+      {/* Planos fica ao lado de "Publique sua obra" e aparece para todo mundo,
+          inclusive visitante sem conta: quem ainda não assinou é justamente
+          quem precisa encontrar a página. */}
+      <Link to="/planos" className="btn-secondary hidden md:inline-flex">
+        <Crown className="h-4 w-4" aria-hidden /> Planos do Livrin
+      </Link>
 
       {isWriter && (
         <Link to="/submit" className="btn-primary hidden md:inline-flex">

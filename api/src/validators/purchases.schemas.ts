@@ -58,3 +58,11 @@ export const createPurchaseSchema = z
   });
 
 export type CreatePurchaseInput = z.infer<typeof createPurchaseSchema>;
+
+/**
+ * Assinatura do plano.
+ *
+ * Como na compra de obra, **não existe campo de valor**: o preço da
+ * mensalidade mora no servidor.
+ */
+export const assinaturaSchema = createPurchaseSchema;

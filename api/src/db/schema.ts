@@ -85,6 +85,18 @@ export const monetizationEnum = pgEnum('monetization', ['GRATUITA', 'PAGA', 'PUB
  */
 export const userPlanEnum = pgEnum('user_plan', ['GRATUITO', 'PREMIUM']);
 
+/**
+ * O que foi adquirido.
+ *
+ *   OBRA  — uma obra paga. Exige `work_id`.
+ *   PLANO — uma mensalidade do plano premium. NÃO tem `work_id`.
+ *
+ * As duas compartilham a mesma tabela de propósito: têm o mesmo ciclo
+ * (abre, fica pendente, confirma ou expira), a mesma idempotência e o mesmo
+ * provedor. Criar uma segunda tabela de pagamento seria duplicar o sistema.
+ */
+export const purchaseKindEnum = pgEnum('purchase_kind', ['OBRA', 'PLANO']);
+
 /** Situação de uma aquisição. Espelha a da doação, mais EXPIRADA (boleto/PIX vencido). */
 export const purchaseStatusEnum = pgEnum('purchase_status', [
   'PENDENTE',
@@ -118,6 +130,8 @@ export const users = pgTable(
     role: userRoleEnum('role').notNull().default('LEITOR'),
     /** Assinatura simulada: só muda a exibição de anúncios. Ver ADR 015. */
     plan: userPlanEnum('plan').notNull().default('GRATUITO'),
+    /** Quando o plano atual passou a valer. Nulo em conta gratuita. */
+    planSince: timestamp('plan_since', { withTimezone: true }),
     isActive: boolean('is_active').notNull().default(true),
     /** Descrição curta exibida em avaliações/notas: ex. "Baixa Visão · Leitor de Tela". */
     headline: varchar('headline', { length: 160 }),
@@ -190,6 +204,14 @@ export const works = pgTable(
     audioReviewer: varchar('audio_reviewer', { length: 160 }),
 
     // Arquivos (caminhos relativos a UPLOAD_DIR; nunca expostos diretamente)
+    /**
+     * Descrição da capa, escrita pela autoria.
+     *
+     * Serve para duas coisas ao mesmo tempo: é o texto alternativo da imagem
+     * e é o primeiro trecho narrado pela audiodescrição. Uma capa sem
+     * descrição é, para quem não a enxerga, uma caixa vazia.
+     */
+    coverAlt: varchar('cover_alt', { length: 300 }),
     coverPath: text('cover_path'),
     filePath: text('file_path'),
     fileType: fileTypeEnum('file_type'),
@@ -390,9 +412,9 @@ export const purchases = pgTable(
     userId: integer('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
-    workId: integer('work_id')
-      .notNull()
-      .references(() => works.id, { onDelete: 'cascade' }),
+    /** Nulo quando `kind` é PLANO: uma mensalidade não pertence a obra alguma. */
+    workId: integer('work_id').references(() => works.id, { onDelete: 'cascade' }),
+    kind: purchaseKindEnum('kind').notNull().default('OBRA'),
     /** Preço cobrado, congelado no instante da compra. */
     priceCents: integer('price_cents').notNull(),
     currency: varchar('currency', { length: 3 }).notNull().default('BRL'),
@@ -418,6 +440,12 @@ export const purchases = pgTable(
       .on(t.userId, t.workId)
       .where(sql`status = 'CONFIRMADA'`),
     check('purchases_price_positive', sql`${t.priceCents} > 0`),
+    // Obra exige work_id; plano exige a ausência dele. Sem isto, um bug
+    // poderia gravar uma mensalidade presa a uma obra qualquer.
+    check(
+      'purchases_kind_matches_work',
+      sql`(${t.kind} = 'OBRA' AND ${t.workId} IS NOT NULL) OR (${t.kind} = 'PLANO' AND ${t.workId} IS NULL)`,
+    ),
   ],
 );
 
@@ -447,3 +475,4 @@ export type Monetization = (typeof monetizationEnum.enumValues)[number];
 export type Purchase = typeof purchases.$inferSelect;
 export type NewPurchase = typeof purchases.$inferInsert;
 export type PurchaseStatus = (typeof purchaseStatusEnum.enumValues)[number];
+export type PurchaseKind = (typeof purchaseKindEnum.enumValues)[number];

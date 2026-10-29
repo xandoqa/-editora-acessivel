@@ -6,7 +6,7 @@ Plataforma editorial aberta para quadrinhos e livros independentes, com acessibi
 
 O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. **A autoria decide como cada obra é disponibilizada** — leitura livre, obra paga ou leitura livre com publicidade — e leitura livre continua sendo o padrão. O apoio financeiro ao projeto é voluntário e nunca condiciona o acesso a uma obra: só a obra que a própria autoria marcou como paga exige aquisição.
 
-**Versão 3.4.0** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras.
+**Versão 3.5.0** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra.
 
 ---
 
@@ -175,6 +175,32 @@ O provedor padrão é o **simulado**: percorre todo o caminho de um provedor rea
 
 Apoiar **não libera obra nenhuma**: é apoio ao projeto. Quem libera obra é a aquisição, logo abaixo.
 
+### Histórico de leitura e biblioteca
+
+São coisas diferentes, e ficam em lugares diferentes:
+
+| Área | O que mostra |
+| --- | --- |
+| **Minha biblioteca** | As obras que você **adquiriu** (obras pagas) |
+| **Histórico de leitura** | As obras que você **abriu**, com a página alcançada e o progresso |
+
+O histórico vem das sessões de leitura que o sistema já registrava para as métricas da autoria — não há tabela nova. Ele agrupa por obra e guarda a página mais distante, não a da última sessão: reler o começo não faz o histórico dizer que você regrediu.
+
+Dá para apagar o histórico. Isso **desvincula** as leituras da sua conta em vez de excluí-las: elas somem da sua lista e as estatísticas de quem publicou seguem contando, sem ligação com você.
+
+### Planos do Livrin
+
+No cabeçalho, ao lado de "Publique sua obra" (e no menu lateral, em tela pequena). A página é pública.
+
+| Plano | O que muda |
+| --- | --- |
+| **Gratuito** | Tudo o que a plataforma oferece, com anúncios nas obras monetizadas por publicidade |
+| **Premium** | As mesmas obras, sem anúncios |
+
+**O premium não libera obra paga.** Quem define o preço de uma obra é a autoria, e o dinheiro de uma assinatura da plataforma não é dela.
+
+A assinatura usa o mesmo fluxo de pagamento simulado da compra de obra, e **funciona**: o plano é ativado pelo servidor ao confirmar a cobrança. Para cancelar, o botão fica na própria página — a conta volta ao gratuito e o histórico de pagamento é mantido.
+
 ### Janela de Libras
 
 Na barra superior, ao lado da leitura em voz alta, há um botão que liga uma **janela com avatar sinalizando em Libras** o texto selecionado. O tradutor é o [VLibras](https://www.gov.br/governodigital/pt-br/acessibilidade-e-usuario/vlibras), suíte livre do governo federal.
@@ -186,6 +212,19 @@ Três coisas a saber antes de demonstrar:
 - **É tradução automática.** Libras é uma língua com gramática própria, não português sinalizado. O recurso é um apoio, declarado como automático, e não substitui intérprete humano.
 
 A marcação **Libras no conteúdo**, nos filtros do catálogo, é outra coisa: é a autoria declarando que a própria obra traz sinalização em suas páginas, conferido pela curadoria. A plataforma não hospeda vídeo de intérprete.
+
+### Audiodescrição
+
+No leitor, o botão **Ouvir Audiodescrição** narra a obra com a voz do sistema. Há dois casos:
+
+- **Obra com audiodescrição cadastrada:** narra a descrição e as falas de cada página, virando as páginas em sincronia.
+- **Obra sem audiodescrição cadastrada:** narra uma **descrição básica** montada a partir da ficha — descrição da capa, formato, páginas, gênero, recursos declarados, sinopse e notas da autoria. A tela avisa que é descrição básica.
+
+Antes, o segundo caso não fazia nada. Um botão que não faz nada promete acessibilidade e não entrega.
+
+Iniciar, pausar e parar valem nos dois casos. A voz vem do sistema operacional, então a qualidade varia — há seletor de voz e de velocidade.
+
+A **descrição da capa** é escrita pela autoria no formulário de publicação e serve para duas coisas: é o texto alternativo da imagem e abre a audiodescrição.
 
 ### Monetização e aquisição
 

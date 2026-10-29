@@ -39,6 +39,7 @@ const METADATA_FIELDS = new Set([
   'authorNotes',
   'tags',
   'editionLabel',
+  'coverAlt',
   'monetization',
   'precoReais',
   'adRevenueAuthorShare',
@@ -57,6 +58,7 @@ type FormState = {
   isbn: string;
   ageRating: string;
   authorNotes: string;
+  coverAlt: string;
   tags: string;
   audioDescriber: string;
   audioNarrator: string;
@@ -79,6 +81,7 @@ function initialState(w?: Work): FormState {
     isbn: w?.isbn ?? '',
     ageRating: w?.ageRating ?? 'L',
     authorNotes: w?.authorNotes ?? '',
+    coverAlt: w?.coverAlt ?? '',
     tags: w?.tags.join(', ') ?? '',
     audioDescriber: w?.audioDescriber ?? '',
     audioNarrator: w?.audioNarrator ?? '',
@@ -374,6 +377,17 @@ export default function WorkForm({ initial, metadataOnly, errors, busy, uploadPr
               description="Proporção recomendada 3:4"
             />
           </div>
+          {/* A descrição da capa é o texto alternativo da imagem E o primeiro
+              trecho da audiodescrição. Uma capa sem descrição é, para quem não
+              a enxerga, uma caixa vazia. */}
+          <TextArea
+            label="Descrição da capa"
+            rows={2}
+            maxLength={300}
+            placeholder="Ex.: Fundo verde-escuro com um círculo grande vazado à direita e três filetes horizontais claros."
+            hint="Descreva o que se vê, em uma ou duas frases. Vira o texto alternativo da imagem e abre a audiodescrição da obra."
+            {...text('coverAlt')}
+          />
           <div className="grid gap-6 md:grid-cols-2">
             <TextInput label="Subtítulo" maxLength={160} {...text('subtitle')} />
             <TextInput label="Rótulo editorial" maxLength={60} placeholder="Ex.: Edição especial, Webcomic serial" {...text('editionLabel')} />

@@ -1,8 +1,9 @@
 import type { Request, Response } from 'express';
 import { currentUser } from '../middlewares/auth';
 import * as purchases from '../services/purchases.service';
+import * as historico from '../services/reading-history.service';
 import { idParams, parse } from '../validators/common';
-import { createPurchaseSchema } from '../validators/purchases.schemas';
+import { assinaturaSchema, createPurchaseSchema } from '../validators/purchases.schemas';
 
 /**
  * Aquisição de obras pagas.
@@ -43,4 +44,34 @@ export async function library(req: Request, res: Response) {
 /** Histórico de compras, com todos os estados. */
 export async function history(req: Request, res: Response) {
   res.json(await purchases.listMyPurchases(currentUser(req).id));
+}
+
+/* ------------------------------- Plano premium ------------------------------ */
+
+/** O que a tela de planos precisa: preço, meios aceitos e se o provedor é real. */
+export async function planOptions(_req: Request, res: Response) {
+  res.json(purchases.descreverPlanos());
+}
+
+export async function subscribe(req: Request, res: Response) {
+  const { method, card } = parse(assinaturaSchema, req.body);
+  // Como na compra de obra: o cartão é validado em formato e descartado.
+  void card;
+  const resultado = await purchases.assinarPlano(method, currentUser(req));
+  res.status(resultado.reaproveitada ? 200 : 201).json(resultado);
+}
+
+export async function cancelPlan(req: Request, res: Response) {
+  res.json(await purchases.cancelarPlano(currentUser(req)));
+}
+
+/* ----------------------------- Histórico de leitura ---------------------------- */
+
+export async function readingHistory(req: Request, res: Response) {
+  res.json(await historico.listReadingHistory(currentUser(req).id));
+}
+
+export async function clearHistory(req: Request, res: Response) {
+  const apagadas = await historico.clearReadingHistory(currentUser(req).id);
+  res.json({ removidas: apagadas });
 }

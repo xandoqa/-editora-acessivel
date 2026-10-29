@@ -8,7 +8,8 @@ A proposta da Livrin é ser uma editora de quadrinhos acessíveis; a própria in
 | --- | --- |
 | **Alto contraste** (botão ◐ / "Alto Contraste") | Todas as cores são variáveis CSS (`web/src/styles/global.css`). A classe `.hc` no `<html>` troca a paleta inteira para amarelo/preto. |
 | **A- / A+** | Ajustam `--font-scale` (87,5% a 150%) aplicado ao `font-size` raiz; como tudo usa `rem`, a interface inteira escala. |
-| **Ler a página em voz alta** (🔊) | Web Speech API do navegador (`speechSynthesis`, voz pt-BR) lê o conteúdo principal. Para ao trocar de página. |
+| **Ler em voz alta** (🔊) | Web Speech API (`speechSynthesis`, voz pt-BR) fala a **palavra sob o ponteiro**. Sem mouse, as setas ← → andam palavra a palavra — e, enquanto o recurso está ligado, elas pertencem a ele e não viram página. Há seletor de voz e de velocidade. |
+| **Janela de Libras** (✋) | Avatar do VLibras sinaliza o texto selecionado. Opcional, começa desligada, e o script só é baixado ao ligar. Ver a seção própria, abaixo. |
 | **Leitor Otimizado** | Sublinha links, reforça o contorno de foco, aumenta entrelinha e desativa animações. |
 | Preferências persistentes | Salvas no navegador (`localStorage`, com tratamento de erro se o armazenamento estiver bloqueado). |
 
@@ -57,14 +58,36 @@ Antes das três vias, o arquivo já é **normalizado no envio** pelo `qpdf` (ver
 | Teclado | ← → trocam de página; Espaço reproduz/pausa o áudio-guia. |
 | Métricas | O uso de audiodescrição, alto contraste, fonte para dislexia e zoom é registrado (anonimamente para visitantes) e aparece no painel do autor. |
 
+## Janela de Libras
+
+Botão na barra superior, ao lado da leitura em voz alta. Liga uma janela com avatar que sinaliza em Libras o texto selecionado, pelo [VLibras](https://www.gov.br/governodigital/pt-br/acessibilidade-e-usuario/vlibras), suíte livre do governo federal feita com a UFPB.
+
+| Decisão | Por quê |
+| --- | --- |
+| Opcional, começa desligada | Recurso de acessibilidade imposto a todos atrapalha quem não precisa dele |
+| O script só baixa ao ligar | Com o botão desligado, a aplicação não faz nenhuma requisição a `vlibras.gov.br`. É a única exceção à regra de não carregar script de terceiro |
+| A falha é dita | Serviço indisponível: o botão avisa e volta a desligado, em vez de girar para sempre |
+| Declarada como automática | Ver "Limitações conhecidas", abaixo |
+
+Detalhes de implementação em [ADR 016](decisions/016-janela-de-libras.md).
+
+## Acesso a obra paga
+
+Obra que a autoria marcou como paga exige aquisição confirmada para ser lida ou baixada. A verificação vale para os **três** caminhos pelos quais o conteúdo pode sair: o arquivo, a faixa de áudio e a **lista de audiodescrição** — que, num quadrinho, é a obra em texto.
+
+Essa última foi uma brecha real, corrigida na 3.3.0: deixá-la aberta seria uma porta dos fundos contra exatamente o público que a plataforma existe para servir. Ver [ADR 015](decisions/015-publicidade-e-plano.md).
+
+Publicidade, quando a obra a tem, aparece **entre** páginas e nunca sobre o texto, sem movimento, sem sobreposição e sem rastreamento. O plano premium a remove.
+
 ## Catálogo
 
-- Filtros por recurso assistivo (audiodescrição, Libras, leitura fácil) e por formato.
+- Filtros por recurso assistivo (audiodescrição, Libras no conteúdo, leitura fácil) e por formato. **"Libras no conteúdo" é declaração da autoria sobre a própria obra**, conferida pela curadoria — coisa diferente da janela de tradução automática da barra superior.
 - "Ouvir sinopse" em cada card e "Ouvir introdução da página" no topo.
 - Selos de recursos com ícone **e** texto (a informação nunca depende só de cor).
 
 ## Limitações conhecidas
 
 - A síntese de voz depende das vozes instaladas no sistema/navegador; em alguns navegadores sem voz pt-BR, a leitura usa a voz padrão.
-- Janela de Libras: a plataforma registra o recurso declarado pela obra, mas não há player de vídeo de Libras embutido.
+- **Janela de Libras: é tradução automática.** O avatar do VLibras sinaliza a partir do texto em português, e Libras é uma língua com gramática própria, não português sinalizado. A compreensão por avatar tem limites reconhecidos na literatura e pela comunidade surda. O recurso é um apoio declarado como automático — não substitui intérprete humano, e a plataforma **não hospeda vídeo de intérprete**.
+- A janela de Libras depende de um serviço externo (`vlibras.gov.br`). Fora do ar ou sem internet, o recurso não sobe; o botão avisa e volta a desligado, sem derrubar o resto da página.
 - Não foi realizada auditoria WCAG formal com usuários; recomenda-se validar com NVDA, VoiceOver e TalkBack antes de produção.

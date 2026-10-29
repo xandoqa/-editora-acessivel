@@ -102,9 +102,11 @@ Caracteres de curinga digitados na busca (`%`, `_`) são escapados e tratados co
 
 ### `POST /works` 🔒 ✍️
 
-- **Entrada** (`multipart/form-data`): `title`, `synopsis` (mín. 20), `genreId`, `format`, `pages`, `ageRating?`, `subtitle?`, `isbn?`, `editionLabel?`, `authorNotes?`, `tags?`, as flags `hasAudioDesc`…`hasAltoContraste`, créditos de audiodescrição, `action` (`draft` | `submit`, padrão `submit`), e os arquivos `file`, `cover`, `audio`.
+- **Entrada** (`multipart/form-data`): `title`, `synopsis` (mín. 20), `genreId`, `format`, `pages`, `ageRating?`, `subtitle?`, `isbn?`, `editionLabel?`, `authorNotes?`, `tags?`, as flags `hasAudioDesc`…`hasAltoContraste`, créditos de audiodescrição, `action` (`draft` | `submit`, padrão `submit`), `monetization` (`GRATUITA` | `PAGA` | `PUBLICIDADE`, padrão `GRATUITA`), `priceCents?`, `adRevenueAuthorShare?`, e os arquivos `file`, `cover`, `audio`.
 - **Saída:** `201` a obra criada — `RASCUNHO` com `action=draft`, `EM_ANALISE` com `action=submit`
 - **Erros:** `400` dados ou arquivo inválido · `403` perfil `LEITOR` · `413` arquivo grande demais · `422` `action=submit` sem arquivo
+
+Monetização: `priceCents` existe **se, e somente se**, `monetization` é `PAGA`, e vale de 100 a 5000 centavos (R$ 1,00 a R$ 50,00). A regra é verificada na API **e** por `CHECK` no banco. Definir preço não publica a obra nem concede o Selo — ver [ADR 014](decisions/014-monetizacao-e-aquisicao.md).
 
 Arquivos: obra em PDF/DOCX/EPUB/CBZ/CBR até `MAX_UPLOAD_MB`; capa em JPG/PNG/WEBP até 5 MB; áudio em MP3/OGG/M4A. A **assinatura binária** é conferida — renomear um executável para `.pdf` ou para `.docx` é recusado. DOCX, EPUB e CBZ são arquivos ZIP e compartilham a mesma assinatura (`PK\x03\x04`); o que os distingue é a extensão declarada.
 
@@ -129,7 +131,11 @@ Mesmos campos, todos opcionais, mais `removeCover` e `removeAudio`. O que pode s
 
 `?download=1` força o download com nome amigável. Aceita `Range`. Obra não aprovada: `404` para quem não é autor nem admin.
 
+**Obra paga exige aquisição confirmada: `403` sem ela**, com ou sem token. Autoria e administração passam direto, porque precisam revisar. A verificação está aqui, no endpoint que ENTREGA o conteúdo — não na tela.
+
 ### `GET /works/:id/audio` 👁 — faixa de audiodescrição
+
+Mesma regra de obra paga: `403` sem aquisição. A faixa é o conteúdo da obra para quem depende dela.
 
 ---
 
@@ -137,12 +143,14 @@ Mesmos campos, todos opcionais, mais `removeCover` e `removeAudio`. O que pode s
 
 | Método e URL | Acesso | Observação |
 | --- | --- | --- |
-| `GET /works/:id/audio-descriptions` | 👁 | Mesma visibilidade da obra |
+| `GET /works/:id/audio-descriptions` | 👁 | Visibilidade da obra **e**, em obra paga, aquisição confirmada (`403` sem ela) |
 | `POST /works/:id/audio-descriptions` | 🔒 | `201`; autor em `RASCUNHO`/`REJEITADO`/`EM_ANALISE`, admin sempre |
 | `PUT /works/:id/audio-descriptions/:adId` | 🔒 | idem |
 | `DELETE /works/:id/audio-descriptions/:adId` | 🔒 | `204` |
 
 Corpo: `{ pageNumber, description, chapterLabel?, chapterTitle?, panelLabel?, dialogues: [{ speaker, tone?, text }] }` — até 12 falas por página. Uma audiodescrição por página e obra.
+
+> **Por que a leitura desta lista é protegida.** A audiodescrição traz a descrição de cada quadro e as falas de cada personagem: num quadrinho, é a obra em texto. Sem a mesma verificação do arquivo, este endpoint seria uma porta dos fundos para obra paga — e uma que atingiria justamente quem mais depende da audiodescrição. Ver [ADR 015](decisions/015-publicidade-e-plano.md).
 
 ---
 
@@ -205,6 +213,41 @@ O valor é **em centavos, inteiro**: dinheiro não trafega como número de ponto
 
 ### `GET /me/donations` 🔒 — seus apoios, mais recentes primeiro
 
+> Apoiar **não libera obra nenhuma**: é apoio ao projeto. Quem libera obra é a aquisição, abaixo.
+
+---
+
+## Aquisição de obras pagas
+
+Todas exigem conta: a aquisição pertence a uma pessoa, nunca a uma sessão ou a um navegador.
+
+### `POST /works/:id/purchase` 🔒
+
+- **Entrada:** `{ method: "PIX" | "CARTAO" | "BOLETO", card?: { holder, number, expiry, cvv } }` — `card` só quando `method` é `CARTAO`
+- **Saída:** `201` `{ purchase, checkout: { code?, instruction?, isReal }, reaproveitada: false }` · `200` com `reaproveitada: true` quando já havia cobrança pendente igual
+- **Erros:** `400` obra de leitura livre, método indisponível ou cartão inválido · `404` obra inexistente ou fora do catálogo · `409` já adquirida
+
+**Não existe campo de valor.** O preço é lido da obra, no servidor, e o schema é `.strict()`: enviar `priceCents` devolve `400`, não um desconto. É assim que alterar o preço no navegador deixa de ser um ataque possível, em vez de apenas desencorajado.
+
+Os dados do cartão são validados em formato e **descartados**: nada de número, validade ou código de segurança entra em banco, log ou resposta.
+
+### `POST /purchases/:id/confirm` 🔒
+
+- **Saída:** `200` a aquisição atualizada. Só `CONFIRMADA` libera a obra.
+- **Erros:** `404` não é sua · `409` expirada ou já não está pendente
+
+Confirmar duas vezes devolve o mesmo resultado: o `UPDATE` exige que a linha ainda esteja `PENDENTE`, então requisições simultâneas não confirmam duas vezes.
+
+### `POST /purchases/:id/cancel` 🔒 — cancela cobrança pendente; **não** libera a obra
+
+### `GET /purchases/:id` 🔒 — estado de uma cobrança sua
+
+### `GET /me/library` 🔒 — obras adquiridas (aquisição confirmada)
+
+### `GET /me/purchases` 🔒 — histórico com todos os estados
+
+Cobrança pendente expira sozinha: PIX 30 min, cartão 15 min, boleto 3 dias. Sem isso, uma cobrança abandonada ficaria "aguardando pagamento" para sempre e bloquearia nova tentativa.
+
 ---
 
 ## Área do autor
@@ -252,7 +295,7 @@ Aprovar aqui é o que coloca a obra no catálogo.
 | `GET /admin/users` | `q`, `role`, `active`, `sort`, `order`, paginação |
 | `POST /admin/users` | `{ name, email, password, role?, headline?, isActive? }` → `201` |
 | `GET /admin/users/:id` | Detalhe + atividade + obras |
-| `PATCH /admin/users/:id` | `{ name?, email?, role?, headline?, isActive? }` |
+| `PATCH /admin/users/:id` | `{ name?, email?, role?, plan?, headline?, isActive? }` — `plan` é `GRATUITO` \| `PREMIUM`, e é a **única** via de ativação do premium: não há compra de assinatura |
 | `POST /admin/users/:id/reset-password` | `{ password }` → `204` |
 | `DELETE /admin/users/:id` | `204`; `409` se a conta tiver obras |
 

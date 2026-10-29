@@ -1,8 +1,10 @@
-# Relatório Final — Livrin 3.3.0
+# Relatório Final — Livrin 3.4.0
 
 *29 de outubro de 2026*
 
 A plataforma passou a ter monetização opcional por obra (gratuita, paga ou com publicidade), aquisição vinculada à conta e plano do leitor — e uma brecha real de acesso a obra paga foi encontrada e fechada. Todo pagamento continua simulado.
+
+Depois disso, a 3.4.0 acrescentou a **janela de Libras** (VLibras, opcional e carregada sob demanda) e corrigiu uma segunda promessa que o sistema não cumpria: a marcação `hasLibras` prometia intérprete e não havia campo de vídeo.
 
 ---
 

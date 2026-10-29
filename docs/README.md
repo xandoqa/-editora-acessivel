@@ -35,6 +35,7 @@
 | --- | --- |
 | [relatorio-final.md](relatorio-final.md) | Relatório final da 3.3.0: o que foi feito, testado e o que ficou pendente |
 | [decisions/](decisions/) | Registro de decisões técnicas (ADRs): o que foi escolhido e por quê |
+| [../README-PAGAMENTO.md](../README-PAGAMENTO.md) | Todos os dados para simular pagamento: números de cartão por bandeira, Pix, boleto, plano e o que falha de propósito |
 | [pagamento-real-opcoes.md](pagamento-real-opcoes.md) | Estudo das opções para receber apoio de verdade sem orçamento, e o que faltaria no código |
 | [obras-dominio-publico.md](obras-dominio-publico.md) | Quando uma obra de terceiro pode entrar no acervo, as armadilhas de tradução e edição, e como adicionar |
 | [academico/](academico/) | Documentos do trabalho: cronograma, DAS, casos de uso, BMC |

@@ -229,6 +229,10 @@ Todas exigem conta: a aquisição pertence a uma pessoa, nunca a uma sessão ou 
 
 **Não existe campo de valor.** O preço é lido da obra, no servidor, e o schema é `.strict()`: enviar `priceCents` devolve `400`, não um desconto. É assim que alterar o preço no navegador deixa de ser um ataque possível, em vez de apenas desencorajado.
 
+**O cartão é conferido no servidor, não só na tela.** `createPurchaseSchema` refaz por conta própria o **algoritmo de Luhn** sobre o número e verifica se a validade `MM/AA` já passou — porque a tela pode ser contornada com um `curl`, e validação que só existe no navegador não é validação. Número implausível devolve `400 "Número de cartão inválido."`; cartão vencido devolve `400 "Cartão vencido."`
+
+A bandeira é identificada **no navegador**, pela faixa de numeração, só para a tela formatar o número e ajustar o tamanho do código de segurança (4 dígitos no American Express). Ela **não é enviada nem armazenada**: o servidor não precisa dela para nada. Ver [ADR 017](decisions/017-bandeira-do-cartao.md) e, para os números de teste, [README-PAGAMENTO.md](../README-PAGAMENTO.md).
+
 Os dados do cartão são validados em formato e **descartados**: nada de número, validade ou código de segurança entra em banco, log ou resposta.
 
 ### `POST /purchases/:id/confirm` 🔒

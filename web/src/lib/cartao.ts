@@ -118,6 +118,12 @@ export function validadeValida(valor: string): boolean {
   return fim > new Date();
 }
 
+/** "13, 16 ou 19" — e não "13 ou 16 ou 19", que é o que um join simples dá. */
+function listar(numeros: number[]): string {
+  if (numeros.length === 1) return String(numeros[0]);
+  return `${numeros.slice(0, -1).join(', ')} ou ${numeros[numeros.length - 1]}`;
+}
+
 export interface ErrosDoCartao {
   number?: string;
   expiry?: string;
@@ -133,7 +139,7 @@ export function validarCartao(numero: string, validade: string, cvv: string): Er
   if (!d) erros.number = 'Informe o número do cartão.';
   else if (!info) erros.number = 'Bandeira não reconhecida. Use um dos cartões de teste listados abaixo.';
   else if (!info.tamanhos.includes(d.length)) {
-    erros.number = `Um cartão ${info.nome} tem ${info.tamanhos.join(' ou ')} dígitos.`;
+    erros.number = `Um cartão ${info.nome} tem ${listar(info.tamanhos)} dígitos.`;
   } else if (!luhnValido(d)) erros.number = 'Número de cartão inválido.';
 
   if (!validadeValida(validade)) erros.expiry = 'Validade inválida ou vencida (use MM/AA).';

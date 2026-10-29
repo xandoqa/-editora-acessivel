@@ -9,7 +9,10 @@ import { DUMMY_HASH, hashPassword, verifyPassword } from '../utils/password';
 import type { changePasswordSchema, loginSchema, registerSchema, updateProfileSchema } from '../validators/auth.schemas';
 
 /** Representação pública de um usuário (nunca inclui o hash da senha). */
-export type PublicUser = Pick<User, 'id' | 'name' | 'email' | 'role' | 'plan' | 'headline' | 'isActive' | 'createdAt'>;
+export type PublicUser = Pick<
+  User,
+  'id' | 'name' | 'email' | 'role' | 'plan' | 'planSince' | 'headline' | 'isActive' | 'createdAt'
+>;
 
 export function toPublicUser(u: User): PublicUser {
   return {
@@ -18,6 +21,7 @@ export function toPublicUser(u: User): PublicUser {
     email: u.email,
     role: u.role,
     plan: u.plan,
+    planSince: u.planSince,
     headline: u.headline,
     isActive: u.isActive,
     createdAt: u.createdAt,

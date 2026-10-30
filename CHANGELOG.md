@@ -2,14 +2,26 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
-## [Não lançado]
+## [3.5.2] — 2026-10-29
 
-### Organização do repositório
+### Licença e organização do repositório
 
-`LICENSE` (MIT para o código), `NOTICE.md` (o que é autoral do grupo e o que é
-domínio público, item por item) e `CONTRIBUTING.md` (o fluxo de branch, teste,
-PR e squash que o projeto já usava, mas que só existia como seção solta em
-`docs/development.md`).
+O repositório é público e não tinha arquivo de licença, o que juridicamente
+significa "todos os direitos reservados": ninguém podia reaproveitar o código
+legalmente. Entrou `LICENSE` com a **MIT**, em texto literal para o GitHub
+reconhecer.
+
+`NOTICE.md` separa o que a MIT **não** cobre: contos, poemas, roteiros, capas e
+peças visuais são autorais do Grupo 13 e seguem reservados. A distinção que
+importa está dita lá — `gerar-obras.py` e `gerar-capas.py` são código e estão
+sob MIT, então qualquer pessoa pode usar os scripts para gerar as próprias
+obras; o que eles produzem a partir dos textos do grupo, não.
+
+`CONTRIBUTING.md` documenta o fluxo que o projeto usa desde a 3.0.0 — branch
+por assunto, teste e documentação na mesma branch, CI verde, merge por squash —
+e que até aqui existia como uma seção de quatro linhas no fim de
+`docs/development.md`. Diz também o que o CI não cobre: a suíte Playwright não
+roda nele.
 
 ## [3.5.1] — 2026-10-29
 

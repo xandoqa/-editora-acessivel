@@ -1,12 +1,14 @@
 # Editora Livrin
 
 [![CI](https://github.com/xandoqa/-editora-acessivel/actions/workflows/ci.yml/badge.svg)](https://github.com/xandoqa/-editora-acessivel/actions/workflows/ci.yml)
+[![Licença MIT](https://img.shields.io/badge/c%C3%B3digo-MIT-blue)](LICENSE)
+[![Obras reservadas](https://img.shields.io/badge/obras-direitos%20reservados-lightgrey)](NOTICE.md)
 
 Plataforma editorial aberta para quadrinhos e livros independentes, com acessibilidade no centro: audiodescrição página a página, tipografia inclusiva, alto contraste e leitor compatível com leitores de tela.
 
 O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. **A autoria decide como cada obra é disponibilizada** — leitura livre, obra paga ou leitura livre com publicidade — e leitura livre continua sendo o padrão. O apoio financeiro ao projeto é voluntário e nunca condiciona o acesso a uma obra: só a obra que a própria autoria marcou como paga exige aquisição.
 
-**Versão 3.5.1** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; e a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número.
+**Versão 3.5.2** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; e a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código.
 
 ---
 
@@ -27,6 +29,7 @@ O Livrin existe para que quem não tem como bancar um lançamento tradicional co
 - [Solução de problemas](#solução-de-problemas)
 - [Direção visual](#direção-visual)
 - [Documentação completa](#documentação-completa)
+- [Licença e conteúdo de demonstração](#licença-e-conteúdo-de-demonstração)
 
 ---
 
@@ -569,7 +572,7 @@ O modo de desenvolvimento usa um volume de uploads **próprio** (`uploads_dev`).
 
 Sem Docker: suba um PostgreSQL, copie `api/.env.example` para `api/.env`, ajuste a `DATABASE_URL`, e então `cd api && npm install && npm run dev` e `cd web && npm install && npm run dev`.
 
-Mais detalhes em [docs/development.md](docs/development.md).
+Mais detalhes em [docs/development.md](docs/development.md). O fluxo de trabalho do grupo — branch, teste, PR, CI verde, squash — está em [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
@@ -617,6 +620,7 @@ O índice completo, por assunto, está em **[docs/README.md](docs/README.md)**. 
 | [README-PAGAMENTO.md](README-PAGAMENTO.md) | Todos os dados para simular pagamento, em uma página: cartão por bandeira, Pix, boleto, plano, o que falha de propósito |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | O fluxo que o projeto usa: branch, teste, PR, CI verde, squash — e as três regras que mais pegam gente |
 | [NOTICE.md](NOTICE.md) | O que está sob MIT, o que é autoral do grupo e o que é domínio público |
+| [LICENSE](LICENSE) | Licença MIT do código |
 | [pagamento-real-opcoes.md](docs/pagamento-real-opcoes.md) | Opções para receber apoio de verdade sem orçamento |
 | [obras-dominio-publico.md](docs/obras-dominio-publico.md) | Quando uma obra de terceiro pode entrar no acervo |
 | [decisions/](docs/decisions/) | Registros de decisão arquitetural (ADR) |

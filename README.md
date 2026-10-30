@@ -615,6 +615,8 @@ O índice completo, por assunto, está em **[docs/README.md](docs/README.md)**. 
 | [design/direcao-visual.md](docs/design/direcao-visual.md) | A direção visual e o que ela não pode quebrar |
 | [relatorio-final.md](docs/relatorio-final.md) | **Relatório final**: o que foi feito, testado e o que ficou pendente |
 | [README-PAGAMENTO.md](README-PAGAMENTO.md) | Todos os dados para simular pagamento, em uma página: cartão por bandeira, Pix, boleto, plano, o que falha de propósito |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | O fluxo que o projeto usa: branch, teste, PR, CI verde, squash — e as três regras que mais pegam gente |
+| [NOTICE.md](NOTICE.md) | O que está sob MIT, o que é autoral do grupo e o que é domínio público |
 | [pagamento-real-opcoes.md](docs/pagamento-real-opcoes.md) | Opções para receber apoio de verdade sem orçamento |
 | [obras-dominio-publico.md](docs/obras-dominio-publico.md) | Quando uma obra de terceiro pode entrar no acervo |
 | [decisions/](docs/decisions/) | Registros de decisão arquitetural (ADR) |
@@ -623,6 +625,8 @@ O índice completo, por assunto, está em **[docs/README.md](docs/README.md)**. 
 ---
 
 ## Licença e conteúdo de demonstração
+
+**O código está sob a licença [MIT](LICENSE).** As obras literárias, as capas e as peças visuais são autorais do Grupo 13 e seguem com todos os direitos reservados — a distinção, item por item, está em **[NOTICE.md](NOTICE.md)**.
 
 Projeto acadêmico. As obras de demonstração são **conteúdo original criado para este projeto** ou de **domínio público** (caso de *Rimas*, de Bécquer). Nenhum PDF ou material protegido por direitos autorais foi incorporado.
 

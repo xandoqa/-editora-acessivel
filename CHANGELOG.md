@@ -2,6 +2,15 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [Não lançado]
+
+### Organização do repositório
+
+`LICENSE` (MIT para o código), `NOTICE.md` (o que é autoral do grupo e o que é
+domínio público, item por item) e `CONTRIBUTING.md` (o fluxo de branch, teste,
+PR e squash que o projeto já usava, mas que só existia como seção solta em
+`docs/development.md`).
+
 ## [3.5.1] — 2026-10-29
 
 ### Layout do player de audiodescrição

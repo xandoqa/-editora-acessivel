@@ -71,6 +71,19 @@ const LIMITE_MS = 10_000;
 type Estado = 'desligado' | 'carregando' | 'ligado' | 'falhou';
 
 /**
+ * Lida por função, de propósito.
+ *
+ * Escrito como `navigator.onLine === false` direto, o TypeScript estreita a
+ * propriedade depois da primeira conferência e passa a tratar a segunda como
+ * comparação impossível — `true` contra `false`. O estreitamento está errado
+ * aqui: entre uma conferência e outra existe uma requisição de rede, e a
+ * conexão pode cair justamente nesse intervalo. É esse caso que a segunda
+ * conferência trata. Chamada de função não é estreitada, então o valor é lido
+ * de novo a cada vez, que é o comportamento correto.
+ */
+const semRede = (): boolean => navigator.onLine === false;
+
+/**
  * Carrega o plugin uma única vez por sessão.
  *
  * O `new window.VLibras.Widget(...)` roda dentro do `onload` do script, e não
@@ -144,11 +157,11 @@ export default function JanelaDeLibras({ classeBotao }: { classeBotao: string })
      * recurso indisponível — e esperar dez segundos para descobrir isso é
      * tempo gasto para chegar a uma resposta que o navegador já tinha.
      * `navigator.onLine` é conservador por natureza: `false` é confiável,
-     * `true` apenas diz que existe uma interface de rede. Por isso ele serve
-     * para encurtar o caminho da falha, nunca para garantir o sucesso — quem
-     * garante é a tentativa, logo abaixo.
+     * `true` apenas diz que existe uma interface de rede. Por isso `semRede()`
+     * serve para encurtar o caminho da falha, nunca para garantir o sucesso —
+     * quem garante é a tentativa, logo abaixo.
      */
-    if (navigator.onLine === false) {
+    if (semRede()) {
       falhar(
         'A janela de Libras precisa de internet: o tradutor é carregado do serviço do governo ' +
           '(vlibras.gov.br) e não fica guardado nesta máquina. Todo o resto do Livrin funciona sem rede.',
@@ -166,7 +179,7 @@ export default function JanelaDeLibras({ classeBotao }: { classeBotao: string })
     } catch {
       if (!montado.current) return;
       falhar(
-        navigator.onLine === false
+        semRede()
           ? 'A conexão caiu durante o carregamento da janela de Libras. Reconecte e tente de novo.'
           : 'Não foi possível carregar a janela de Libras. O tradutor é um serviço externo ' +
             '(vlibras.gov.br): ele pode estar fora do ar ou bloqueado nesta rede. Todo o resto do ' +

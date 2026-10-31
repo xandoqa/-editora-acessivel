@@ -22,6 +22,7 @@ const Apoiar = lazy(() => import('./pages/Apoiar'));
 const Biblioteca = lazy(() => import('./pages/Biblioteca'));
 const Historico = lazy(() => import('./pages/Historico'));
 const Planos = lazy(() => import('./pages/Planos'));
+const Sobre = lazy(() => import('./pages/Sobre'));
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminWorks = lazy(() => import('./pages/admin/AdminWorks'));
@@ -64,6 +65,7 @@ export default function App() {
             {/* A página de planos é pública: quem ainda não tem conta precisa
                 conseguir ler o que o plano oferece antes de criar uma. */}
             <Route path="/planos" element={<Planos />} />
+            <Route path="/sobre" element={<Sobre />} />
             {/* Qualquer conta autenticada */}
             <Route element={<RequireAuth />}>
               <Route path="/profile" element={<Profile />} />

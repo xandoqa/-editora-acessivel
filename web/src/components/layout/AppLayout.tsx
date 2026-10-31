@@ -1,35 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
-import { HandHeart, X } from 'lucide-react';
+import { Outlet, useLocation } from 'react-router-dom';
+import { X } from 'lucide-react';
+import Rodape from './Rodape';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import { OndaDivisoria } from '../ui/Ornamentos';
-
-/**
- * Rodapé do site. É aqui que mora o convite para apoiar o projeto: discreto, no
- * fim da página, como pede a seção 19 da especificação — nunca um banner, nunca
- * um anteparo na frente da leitura.
- */
-function Rodape() {
-  return (
-    <footer className="mt-20 border-t border-outline/25 pt-8">
-      <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-6 px-4 pb-10 md:flex-row md:items-center md:justify-between md:px-8">
-        <p className="max-w-md text-sm leading-relaxed text-ink-muted">
-          O Livrin é uma editora digital aberta: quem não tem como bancar um lançamento tradicional publica e é lido aqui. Ler é de graça e
-          continua sendo.
-        </p>
-        <div className="flex shrink-0 items-center gap-4">
-          <span className="text-xs text-ink-subtle" title="Versão do site que está no seu navegador">
-            v{__LIVRIN_VERSAO__}
-          </span>
-          <Link to="/apoiar" className="btn-secondary">
-            <HandHeart className="h-4 w-4" aria-hidden /> Apoiar o Livrin
-          </Link>
-        </div>
-      </div>
-    </footer>
-  );
-}
 
 /** Estrutura do protótipo: barra lateral fixa + barra superior + conteúdo. */
 export default function AppLayout() {

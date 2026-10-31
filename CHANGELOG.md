@@ -2,6 +2,41 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.6.0] — 2026-10-31
+
+### Rodapé completo
+
+O rodapé tinha uma frase e um botão. Agora traz navegação por área — ler,
+publicar, o Livrin —, contato, a identidade do projeto e o selo de
+acessibilidade. A coluna de publicação muda conforme o perfil: quem já publica
+vê o painel e as obras em análise; quem ainda não, vê o convite.
+
+Três ausências são deliberadas. **Não há bandeira de cartão:** uma fileira de
+selos Visa/Elo diz "aceitamos esses cartões", e aqui seria mentira — o pagamento
+é simulado, e no lugar vai uma linha dizendo o que de fato acontece. **Não há
+CNPJ:** número de registro identifica empresa real, e inventar um para parecer
+profissional é falsificar documento, ainda que em HTML. **Não há redes sociais:**
+não existem perfis do Livrin, e ícone que leva a lugar nenhum é defeito, não
+enfeite.
+
+Os dados de contato são fictícios e o rodapé diz isso. O link do repositório é
+real. O carimbo de versão continua lá — e acabou de provar serventia.
+
+### Página "Sobre o Livrin"
+
+Nova rota `/sobre`, com cinco seções: por que o projeto existe, por que ler é de
+graça, o que "acessível" significa aqui, como uma obra chega ao catálogo, e que
+é um trabalho acadêmico com pagamento simulado. O conteúdo vem da documentação
+— README, `docs/accessibility.md`, `docs/business-rules.md` e `NOTICE.md` — e
+não de texto inventado para encher página. Inclusive a parte incômoda: um
+"sobre nós" que escondesse a simulação seria o único lugar do site mentindo.
+
+### Tradução
+
+Rodapé e página "Sobre" nasceram **inteiros no dicionário**, nos três idiomas —
+38 chaves novas. Nenhum dos dois acrescentou um único trecho à conta do que
+falta traduzir.
+
 ## [3.5.8] — 2026-10-31
 
 Dois defeitos relatados com print. Os dois eram reais.

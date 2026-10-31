@@ -8,7 +8,7 @@ Plataforma editorial aberta para quadrinhos e livros independentes, com acessibi
 
 O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. **A autoria decide como cada obra é disponibilizada** — leitura livre, obra paga ou leitura livre com publicidade — e leitura livre continua sendo o padrão. O apoio financeiro ao projeto é voluntário e nunca condiciona o acesso a uma obra: só a obra que a própria autoria marcou como paga exige aquisição.
 
-**Versão 3.5.8** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede; a 3.5.5 trouxe os seis temas e o sistema de tradução; a 3.5.6 levou os seletores de tema e idioma para junto do perfil; a 3.5.7 levou os recursos de acessibilidade para o menu lateral; e a 3.5.8 traduziu o catálogo inteiro e acertou a tipografia e a busca no celular.
+**Versão 3.6.0** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede; a 3.5.5 trouxe os seis temas e o sistema de tradução; a 3.5.6 levou os seletores de tema e idioma para junto do perfil; a 3.5.7 levou os recursos de acessibilidade para o menu lateral; a 3.5.8 traduziu o catálogo inteiro e acertou a tipografia e a busca no celular; e a 3.6.0 trouxe o rodapé completo e a página **Sobre o Livrin**.
 
 ---
 
@@ -29,6 +29,7 @@ O Livrin existe para que quem não tem como bancar um lançamento tradicional co
 - [Solução de problemas](#solução-de-problemas)
 - [Antes da apresentação](#antes-da-apresentação)
 - [Correções recentes](#correções-recentes)
+- [Rodapé e página "Sobre"](#rodapé-e-página-sobre)
 - [Abrir no celular](#abrir-no-celular)
 - [Idiomas e temas](#idiomas-e-temas)
 - [Direção visual](#direção-visual)
@@ -624,6 +625,20 @@ Uma correção foi **recusada depois de implementada**: acrescentar `NULLS NOT D
 O histórico completo está no [CHANGELOG](CHANGELOG.md); o que a auditoria verificou e achou em ordem está no [relatório final](docs/relatorio-final.md).
 
 ---
+
+## Rodapé e página "Sobre"
+
+O rodapé traz navegação por área (ler, publicar, o Livrin), contato e a identidade do projeto, e a página **Sobre o Livrin** (`/sobre`) conta por que o Livrin existe, o que "acessível" significa aqui, como uma obra chega ao catálogo e que é um trabalho acadêmico. O conteúdo da página vem da documentação, não de texto inventado para encher espaço.
+
+Três ausências no rodapé são deliberadas, e valem explicação se perguntarem:
+
+| O que não tem | Por quê |
+| --- | --- |
+| **Bandeiras de cartão** (Visa, Elo, Mastercard) | Uma fileira de selos diz "aceitamos esses cartões", e aqui seria mentira: o pagamento é simulado. No lugar há uma linha dizendo o que de fato acontece |
+| **CNPJ** | Número de registro identifica empresa real. Inventar um para parecer profissional é falsificar documento, ainda que em HTML. No lugar vai o que o Livrin é: trabalho acadêmico |
+| **Redes sociais** | Não existem perfis do Livrin. Ícone que leva a lugar nenhum — ou pior, ao perfil de outra pessoa — não é enfeite, é defeito |
+
+Os dados de contato são **fictícios**, e o próprio rodapé diz isso, para ninguém tentar escrever para aquele endereço. O link do repositório é real.
 
 ## Abrir no celular
 

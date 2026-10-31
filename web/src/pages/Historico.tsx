@@ -87,7 +87,7 @@ export default function Historico() {
 
               <div className="min-w-0 flex-1">
                 <p className="eyebrow text-ink-subtle">
-                  {FORMAT_SHORT[item.work.format as keyof typeof FORMAT_SHORT] ?? item.work.format} ·{' '}
+                  {t(FORMAT_SHORT[item.work.format as keyof typeof FORMAT_SHORT])} ·{' '}
                   {item.work.pages}p
                 </p>
                 <h2 className="mt-0.5 font-display text-lg font-semibold leading-tight text-ink">

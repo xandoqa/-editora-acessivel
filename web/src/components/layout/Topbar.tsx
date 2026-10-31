@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { ChevronDown, Contrast, Crown, LayoutDashboard, LogOut, Menu, Plus, Search, ShieldCheck, UserRound } from 'lucide-react';
+import { ChevronDown, Contrast, Crown, LayoutDashboard, LogOut, Menu, Plus, Search, ShieldCheck, UserRound, X } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext';
 import { FONT_MAX, FONT_MIN, usePreferences } from '../../preferences/PreferencesContext';
 import { useT } from '../../i18n/I18nContext';
@@ -103,6 +103,16 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
   const location = useLocation();
   const [params] = useSearchParams();
   const [term, setTerm] = useState(params.get('q') ?? '');
+  /*
+   * Busca aberta, só no celular.
+   *
+   * Abaixo de 640px o campo dividia a linha com o menu, os dois seletores e o
+   * perfil, e sobravam menos de cem pixels: virava uma bolinha com uma lupa
+   * dentro, sem lugar para digitar. Agora a lupa é um botão que abre o campo
+   * ocupando a linha inteira — o padrão de quase todo aplicativo, e o único que
+   * cabe nessa largura sem esconder o resto o tempo todo.
+   */
+  const [buscaAberta, setBuscaAberta] = useState(false);
 
   useEffect(() => {
     if (location.pathname === '/') setTerm(params.get('q') ?? '');
@@ -117,6 +127,7 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
     e.preventDefault();
     const q = term.trim();
     navigate(q ? `/?q=${encodeURIComponent(q)}` : '/');
+    setBuscaAberta(false);
   };
 
   const tool =
@@ -124,7 +135,12 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
 
   return (
     <header className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b border-outline/25 bg-bg/95 px-4 backdrop-blur md:px-6">
-      <button type="button" className="icon-btn lg:hidden" onClick={onOpenMenu} aria-label={t('nav.abrirMenu')}>
+      <button
+        type="button"
+        className={`icon-btn lg:hidden ${buscaAberta ? 'hidden sm:inline-flex lg:hidden' : ''}`}
+        onClick={onOpenMenu}
+        aria-label={t('nav.abrirMenu')}
+      >
         <Menu className="h-6 w-6" aria-hidden />
       </button>
 
@@ -138,12 +154,24 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         critério WCAG 2.4.7 numa plataforma de acessibilidade. O realce da borda
         abaixo é um reforço visual, não o indicador: o indicador é o contorno.
       */}
+      {/* No celular, a lupa abre o campo; de 640px para cima o campo já está
+          aberto e este botão não existe. */}
+      <button
+        type="button"
+        className={`icon-btn sm:hidden ${buscaAberta ? 'hidden' : ''}`}
+        onClick={() => setBuscaAberta(true)}
+        aria-label={t('nav.abrirBusca')}
+        aria-expanded={buscaAberta}
+      >
+        <Search className="h-5 w-5" aria-hidden />
+      </button>
+
       <form
         role="search"
         onSubmit={onSearch}
-        className="flex min-w-0 flex-1 items-center gap-2 rounded-full border border-outline bg-surface px-4 focus-within:border-primary md:max-w-xl"
+        className={`${buscaAberta ? 'flex' : 'hidden'} min-w-0 flex-1 items-center gap-2 rounded-full border border-outline bg-surface px-4 focus-within:border-primary sm:flex md:max-w-xl`}
       >
-        <Search className="h-5 w-5 shrink-0 text-ink-muted" aria-hidden />
+        <Search className="hidden h-5 w-5 shrink-0 text-ink-muted sm:block" aria-hidden />
         <label htmlFor="global-search" className="sr-only">
           {t('nav.buscarObras')}
         </label>
@@ -155,6 +183,14 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
           placeholder={t('nav.buscaPlaceholder')}
           className="h-11 min-w-0 flex-1 bg-transparent text-sm text-ink placeholder:text-ink-subtle"
         />
+        <button
+          type="button"
+          className="icon-btn h-8 w-8 shrink-0 sm:hidden"
+          onClick={() => setBuscaAberta(false)}
+          aria-label={t('nav.fecharBusca')}
+        >
+          <X className="h-4 w-4" aria-hidden />
+        </button>
       </form>
 
       <div className="relative hidden items-center gap-0.5 rounded-full border border-outline bg-surface p-1 sm:flex" role="group" aria-label={t('a11y.grupo')}>
@@ -201,7 +237,7 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         alto contraste, tamanho do texto, leitura em voz alta e Libras.
       */}
       <div
-        className="flex shrink-0 items-center gap-0.5 rounded-full border border-outline bg-surface p-1"
+        className={`${buscaAberta ? 'hidden sm:flex' : 'flex'} shrink-0 items-center gap-0.5 rounded-full border border-outline bg-surface p-1`}
         role="group"
         aria-label={t('preferencias.grupo')}
       >
@@ -210,7 +246,9 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
       </div>
 
       <div className="mx-1 hidden h-8 w-px bg-outline/60 md:block" aria-hidden />
-      <UserMenu />
+      <div className={buscaAberta ? 'hidden sm:block' : 'block'}>
+        <UserMenu />
+      </div>
     </header>
   );
 }

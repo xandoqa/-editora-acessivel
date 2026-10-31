@@ -93,7 +93,7 @@ export default function ReviewStatus() {
         <p className="eyebrow mb-2 flex items-center gap-2 text-primary">
           <Hourglass className="h-4 w-4" aria-hidden /> Fluxo de avaliação editorial · Protocolo #{review?.protocol ?? '—'}
         </p>
-        <h1 className="text-4xl font-bold tracking-tight text-ink">{title}</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">{title}</h1>
         <p className="mt-3 max-w-3xl text-lg text-ink-muted">
           Acompanhe em tempo real as validações de conteúdo, diagramação inclusiva e testes de audiodescrição para publicação na plataforma.
         </p>

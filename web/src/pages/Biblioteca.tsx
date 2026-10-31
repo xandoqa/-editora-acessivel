@@ -68,7 +68,7 @@ export default function Biblioteca() {
                 <Cover url={item.work.coverUrl} title={item.work.title} alt="" className="aspect-[16/9] w-full" />
               </Link>
               <p className="eyebrow mt-3 text-ink-subtle">
-                {FORMAT_SHORT[item.work.format]} · {item.work.pages}p
+                {t(FORMAT_SHORT[item.work.format])} · {item.work.pages}p
               </p>
               <h2 className="mt-1 font-display text-xl font-semibold leading-tight text-ink">{item.work.title}</h2>
               <p className="mt-1 text-sm text-ink-muted">{item.author.name}</p>

@@ -2,6 +2,51 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.5.8] — 2026-10-31
+
+Dois defeitos relatados com print. Os dois eram reais.
+
+### O catálogo ficava meio em português
+
+Trocar para inglês ou francês deixava a primeira tela do site pela metade: a
+chamada, os chips de filtro, a contagem de obras e os cartões continuavam em
+português. A cobertura estava declarada como parcial, mas o catálogo é a tela
+que todo mundo vê primeiro — meia tradução ali é defeito, não limitação
+declarada.
+
+**O catálogo e os cartões de obra agora saem inteiros do dicionário**: chamada,
+recursos destacados, chips de filtro, contagem, chamada para a autoria, e nos
+cartões o formato, os selos de recurso, a modalidade e os botões.
+
+A causa de um pedaço disso merece registro, porque é a mesma de antes e vai
+voltar: **listas declaradas no nível do módulo guardavam texto, não chave.** Elas
+rodam uma vez, antes de qualquer idioma ser escolhido, então o português ficava
+congelado no primeiro carregamento mesmo com o seletor funcionando. `FILTERS`,
+`TOP_BADGE`, `SIDE_TAG` e `FORMAT_SHORT` passaram a guardar `ChaveDeTraducao`, e
+o tipo agora impede o erro.
+
+### Tudo grande no celular
+
+O título do catálogo era `2.75rem` fixo — 44px num aparelho de 375px, duas
+palavras ocupando a tela. Agora escala com a largura: **32px no celular**, 40px
+a partir de 640px, 60px no computador. O texto de apoio e os números grandes dos
+painéis seguem a mesma regra.
+
+E a busca: abaixo de 640px ela dividia a linha com o menu, os dois seletores e o
+perfil, sobrava menos de cem pixels e o campo virava **uma bolinha com uma lupa
+dentro**, sem lugar para digitar. Agora a lupa é um botão que abre o campo
+ocupando a linha inteira, e o resto da barra cede lugar enquanto ela está aberta.
+
+### Verificação
+
+Medido em navegador sem interface a 360, 375, 414, 640 e 1280px: nenhuma rolagem
+horizontal, título a 32px no celular, e o cabeçalho passou a ter de 123 a 177px
+de folga em vez de espremer a busca. Contraste dos sete temas conferido de novo.
+
+**O que continua faltando traduzir:** 370 trechos, concentrados no formulário de
+envio, na administração e no painel da autoria —
+`python3 ferramentas/conferir-traducao.py --detalhado` lista arquivo e linha.
+
 ## [3.5.7] — 2026-10-31
 
 ### Os recursos de acessibilidade voltaram a existir no celular

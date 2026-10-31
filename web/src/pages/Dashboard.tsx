@@ -36,7 +36,7 @@ function StatCard({ label, icon, value, suffix, accent }: { label: string; icon:
         </span>
       </div>
       <p className="relative mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-        <span className={`font-display text-4xl font-bold ${accent ? 'text-accent' : 'text-ink'}`}>{value}</span>
+        <span className={`font-display text-3xl sm:text-4xl font-bold ${accent ? 'text-accent' : 'text-ink'}`}>{value}</span>
         {suffix}
       </p>
     </div>
@@ -102,7 +102,7 @@ export default function Dashboard() {
           <p className="eyebrow mb-2 flex items-center gap-2 text-accent">
             <ShieldCheck className="h-4 w-4" aria-hidden /> Painel editorial do autor
           </p>
-          <h1 className="text-4xl font-bold tracking-tight text-ink">Olá, {user?.name}</h1>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-ink">Olá, {user?.name}</h1>
           <p className="mt-3 text-lg text-ink-muted">
             Acompanhe o alcance das suas obras, o andamento da curadoria de acessibilidade e o uso real dos recursos assistivos
             pelos leitores.
@@ -174,7 +174,7 @@ export default function Dashboard() {
               <p className="chip mb-4 bg-accent-container py-1.5 text-accent">
                 <span className="h-2 w-2 rounded-full bg-current" aria-hidden /> Aprovada pela curadoria e publicada no catálogo
               </p>
-              <h2 id="highlight-title" className="text-4xl font-bold text-ink">
+              <h2 id="highlight-title" className="text-3xl sm:text-4xl font-bold text-ink">
                 {highlight.title}
               </h2>
               {highlight.subtitle && <p className="mt-1 text-lg text-primary">{highlight.subtitle}</p>}

@@ -1,4 +1,5 @@
 import type { CheckStatus, FeatureFlag, Role, Work, WorkFormat, WorkStatus } from '../types/api';
+import type { ChaveDeTraducao } from '../i18n/tipos';
 
 export const ROLE_LABEL: Record<Role, string> = {
   LEITOR: 'Leitor',
@@ -41,11 +42,17 @@ export const FORMAT_LABEL: Record<WorkFormat, string> = {
   ZINE: 'Zine',
 };
 
-export const FORMAT_SHORT: Record<WorkFormat, string> = {
-  QUADRINHO: 'HQ',
-  LIVRO: 'Livro',
-  MANGA_WEBCOMIC: 'Webcomic',
-  ZINE: 'Zine',
+/**
+ * Forma curta do formato, para a linha de ficha do card.
+ *
+ * Guarda CHAVE de tradução, não texto: este mapa é lido no nível do módulo e
+ * o texto ficaria preso ao idioma do primeiro carregamento.
+ */
+export const FORMAT_SHORT: Record<WorkFormat, ChaveDeTraducao> = {
+  QUADRINHO: 'formato.hq',
+  LIVRO: 'formato.livro',
+  MANGA_WEBCOMIC: 'formato.webcomic',
+  ZINE: 'formato.zine',
 };
 
 export const CHECK_LABEL: Record<CheckStatus, string> = {

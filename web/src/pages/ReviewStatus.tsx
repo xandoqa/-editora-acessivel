@@ -126,7 +126,7 @@ export default function ReviewStatus() {
               <span className="chip absolute right-3 top-3 bg-black/80 text-warn">
                 <span className="h-2 w-2 rounded-full bg-current" aria-hidden /> {STATUS_LABEL[status]}
               </span>
-              <p className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent px-3 pb-2 pt-8 text-xs font-bold uppercase tracking-wider text-[#d6e2ff]">
+              <p className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 to-transparent px-3 pb-2 pt-8 text-xs font-bold uppercase tracking-wider text-white">
                 {work.genre.name}
               </p>
             </div>

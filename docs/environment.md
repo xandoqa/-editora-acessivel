@@ -26,7 +26,7 @@ Nunca versione arquivos `.env` (já estão no `.gitignore`). Os valores dos exem
 | `ADMIN_PASSWORD` | recomendada | vazio | ≥ 8 caracteres, com letras e números | seed — mesma política de senha do resto do sistema |
 | `SEED_DEMO_DATA` | não | `false` (`.env.example`: `true`) | `true`/`false` | seed — dados do protótipo |
 | `DEMO_USER_PASSWORD` | se `SEED_DEMO_DATA=true` | vazio | ≥ 8 caracteres, com letras e números | senha das contas de demonstração |
-| `PAYMENT_PROVIDER` | não | `simulado` | nome do provedor registrado | doações — `simulado` não movimenta dinheiro e avisa isso na interface |
+| `PAYMENT_PROVIDER` | não | `simulado` | nome do provedor registrado | apoio, compra de obra e assinatura do plano — `simulado` não movimenta dinheiro e avisa isso na interface |
 | `WEB_PORT` | não | `5173` | porta | porta do site no host |
 | `API_PORT` | não | `3000` | porta | porta da API no host (depuração) |
 | `DB_PORT` | não | `5432` | porta | só no `docker-compose.dev.yml` |

@@ -138,6 +138,31 @@ export function iniciarLeituraPorPalavra(raiz: HTMLElement, aoLer?: (palavra: st
   let indiceTeclado = -1;
   let cacheDePalavras: Palavra[] | null = null;
 
+  /*
+   * Identidade dos nós de texto, para a chave que evita repetir a palavra.
+   *
+   * A chave anterior era o deslocamento mais os doze primeiros caracteres do
+   * nó. Dois nós diferentes que comecem igual — uma lista de cards onde se lê
+   * "Leitura livre" em todos, por exemplo — geravam a mesma chave, e passar o
+   * ponteiro de um para o outro não falava de novo. Num recurso de
+   * acessibilidade, calar onde deveria falar é a pior falha possível, e era
+   * silenciosa.
+   *
+   * Comparar o próprio nó resolve sem heurística. O `WeakMap` numera cada nó
+   * uma vez e não impede que ele seja coletado quando a página muda.
+   */
+  const idsDeNo = new WeakMap<Node, number>();
+  let proximoId = 0;
+  const idDoNo = (no: Node): number => {
+    let id = idsDeNo.get(no);
+    if (id === undefined) {
+      id = proximoId;
+      proximoId += 1;
+      idsDeNo.set(no, id);
+    }
+    return id;
+  };
+
   const falar = (texto: string, chave: string) => {
     if (!texto.trim() || chave === ultimaChave) return;
     ultimaChave = chave;
@@ -155,7 +180,7 @@ export function iniciarLeituraPorPalavra(raiz: HTMLElement, aoLer?: (palavra: st
     const texto = achado.no.nodeValue ?? '';
     const limites = limitesDaPalavra(texto, achado.deslocamento);
     if (!limites) return;
-    falar(texto.slice(limites[0], limites[1]), `${limites[0]}@${texto.slice(0, 12)}`);
+    falar(texto.slice(limites[0], limites[1]), `no:${idDoNo(achado.no)}@${limites[0]}`);
   };
 
   const aoTeclar = (evento: KeyboardEvent) => {

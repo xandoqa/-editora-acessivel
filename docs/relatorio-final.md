@@ -1,12 +1,14 @@
-# Relatório Final — Livrin 3.5.0
+# Relatório Final — Livrin 3.5.3
 
-*29 de outubro de 2026*
+*30 de outubro de 2026*
 
 A plataforma passou a ter monetização opcional por obra (gratuita, paga ou com publicidade), aquisição vinculada à conta e plano do leitor — e uma brecha real de acesso a obra paga foi encontrada e fechada. Todo pagamento continua simulado.
 
 Depois disso, a 3.4.0 acrescentou a **janela de Libras** (VLibras, opcional e carregada sob demanda) e corrigiu uma segunda promessa que o sistema não cumpria: a marcação `hasLibras` prometia intérprete e não havia campo de vídeo.
 
 A 3.5.0 fechou a série com **histórico de leitura**, a página **Planos do Livrin** com assinatura simulada que ativa o plano de verdade e permite cancelar, e a **audiodescrição que funciona em toda obra** — antes, obra sem descrição cadastrada tinha um botão que não fazia nada.
+
+Três versões vieram depois. A **3.5.1** corrigiu o layout do player de audiodescrição e passou a **identificar a bandeira do cartão pelo número**, com validação por algoritmo de Luhn e conferência de vencimento nos dois lados — antes, o formulário contava dígitos e aceitava `1111 1111 1111 1111`. A **3.5.2** deu **licença** ao repositório, que era público e sem nenhuma, e separou por escrito o que é código sob MIT do que é obra autoral do grupo. A **3.5.3** aplicou as correções de uma **auditoria completa do repositório**, descrita no fim deste relatório.
 
 ---
 
@@ -185,6 +187,34 @@ As contas de demonstração e suas senhas estão no `README.md`. As senhas reais
 
 > `docker compose down -v` apaga o volume do banco e, com ele, tudo o que foi cadastrado. Sem o `-v`, os dados permanecem.
 
+## Auditoria da 3.5.3
+
+Antes do fechamento, o repositório inteiro foi auditado: todas as pastas, os 87 arquivos TypeScript da API, os 58 do front, as nove migrations, os 50 arquivos de documentação e a configuração de Docker e de integração contínua.
+
+### O que a auditoria verificou e estava correto
+
+Nenhuma chamada de API do front sem rota correspondente no servidor, e nenhum handler de rota sem controller — as duas listas foram cruzadas inteiras, não por amostragem. Nenhum import quebrado nos dois pacotes. As dez tabelas e os onze enums do `schema.ts` batem com as nove migrations, incluindo as renomeações de tipo (`user_role_v2 → user_role`, `work_status_v2 → work_status`) e o `ADD VALUE` do `DOCX`. Migrations e `meta/_journal.json` em sincronia. Os 25 arquivos citados pelo seed existem em `seed-assets`. Nenhum link relativo quebrado na documentação. Nenhuma dependência importada sem ser declarada. Nenhum `TODO`, `console.log`, `any` ou `.only` esquecido. As três saídas de conteúdo — arquivo, faixa de áudio e audiodescrição — verificam aquisição.
+
+### O que foi corrigido
+
+| Achado | Correção |
+| --- | --- |
+| O limite de login contava acertos, e numa sala atrás do mesmo Wi-Fi o grupo e quem avaliasse esgotariam a cota **entrando com a senha certa** | `skipSuccessfulRequests`: só tentativa que falha consome cota. Força bruta é feita de erros |
+| O mesmo limitador freava o login e a abertura de cobrança, onde o acerto é justamente o que precisa ser contado | `cobrancaLimiter` separado, aplicado a apoio, compra e assinatura |
+| A garantia de banco contra cobrança duplicada não alcançava a assinatura de plano, porque `work_id` nulo escapa do índice único | Assinatura passou a serializar com `SELECT … FOR UPDATE` sobre a linha da conta |
+| Duas cores fixas ignoravam o sistema de temas | Substituídas por token |
+| A chave que evita repetir palavra na leitura em voz alta colidia entre nós de texto com início igual | Identidade do nó via `WeakMap`, sem heurística |
+| `PAYMENT_PROVIDER` não estava documentada em nenhum `.env.example` | Documentada nos dois, com os valores aceitos |
+| Os três `package-lock.json` registravam a versão `3.1.5` | Sincronizados |
+
+### A correção que foi recusada
+
+A auditoria recomendou `NULLS NOT DISTINCT` no índice `purchases_one_confirmed_per_user_work`, para estender ao plano a garantia que a compra de obra já tem. **A recomendação estava errada, e isso foi descoberto ao implementá-la.**
+
+Cancelar assinatura não apaga o que foi pago: a cobrança anterior permanece `CONFIRMADA`. Um índice único sobre assinaturas confirmadas impediria que alguém que cancelou voltasse a assinar — trocaria uma corrida improvável por um defeito garantido, e um defeito que só apareceria com uma pessoa real tentando voltar a ser premium. A solução adotada serializa a decisão em transação. Um teste novo cobre exatamente o caminho que o índice teria quebrado.
+
+Ver [ADR 018](decisions/018-assinatura-concorrente.md).
+
 ## Pendências e o que não foi verificado
 
 ### Não verificado
@@ -196,10 +226,12 @@ As contas de demonstração e suas senhas estão no `README.md`. As senhas reais
 | Pendência | Impacto |
 | --- | --- |
 | Painel administrativo de publicidade simulada | Nenhum na demonstração; os dados seriam fictícios de qualquer forma |
-| `PAYMENT_PROVIDER` ausente dos três `.env.example` | Nenhum: tem padrão `simulado` |
-| Duas cores fixas (`text-[#d6e2ff]`) que ignoram o tema Alto Contraste | Baixo, visual |
-| Colisão de chave na leitura por mouse | Raro: uma palavra repetida pode ser silenciada |
 | Design de formulários e administração | Estrutural, pouco visual |
+| As telas de biblioteca, histórico e planos não têm teste de interface | O servidor delas é testado; a camada visual não. O único defeito visual desta série foi achado a olho |
+| A assinatura abre a cobrança dentro da transação | Nenhum com o provedor simulado, que é instantâneo. Com provedor real, a transação seguraria a conexão durante a chamada externa |
+| O limite do nginx (`client_max_body_size 200m`) é fixo e não acompanha `MAX_UPLOAD_MB` | Nenhum hoje, com folga de 20 MB. Aumentar a variável além de 200 faria o nginx recusar antes da API |
+
+As quatro pendências da 3.5.0 que não aparecem mais aqui — `PAYMENT_PROVIDER` sem documentação, as duas cores fixas, a colisão de chave na leitura e a versão dos `package-lock.json` — foram corrigidas na 3.5.3.
 
 ### Configuração manual
 

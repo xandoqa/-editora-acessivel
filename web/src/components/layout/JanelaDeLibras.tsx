@@ -25,7 +25,9 @@ import { safeStorage } from '../../lib/api';
  *  3. **A falha é dita, não escondida.** O avatar vem de um serviço externo.
  *     Se ele estiver fora do ar, ou se a máquina estiver sem internet, o
  *     botão avisa em vez de ficar girando para sempre. Um recurso de
- *     acessibilidade que falha em silêncio é pior que um ausente.
+ *     acessibilidade que falha em silêncio é pior que um ausente. Máquina
+ *     sem rede nem chega a tentar: avisa na hora, e diz que **só este
+ *     recurso** depende de internet — o resto do Livrin não.
  *
  *  4. **Diz o que é.** Tradução automática por avatar não equivale a
  *     intérprete humano: Libras é uma língua com gramática própria, não
@@ -56,10 +58,30 @@ declare module 'react' {
 const URL_APP = 'https://vlibras.gov.br/app';
 const URL_PLUGIN = `${URL_APP}/vlibras-plugin.js`;
 const CHAVE = 'livrin_libras';
-/** Depois disso, considera-se que o serviço não respondeu. */
-const LIMITE_MS = 15_000;
+/**
+ * Depois disso, considera-se que o serviço não respondeu.
+ *
+ * Eram 15 segundos. Numa apresentação, 15 segundos de ampulheta não parecem
+ * espera: parecem defeito. Dez já é folgado para um plugin que, em rede
+ * razoável, chega em dois ou três — e quando não chega, dizer logo é melhor
+ * do que continuar girando.
+ */
+const LIMITE_MS = 10_000;
 
 type Estado = 'desligado' | 'carregando' | 'ligado' | 'falhou';
+
+/**
+ * Lida por função, de propósito.
+ *
+ * Escrito como `navigator.onLine === false` direto, o TypeScript estreita a
+ * propriedade depois da primeira conferência e passa a tratar a segunda como
+ * comparação impossível — `true` contra `false`. O estreitamento está errado
+ * aqui: entre uma conferência e outra existe uma requisição de rede, e a
+ * conexão pode cair justamente nesse intervalo. É esse caso que a segunda
+ * conferência trata. Chamada de função não é estreitada, então o valor é lido
+ * de novo a cada vez, que é o comportamento correto.
+ */
+const semRede = (): boolean => navigator.onLine === false;
 
 /**
  * Carrega o plugin uma única vez por sessão.
@@ -121,7 +143,32 @@ export default function JanelaDeLibras({ classeBotao }: { classeBotao: string })
     };
   }, []);
 
+  const falhar = (mensagem: string) => {
+    setEstado('falhou');
+    safeStorage.remove(CHAVE);
+    setAviso(mensagem);
+  };
+
   const ligar = async () => {
+    /*
+     * Sem rede, não há o que tentar.
+     *
+     * O tradutor vem de um serviço externo, então máquina offline significa
+     * recurso indisponível — e esperar dez segundos para descobrir isso é
+     * tempo gasto para chegar a uma resposta que o navegador já tinha.
+     * `navigator.onLine` é conservador por natureza: `false` é confiável,
+     * `true` apenas diz que existe uma interface de rede. Por isso `semRede()`
+     * serve para encurtar o caminho da falha, nunca para garantir o sucesso —
+     * quem garante é a tentativa, logo abaixo.
+     */
+    if (semRede()) {
+      falhar(
+        'A janela de Libras precisa de internet: o tradutor é carregado do serviço do governo ' +
+          '(vlibras.gov.br) e não fica guardado nesta máquina. Todo o resto do Livrin funciona sem rede.',
+      );
+      return;
+    }
+
     setEstado('carregando');
     setAviso('');
     try {
@@ -131,11 +178,12 @@ export default function JanelaDeLibras({ classeBotao }: { classeBotao: string })
       safeStorage.set(CHAVE, 'on');
     } catch {
       if (!montado.current) return;
-      setEstado('falhou');
-      safeStorage.remove(CHAVE);
-      setAviso(
-        'Não foi possível carregar a janela de Libras. O tradutor é um serviço externo (vlibras.gov.br): ' +
-          'verifique sua conexão e tente de novo.',
+      falhar(
+        semRede()
+          ? 'A conexão caiu durante o carregamento da janela de Libras. Reconecte e tente de novo.'
+          : 'Não foi possível carregar a janela de Libras. O tradutor é um serviço externo ' +
+            '(vlibras.gov.br): ele pode estar fora do ar ou bloqueado nesta rede. Todo o resto do ' +
+            'Livrin continua funcionando.',
       );
     }
   };

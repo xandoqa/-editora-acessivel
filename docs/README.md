@@ -3,6 +3,7 @@
 | Começar | |
 | --- | --- |
 | [rodar-no-linux.md](rodar-no-linux.md) | Passo a passo do zero ao navegador, com o que fazer em cada erro |
+| [plano-b-apresentacao.md](plano-b-apresentacao.md) | Plano B da apresentação: véspera, o que cai sem internet, o que dizer e o que levar aberto |
 | [troubleshooting.md](troubleshooting.md) | Problemas por sintoma, para quando você já sabe o que deu errado |
 | [development.md](development.md) | Rodar sem Docker, scripts de cada pacote, fluxo de trabalho |
 

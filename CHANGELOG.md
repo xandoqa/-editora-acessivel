@@ -2,6 +2,36 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.5.4] — 2026-10-30
+
+### Plano B da apresentação
+
+Novo `docs/plano-b-apresentacao.md`: os quatro comandos da véspera que evitam a
+maior parte dos imprevistos, o que fazer se cada coisa falhar na frente de
+gente, e o que dizer. A regra que o organiza: **o Livrin inteiro funciona sem
+internet, com uma única exceção — a janela de Libras.**
+
+### A janela de Libras avisa na hora quando não há rede
+
+O botão tentava carregar o plugin e só desistia depois de 15 segundos. Numa
+apresentação, 15 segundos de ampulheta não parecem espera: parecem defeito.
+
+Agora, máquina sem rede nem chega a tentar — `navigator.onLine` responde na hora,
+e a mensagem diz que o tradutor vem de um serviço externo e que **só este
+recurso** depende de internet. O limite das tentativas que de fato acontecem caiu
+para 10 segundos, e a mensagem de falha passou a distinguir conexão caída de
+serviço fora do ar ou bloqueado na rede.
+
+`navigator.onLine` é usado só para encurtar o caminho da falha, nunca para
+garantir o sucesso: `false` é confiável, `true` apenas diz que existe uma
+interface de rede.
+
+### README
+
+Ganhou duas seções: **Antes da apresentação**, apontando o plano B, e
+**Correções recentes**, com o que a 3.5.3 e a 3.5.4 corrigiram e por que cada
+coisa importava — inclusive a correção que foi recusada depois de implementada.
+
 ## [3.5.3] — 2026-10-30
 
 Correções de uma auditoria completa do repositório. Nenhuma funcionalidade nova.

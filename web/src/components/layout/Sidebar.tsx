@@ -6,6 +6,7 @@ import { useMySummary } from '../../hooks/queries';
 import { useT } from '../../i18n/I18nContext';
 import { ROLE_LABEL } from '../../lib/labels';
 import Logo from './Logo';
+import PainelDeAcessibilidade from './PainelDeAcessibilidade';
 
 interface NavItem {
   to: string;
@@ -100,6 +101,10 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         ))}
       </nav>
       <div className="space-y-2 border-t border-outline/25 p-3">
+        {/* Só aparece abaixo de 640px, que é onde o grupo do cabeçalho some.
+            É o que torna alto contraste, tamanho do texto, leitura em voz alta
+            e Libras alcançáveis no celular. */}
+        <PainelDeAcessibilidade />
         <div className="card-high flex items-center gap-3 px-4 py-3">
           <PersonStanding className="h-6 w-6 shrink-0 text-accent" aria-hidden />
           <p className="text-xs font-semibold leading-snug text-ink">

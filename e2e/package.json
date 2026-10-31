@@ -1,7 +1,7 @@
 {
   "name": "livrin-e2e",
   "private": true,
-  "version": "3.5.5",
+  "version": "3.5.6",
   "description": "Testes ponta a ponta (navegador) da Editora Livrin com Playwright",
   "scripts": {
     "test": "playwright test",

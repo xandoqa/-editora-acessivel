@@ -158,7 +158,6 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
       </form>
 
       <div className="relative hidden items-center gap-0.5 rounded-full border border-outline bg-surface p-1 sm:flex" role="group" aria-label={t('a11y.grupo')}>
-        <SeletorDeTema classeBotao={tool} />
         <button type="button" className={tool} onClick={prefs.toggleHighContrast} aria-pressed={prefs.highContrast} title={t('a11y.altoContrasteTitulo')}>
           <Contrast className="h-5 w-5" aria-hidden />
           <span className="sr-only">{t('a11y.altoContraste')}</span>
@@ -169,7 +168,6 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         <button type="button" className={tool} onClick={prefs.increaseFont} disabled={prefs.fontScale >= FONT_MAX} aria-label={t('a11y.aumentarTexto')}>
           A+
         </button>
-        <SeletorDeIdioma classeBotao={tool} />
         <LeituraEmVoz classeBotao={tool} />
         <JanelaDeLibras classeBotao={tool} />
       </div>
@@ -186,6 +184,31 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
           <Plus className="h-4 w-4" aria-hidden /> {t('nav.publicar')}
         </Link>
       )}
+      {/*
+        Aparência e idioma ficam JUNTO DO PERFIL, e não dentro do grupo de
+        acessibilidade. Três razões:
+
+         1. Aquele grupo é `hidden sm:flex` — em celular ele não existe, e os
+            dois seletores sumiam por completo. Aqui eles aparecem em qualquer
+            largura, porque são dois botões estreitos.
+         2. Idioma não é recurso de acessibilidade. Estava num grupo rotulado
+            "Recursos de acessibilidade", o que é errado para quem navega por
+            leitor de tela e procura pelo rótulo do grupo.
+         3. É onde as pessoas procuram preferência de conta: ao lado de quem
+            elas são.
+
+        O grupo de acessibilidade continua com o que de fato é acessibilidade:
+        alto contraste, tamanho do texto, leitura em voz alta e Libras.
+      */}
+      <div
+        className="flex shrink-0 items-center gap-0.5 rounded-full border border-outline bg-surface p-1"
+        role="group"
+        aria-label={t('preferencias.grupo')}
+      >
+        <SeletorDeTema classeBotao={tool} />
+        <SeletorDeIdioma classeBotao={tool} />
+      </div>
+
       <div className="mx-1 hidden h-8 w-px bg-outline/60 md:block" aria-hidden />
       <UserMenu />
     </header>

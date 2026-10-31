@@ -2,6 +2,41 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.5.6] — 2026-10-31
+
+### Os seletores de tema e idioma foram para junto do perfil
+
+Eles estavam dentro do grupo de acessibilidade, que é `hidden sm:flex`: **em
+celular não existiam**. Quem abrisse o site no telefone não tinha como trocar de
+idioma nem de tema.
+
+Agora ficam ao lado do perfil, num par de botões estreitos, visíveis em qualquer
+largura. Três razões, nessa ordem: o grupo antigo sumia no celular; idioma **não
+é recurso de acessibilidade** e estava sob um rótulo errado para quem navega por
+leitor de tela; e preferência de conta é procurada ao lado de quem a pessoa é.
+
+O grupo de acessibilidade continua com o que de fato é acessibilidade: alto
+contraste, tamanho do texto, leitura em voz alta e janela de Libras.
+
+### Os dois botões dizem o que fazem
+
+O de idioma mostra o **código do idioma atual** — PT, EN, FR — ao lado do globo.
+Um globo sozinho diz que existe algo de idioma ali; o código diz em qual a pessoa
+está. O de tema mostra sol ou lua conforme o tom atual.
+
+Os dois ganharam uma seta, que é o que distingue "abre uma lista" de "alterna no
+clique" — e o de tema de fato alternava, antes de os temas virarem seis. A seta
+recolhe abaixo de 640px, onde cada pixel do campo de busca conta.
+
+Os painéis ganharam `max-width` para não estourar a tela num celular estreito.
+
+### Verificação
+
+A largura do cabeçalho foi **medida** em 360, 400, 640, 768 e 1280px com
+navegador sem interface: não há rolagem horizontal em nenhuma. O campo de busca
+cai a 95px num aparelho de 360px, que é o custo honesto de ter os dois seletores
+sempre à mão.
+
 ## [3.5.5] — 2026-10-31
 
 ### Seis temas, medidos

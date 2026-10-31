@@ -8,7 +8,7 @@ Plataforma editorial aberta para quadrinhos e livros independentes, com acessibi
 
 O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. **A autoria decide como cada obra é disponibilizada** — leitura livre, obra paga ou leitura livre com publicidade — e leitura livre continua sendo o padrão. O apoio financeiro ao projeto é voluntário e nunca condiciona o acesso a uma obra: só a obra que a própria autoria marcou como paga exige aquisição.
 
-**Versão 3.5.5** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede; e a 3.5.5 trouxe os seis temas e o sistema de tradução.
+**Versão 3.5.6** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede; a 3.5.5 trouxe os seis temas e o sistema de tradução; e a 3.5.6 levou os seletores de tema e idioma para junto do perfil, onde aparecem em qualquer largura de tela.
 
 ---
 
@@ -625,6 +625,14 @@ O histórico completo está no [CHANGELOG](CHANGELOG.md); o que a auditoria veri
 ---
 
 ## Idiomas e temas
+
+### Onde ficam os seletores
+
+Os dois ficam **no cabeçalho, ao lado do perfil**, num par de botões estreitos — e aparecem em **qualquer largura de tela**, inclusive no celular. Trocar de idioma ou de tema é um clique e uma escolha, sem passar por página de configuração.
+
+O botão de idioma mostra o código do idioma atual (**PT**, **EN**, **FR**) ao lado do globo: um globo sozinho diz que existe algo de idioma ali, o código diz em qual você está. O de tema mostra sol ou lua conforme o tom atual. Os dois trazem uma seta, que é o que distingue "abre uma lista" de "alterna no clique".
+
+Eles **não** ficam mais dentro do grupo de acessibilidade, e por três razões: aquele grupo some em telas pequenas, idioma não é recurso de acessibilidade (estava sob um rótulo errado para quem navega por leitor de tela), e preferência de conta é procurada ao lado de quem você é. O grupo de acessibilidade continua com o que de fato é acessibilidade: alto contraste, tamanho do texto, leitura em voz alta e janela de Libras.
 
 ### Três idiomas
 

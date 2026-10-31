@@ -134,6 +134,7 @@ export const ptBR = {
   'historico.vazio': 'Você ainda não leu nenhuma obra',
   'historico.apagarTitulo': 'Apagar o histórico de leitura?',
   'biblioteca.vaziaTexto': 'Obras de leitura livre não precisam de aquisição: elas abrem direto no catálogo.',
+  'preferencias.grupo': 'Aparência e idioma',
   // --- Temas -------------------------------------------------------------
   'tema.seletor': 'Tema da interface',
   'tema.escolher': 'Escolher tema',

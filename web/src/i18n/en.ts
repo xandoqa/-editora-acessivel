@@ -126,6 +126,7 @@ export const en: Dicionario = {
   'historico.vazio': 'You have not read any work yet',
   'historico.apagarTitulo': 'Clear your reading history?',
   'biblioteca.vaziaTexto': 'Freely readable works need no purchase: they open straight from the catalogue.',
+  'preferencias.grupo': 'Appearance and language',
   // --- Themes ------------------------------------------------------------
   'tema.seletor': 'Interface theme',
   'tema.escolher': 'Choose a theme',

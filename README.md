@@ -8,7 +8,7 @@ Plataforma editorial aberta para quadrinhos e livros independentes, com acessibi
 
 O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. **A autoria decide como cada obra é disponibilizada** — leitura livre, obra paga ou leitura livre com publicidade — e leitura livre continua sendo o padrão. O apoio financeiro ao projeto é voluntário e nunca condiciona o acesso a uma obra: só a obra que a própria autoria marcou como paga exige aquisição.
 
-**Versão 3.5.3** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; e a 3.5.3 aplicou as correções de uma auditoria completa.
+**Versão 3.5.4** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; e a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede.
 
 ---
 
@@ -27,6 +27,8 @@ O Livrin existe para que quem não tem como bancar um lançamento tradicional co
 - [Testes](#testes)
 - [Desenvolvimento](#desenvolvimento)
 - [Solução de problemas](#solução-de-problemas)
+- [Antes da apresentação](#antes-da-apresentação)
+- [Correções recentes](#correções-recentes)
 - [Direção visual](#direção-visual)
 - [Documentação completa](#documentação-completa)
 - [Licença e conteúdo de demonstração](#licença-e-conteúdo-de-demonstração)
@@ -591,6 +593,36 @@ Lista completa em [docs/troubleshooting.md](docs/troubleshooting.md).
 
 ---
 
+## Antes da apresentação
+
+Existe um roteiro de contingência: **[docs/plano-b-apresentacao.md](docs/plano-b-apresentacao.md)**. Ele traz os quatro comandos da véspera que evitam a maior parte dos imprevistos, o que fazer se cada coisa falhar na frente de gente, e o que dizer.
+
+A regra que resume o documento: **o Livrin inteiro funciona sem internet, com uma única exceção — a janela de Libras.** O tradutor é carregado de `vlibras.gov.br` sob demanda e não fica guardado na máquina. Todo o resto é local, inclusive o `worker` do leitor de PDF, que é empacotado no site em vez de vir de um CDN.
+
+Dois comandos resolvem quase tudo. Na véspera, com internet: `docker compose build`. No dia: `docker compose up -d`, **sem `--build`**. E nunca `docker compose down -v`, que apaga o banco e os arquivos das obras.
+
+---
+
+## Correções recentes
+
+As duas últimas versões não trouxeram funcionalidade nova: foram correções, a maior parte vinda de uma auditoria completa do repositório.
+
+| Versão | O que foi corrigido | Por que importava |
+| --- | --- | --- |
+| 3.5.4 | A janela de Libras passou a avisar **na hora** quando a máquina está sem rede, em vez de girar dez segundos antes de desistir | Numa apresentação, dez segundos de ampulheta não parecem espera: parecem defeito |
+| 3.5.3 | O limite de login deixou de contar tentativas **bem-sucedidas** | Numa sala atrás do mesmo Wi-Fi, a cota se esgotava com todo mundo entrando com a senha certa. Força bruta é feita de erros |
+| 3.5.3 | Rotas que abrem cobrança ganharam limitador próprio | Ali o oposto vale: o acerto repetido é que precisa de freio |
+| 3.5.3 | Assinatura de plano passou a serializar com `SELECT … FOR UPDATE` | A garantia de banco contra cobrança duplicada não alcançava o plano, porque `work_id` nulo escapa do índice único |
+| 3.5.3 | Duas cores fixas passaram a usar token | Cor escrita à mão ignora o tema Alto contraste |
+| 3.5.3 | A leitura em voz alta deixou de calar em textos repetidos | A chave de deduplicação colidia entre trechos começando igual, e o recurso silenciava sem avisar |
+| 3.5.3 | `PAYMENT_PROVIDER` documentada, `package-lock.json` sincronizados | Metadados que diziam coisa diferente do código |
+
+Uma correção foi **recusada depois de implementada**: acrescentar `NULLS NOT DISTINCT` ao índice de compras pareceria resolver a assinatura duplicada, mas impediria quem cancelou o plano de assinar de novo — a cobrança anterior continua `CONFIRMADA`, porque cancelar não apaga o que foi pago. O raciocínio está na [ADR 018](docs/decisions/018-assinatura-concorrente.md), e há um teste cobrindo o caminho que o índice teria quebrado.
+
+O histórico completo está no [CHANGELOG](CHANGELOG.md); o que a auditoria verificou e achou em ordem está no [relatório final](docs/relatorio-final.md).
+
+---
+
 ## Direção visual
 
 A estética é editorial e artesanal — papel, traço de tinta, cor de cartaz —, inspirada no espírito das obras de Ziraldo sem reproduzir personagens ou traços de terceiros. O que isso quer dizer na prática, o que já está implementado e **o que qualquer mudança visual precisa preservar** (contraste AAA, foco visível, alvo de toque, os três temas) está em:
@@ -618,6 +650,7 @@ O índice completo, por assunto, está em **[docs/README.md](docs/README.md)**. 
 | [design/direcao-visual.md](docs/design/direcao-visual.md) | A direção visual e o que ela não pode quebrar |
 | [relatorio-final.md](docs/relatorio-final.md) | **Relatório final**: o que foi feito, testado e o que ficou pendente |
 | [README-PAGAMENTO.md](README-PAGAMENTO.md) | Todos os dados para simular pagamento, em uma página: cartão por bandeira, Pix, boleto, plano, o que falha de propósito |
+| [docs/plano-b-apresentacao.md](docs/plano-b-apresentacao.md) | Roteiro de contingência: os comandos da véspera, o que fazer se algo falhar na frente de gente, e o que dizer |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | O fluxo que o projeto usa: branch, teste, PR, CI verde, squash — e as três regras que mais pegam gente |
 | [NOTICE.md](NOTICE.md) | O que está sob MIT, o que é autoral do grupo e o que é domínio público |
 | [LICENSE](LICENSE) | Licença MIT do código |

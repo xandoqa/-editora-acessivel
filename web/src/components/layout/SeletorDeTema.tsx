@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, Moon, Palette, Sun } from 'lucide-react';
+import { Check, ChevronDown, Moon, Palette, Sun } from 'lucide-react';
 import { usePreferences } from '../../preferences/PreferencesContext';
 import { TEMAS, infoDoTema } from '../../preferences/temas';
 import { useT } from '../../i18n/I18nContext';
@@ -78,15 +78,18 @@ export default function SeletorDeTema({ classeBotao }: { classeBotao: string }) 
         onClick={() => setAberto((a) => !a)}
       >
         {atual.tom === 'escuro' ? (
-          <Moon className="h-5 w-5" aria-hidden />
+          <Moon className="h-[18px] w-[18px]" aria-hidden />
         ) : (
-          <Sun className="h-5 w-5" aria-hidden />
+          <Sun className="h-[18px] w-[18px]" aria-hidden />
         )}
+        {/* A seta distingue "abre uma lista" de "alterna no clique" — que era
+            o que este botão fazia antes de os temas virarem seis. */}
+        <ChevronDown className="ml-0.5 hidden h-3.5 w-3.5 opacity-70 sm:block" aria-hidden />
         <span className="sr-only">{t('tema.atual', { nome: t(atual.nome) })}</span>
       </button>
 
       {aberto && (
-        <div role="menu" aria-label={t('tema.seletor')} className="card absolute right-0 top-12 z-40 w-72 p-2 shadow-card">
+        <div role="menu" aria-label={t('tema.seletor')} className="card absolute right-0 top-12 z-40 w-72 max-w-[calc(100vw-1.5rem)] p-2 shadow-card">
           <p className="px-3 pb-1 pt-1 text-xs font-bold uppercase tracking-wider text-ink-subtle">
             <Palette className="mr-1 inline h-3.5 w-3.5" aria-hidden />
             {t('tema.claros')}

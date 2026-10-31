@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Check, Languages } from 'lucide-react';
+import { Check, ChevronDown, Languages } from 'lucide-react';
 import { useI18n } from '../../i18n/I18nContext';
 import { IDIOMAS, infoDoIdioma } from '../../i18n/tipos';
 
@@ -44,7 +44,14 @@ export default function SeletorDeIdioma({ classeBotao }: { classeBotao: string }
         title={t('idioma.atual', { nome: atual.nomeNativo })}
         onClick={() => setAberto((a) => !a)}
       >
-        <Languages className="h-5 w-5" aria-hidden />
+        <Languages className="h-[18px] w-[18px]" aria-hidden />
+        {/* O código fica VISÍVEL: um globo sozinho diz que existe algo de
+            idioma ali; "PT" diz em qual a pessoa está agora. A seta diz que
+            abre um menu, e não que alterna no clique. */}
+        <span aria-hidden className="ml-1 text-xs font-bold tracking-wide">
+          {atual.codigo}
+        </span>
+        <ChevronDown className="ml-0.5 hidden h-3.5 w-3.5 opacity-70 sm:block" aria-hidden />
         <span className="sr-only">{t('idioma.atual', { nome: atual.nomeNativo })}</span>
       </button>
 
@@ -52,7 +59,7 @@ export default function SeletorDeIdioma({ classeBotao }: { classeBotao: string }
         <div
           role="menu"
           aria-label={t('idioma.seletor')}
-          className="card absolute right-0 top-12 z-40 w-72 p-2 shadow-card"
+          className="card absolute right-0 top-12 z-40 w-72 max-w-[calc(100vw-1.5rem)] p-2 shadow-card"
         >
           {IDIOMAS.map((info) => (
             <button

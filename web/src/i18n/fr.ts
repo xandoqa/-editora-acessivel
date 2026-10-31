@@ -127,6 +127,7 @@ export const fr: Dicionario = {
   'historico.vazio': 'Vous n’avez encore lu aucune œuvre',
   'historico.apagarTitulo': 'Effacer l’historique de lecture ?',
   'biblioteca.vaziaTexto': 'Les œuvres en lecture libre ne nécessitent aucun achat : elles s’ouvrent directement depuis le catalogue.',
+  'preferencias.grupo': 'Apparence et langue',
   // --- Thèmes ------------------------------------------------------------
   'tema.seletor': 'Thème de l’interface',
   'tema.escolher': 'Choisir un thème',

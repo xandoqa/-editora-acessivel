@@ -22,6 +22,14 @@ export interface InfoDoIdioma {
   id: Idioma;
   /** Como o idioma se chama no próprio idioma — nunca traduzido. */
   nomeNativo: string;
+  /**
+   * Duas letras, para o botão do cabeçalho.
+   *
+   * O código visível é o que torna o seletor reconhecível sem abrir: um globo
+   * sozinho diz "tem alguma coisa de idioma aqui", enquanto "PT" diz em que
+   * idioma a pessoa está agora.
+   */
+  codigo: string;
   /** Vai para o atributo `lang` do documento e para a formatação de datas. */
   tag: string;
 }
@@ -34,9 +42,9 @@ export interface InfoDoIdioma {
  * lista. "Francês" não ajuda quem só lê francês; "Français" ajuda.
  */
 export const IDIOMAS: readonly InfoDoIdioma[] = [
-  { id: 'pt-BR', nomeNativo: 'Português (Brasil)', tag: 'pt-BR' },
-  { id: 'en', nomeNativo: 'English', tag: 'en' },
-  { id: 'fr', nomeNativo: 'Français', tag: 'fr' },
+  { id: 'pt-BR', nomeNativo: 'Português (Brasil)', codigo: 'PT', tag: 'pt-BR' },
+  { id: 'en', nomeNativo: 'English', codigo: 'EN', tag: 'en' },
+  { id: 'fr', nomeNativo: 'Français', codigo: 'FR', tag: 'fr' },
 ] as const;
 
 export const IDIOMAS_VALIDOS = new Set<string>(IDIOMAS.map((i) => i.id));

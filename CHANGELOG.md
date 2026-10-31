@@ -2,6 +2,53 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.5.3] — 2026-10-30
+
+Correções de uma auditoria completa do repositório. Nenhuma funcionalidade nova.
+
+### Limite de login deixou de punir quem acerta a senha
+
+O limitador contava **toda** tentativa de login, certa ou errada, 20 por IP a cada
+15 minutos. Numa sala atrás do mesmo Wi-Fi — o grupo e quem estivesse avaliando —
+a cota se esgotava com todo mundo entrando normalmente, com a senha certa.
+
+Agora só tentativa que falha consome cota (`skipSuccessfulRequests`), e o teto
+subiu para 30. Força bruta é feita de erros: contar os acertos protegia contra
+nada e punia o uso legítimo.
+
+As rotas que abrem cobrança — apoio, compra e assinatura — ganharam o
+`cobrancaLimiter`, separado, onde o oposto é verdade: ali o **acerto** repetido é
+que precisa ser contado.
+
+### Assinatura de plano protegida contra corrida
+
+A garantia de banco contra cobrança duplicada não alcançava a assinatura: o
+índice único é sobre `(user_id, work_id)`, e plano grava `work_id` nulo — nulos
+são distintos entre si no PostgreSQL.
+
+A correção óbvia (`NULLS NOT DISTINCT`) **foi implementada, testada e recusada**:
+cancelar assinatura não apaga o que foi pago, então a cobrança anterior segue
+`CONFIRMADA`, e o índice impediria quem cancelou de assinar de novo. Trocaria uma
+corrida improvável por um defeito garantido.
+
+A assinatura passou a serializar com `SELECT … FOR UPDATE` sobre a linha da conta.
+Um teste novo cobre o caminho que o índice teria quebrado. Ver [ADR 018](docs/decisions/018-assinatura-concorrente.md).
+
+### Correções menores
+
+Duas cores fixas (`text-[#d6e2ff]`) que ignoravam o sistema de temas, em
+`Reader` e `ReviewStatus`, passaram a usar token. A chave que evita repetir a
+palavra na leitura em voz alta deixou de ser o início do texto — que colidia
+entre nós começando igual, calando o recurso — e passou a ser a identidade do nó,
+por `WeakMap`. `PAYMENT_PROVIDER` foi documentada nos dois `.env.example`. Os três
+`package-lock.json`, que ainda registravam `3.1.5`, foram sincronizados.
+
+### Relatório final
+
+Atualizado para a 3.5.3, cobrindo a 3.5.1, a 3.5.2 e esta auditoria — o que foi
+verificado e estava correto, o que foi corrigido, e a recomendação que se provou
+errada ao ser implementada.
+
 ## [3.5.2] — 2026-10-29
 
 ### Licença e organização do repositório

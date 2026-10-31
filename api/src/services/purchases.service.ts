@@ -412,6 +412,30 @@ export async function exigirAcessoDeLeitura(
  * Reaproveita inteiro o caminho da aquisição de obra: mesmo provedor, mesma
  * idempotência, mesma expiração, mesma tabela. O que muda é `kind` e a
  * ausência de obra.
+ *
+ * ## Por que esta função trava a linha do usuário
+ *
+ * A compra de obra tem uma garantia de banco contra cobrança duplicada: o
+ * índice único parcial `purchases_one_confirmed_per_user_work`, sobre
+ * `(user_id, work_id)` onde o estado é `CONFIRMADA`. Assinatura grava
+ * `work_id` nulo, e no PostgreSQL nulos são distintos entre si num índice
+ * único — então **aquela garantia não alcança o plano**.
+ *
+ * Estender o índice com `NULLS NOT DISTINCT` seria o reflexo óbvio, e está
+ * errado: uma pessoa pode assinar, cancelar e assinar de novo meses depois, e
+ * o cancelamento **mantém** a cobrança anterior como `CONFIRMADA`, porque
+ * cancelar assinatura não apaga o que foi pago. Um índice único sobre
+ * assinaturas confirmadas impediria a segunda assinatura legítima — trocaria
+ * uma corrida improvável por um defeito garantido.
+ *
+ * O que sobra é serializar: a transação trava a linha do usuário com `FOR
+ * UPDATE`, e duas requisições simultâneas da mesma conta passam a entrar em
+ * fila. A segunda encontra ou a conta já premium, ou a cobrança pendente que a
+ * primeira abriu — e os dois caminhos já existiam.
+ *
+ * A chamada ao provedor fica dentro da transação, segurando a conexão. Com o
+ * provedor simulado é instantâneo; com um provedor real valeria mover a
+ * abertura da cobrança para fora e reservar a transação só para a decisão.
  */
 export async function assinarPlano(method: PaymentMethod, viewer: AuthUser) {
   const provedor = provedorAtual();
@@ -419,68 +443,75 @@ export async function assinarPlano(method: PaymentMethod, viewer: AuthUser) {
     throw badRequest(`O meio de pagamento ${method} não está disponível nesta instalação.`);
   }
 
-  const [conta] = await db.select({ plan: users.plan }).from(users).where(eq(users.id, viewer.id));
-  if (!conta) throw notFound('Conta não encontrada.');
-  if (conta.plan === 'PREMIUM') throw conflict('Sua conta já está no plano premium.');
-
+  // Fora da transação de propósito: mexe em outras linhas e não precisa do travamento.
   await expirarPendentesVencidas(viewer.id);
 
-  // Clique repetido reaproveita a cobrança aberta, em vez de abrir outra.
-  const [pendente] = await db
-    .select()
-    .from(purchases)
-    .where(
-      and(
-        eq(purchases.userId, viewer.id),
-        eq(purchases.kind, 'PLANO'),
-        eq(purchases.method, method),
-        eq(purchases.status, 'PENDENTE'),
-      ),
-    )
-    .orderBy(desc(purchases.createdAt));
-  if (pendente) return { purchase: toPurchaseDto(pendente), checkout: null, reaproveitada: true as const };
+  return db.transaction(async (tx) => {
+    const [conta] = await tx
+      .select({ plan: users.plan })
+      .from(users)
+      .where(eq(users.id, viewer.id))
+      .for('update');
+    if (!conta) throw notFound('Conta não encontrada.');
+    if (conta.plan === 'PREMIUM') throw conflict('Sua conta já está no plano premium.');
 
-  const cobranca = await provedor.createCharge({
-    amountCents: PRECO_PLANO_CENTAVOS,
-    currency: 'BRL',
-    method,
-    donorName: viewer.name ?? null,
-    message: 'Assinatura do plano premium do Livrin',
-  });
+    // Clique repetido reaproveita a cobrança aberta, em vez de abrir outra.
+    const [pendente] = await tx
+      .select()
+      .from(purchases)
+      .where(
+        and(
+          eq(purchases.userId, viewer.id),
+          eq(purchases.kind, 'PLANO'),
+          eq(purchases.method, method),
+          eq(purchases.status, 'PENDENTE'),
+        ),
+      )
+      .orderBy(desc(purchases.createdAt));
+    if (pendente) return { purchase: toPurchaseDto(pendente), checkout: null, reaproveitada: true as const };
 
-  const [registro] = await db
-    .insert(purchases)
-    .values({
-      userId: viewer.id,
-      workId: null,
-      kind: 'PLANO',
-      priceCents: PRECO_PLANO_CENTAVOS,
+    const cobranca = await provedor.createCharge({
+      amountCents: PRECO_PLANO_CENTAVOS,
       currency: 'BRL',
       method,
-      provider: provedor.name,
-      providerRef: cobranca.providerRef,
-      status: cobranca.status === 'CONFIRMADA' ? 'CONFIRMADA' : 'PENDENTE',
-      confirmedAt: cobranca.status === 'CONFIRMADA' ? new Date() : null,
-      expiresAt: new Date(Date.now() + VALIDADE_MS[method]),
-    })
-    .returning();
+      donorName: viewer.name ?? null,
+      message: 'Assinatura do plano premium do Livrin',
+    });
 
-  // Cobrança já confirmada na abertura: ativa na hora, como faz o confirm.
-  if (registro.status === 'CONFIRMADA') {
-    await db.update(users).set({ plan: 'PREMIUM', planSince: new Date() }).where(eq(users.id, viewer.id));
-  }
+    const [registro] = await tx
+      .insert(purchases)
+      .values({
+        userId: viewer.id,
+        workId: null,
+        kind: 'PLANO',
+        priceCents: PRECO_PLANO_CENTAVOS,
+        currency: 'BRL',
+        method,
+        provider: provedor.name,
+        providerRef: cobranca.providerRef,
+        status: cobranca.status === 'CONFIRMADA' ? 'CONFIRMADA' : 'PENDENTE',
+        confirmedAt: cobranca.status === 'CONFIRMADA' ? new Date() : null,
+        expiresAt: new Date(Date.now() + VALIDADE_MS[method]),
+      })
+      .returning();
 
-  logger.info(`Assinatura #${registro.id} aberta para o usuário ${viewer.id} (${method}).`);
-  return {
-    purchase: toPurchaseDto(registro),
-    checkout: {
-      code: cobranca.code,
-      instruction: cobranca.instruction,
-      checkoutUrl: cobranca.checkoutUrl,
-      isReal: provedor.isReal,
-    },
-    reaproveitada: false as const,
-  };
+    // Cobrança já confirmada na abertura: ativa na hora, como faz o confirm.
+    if (registro.status === 'CONFIRMADA') {
+      await tx.update(users).set({ plan: 'PREMIUM', planSince: new Date() }).where(eq(users.id, viewer.id));
+    }
+
+    logger.info(`Assinatura #${registro.id} aberta para o usuário ${viewer.id} (${method}).`);
+    return {
+      purchase: toPurchaseDto(registro),
+      checkout: {
+        code: cobranca.code,
+        instruction: cobranca.instruction,
+        checkoutUrl: cobranca.checkoutUrl,
+        isReal: provedor.isReal,
+      },
+      reaproveitada: false as const,
+    };
+  });
 }
 
 /**

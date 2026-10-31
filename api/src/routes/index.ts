@@ -5,7 +5,7 @@ import * as meCtrl from '../controllers/me.controller';
 import * as purchasesCtrl from '../controllers/purchases.controller';
 import * as worksCtrl from '../controllers/works.controller';
 import { authenticate, optionalAuth, requireWriter } from '../middlewares/auth';
-import { authLimiter, sessionLimiter } from '../middlewares/rate-limit';
+import { authLimiter, cobrancaLimiter, sessionLimiter } from '../middlewares/rate-limit';
 import { workUpload } from '../middlewares/upload';
 import adminRoutes from './admin';
 
@@ -66,15 +66,15 @@ router.patch('/sessions/:sessionId', worksCtrl.updateSession);
 
 /* ------------------------------ Doações ------------------------------- */
 router.get('/donations/options', donationsCtrl.options); // público
-router.post('/donations', authLimiter, optionalAuth, donationsCtrl.create); // público (apoio anônimo permitido)
+router.post('/donations', cobrancaLimiter, optionalAuth, donationsCtrl.create); // público (apoio anônimo permitido)
 router.post('/donations/:id/confirm', optionalAuth, donationsCtrl.confirm);
 router.get('/me/donations', authenticate, donationsCtrl.mine);
 
 /* ---------------------------- Aquisições ------------------------------ */
 // Todas exigem conta: aquisição pertence a uma pessoa, não a um navegador.
-// O limitador do fluxo de autenticação é reaproveitado na abertura da
-// cobrança — é o caminho que cria registro financeiro e merece freio.
-router.post('/works/:id/purchase', authLimiter, authenticate, purchasesCtrl.create);
+// A abertura de cobrança tem limitador próprio: é o caminho que cria registro
+// financeiro e merece freio, e lá o sucesso conta — ao contrário do login.
+router.post('/works/:id/purchase', cobrancaLimiter, authenticate, purchasesCtrl.create);
 router.get('/purchases/:id', authenticate, purchasesCtrl.show);
 router.post('/purchases/:id/confirm', authenticate, purchasesCtrl.confirm);
 router.post('/purchases/:id/cancel', authenticate, purchasesCtrl.cancel);
@@ -83,7 +83,7 @@ router.get('/me/purchases', authenticate, purchasesCtrl.history);
 
 /* ------------------------------ Plano premium -------------------------------- */
 router.get('/plans/options', purchasesCtrl.planOptions); // público: a tela de planos é aberta
-router.post('/me/plan/subscribe', authLimiter, authenticate, purchasesCtrl.subscribe);
+router.post('/me/plan/subscribe', cobrancaLimiter, authenticate, purchasesCtrl.subscribe);
 router.post('/me/plan/cancel', authenticate, purchasesCtrl.cancelPlan);
 
 /* --------------------------- Histórico de leitura ---------------------------- */

@@ -240,7 +240,7 @@ export default function Reader() {
                   <BookOpen className="h-4 w-4" aria-hidden /> {work.pages} páginas
                 </span>
                 {work.hasAudioDesc && (
-                  <span className="flex items-center gap-1.5 text-[#d6e2ff]">
+                  <span className="flex items-center gap-1.5">
                     <Volume2 className="h-4 w-4" aria-hidden />
                     {work.hasAudio ? 'Faixa em áudio' : `${descriptions.length} quadros narrados`}
                   </span>

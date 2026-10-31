@@ -21,3 +21,4 @@ Cada arquivo responde: o que foi escolhido, por quê, quais alternativas existia
 | [015](015-publicidade-e-plano.md) | Publicidade entre unidades de leitura e plano do leitor; a brecha da audiodescrição |
 | [016](016-janela-de-libras.md) | Janela de Libras com VLibras, opcional e carregada sob demanda |
 | [017](017-bandeira-do-cartao.md) | Bandeira do cartão detectada pelo número, sem seletor; Luhn e vencimento nos dois lados |
+| [018](018-assinatura-concorrente.md) | Assinatura simultânea travada por transação, e não por índice único; revisa parte da 014 |

@@ -178,6 +178,34 @@ describe('Plano premium', () => {
     expect(doPlano.some((p: { status: string }) => p.status === 'CONFIRMADA')).toBe(true);
   });
 
+  /*
+   * Quem cancelou pode assinar de novo.
+   *
+   * Parece óbvio, e é justamente por isso que merece teste: a cobrança
+   * anterior continua `CONFIRMADA` depois do cancelamento, porque cancelar
+   * assinatura não apaga o que foi pago. Qualquer tentativa de impedir
+   * assinatura duplicada com um índice único sobre assinaturas confirmadas
+   * quebraria exatamente este caminho — trocaria uma corrida improvável por um
+   * defeito garantido. Este teste existe para que a tentação seja descoberta
+   * aqui, e não por uma pessoa que não consegue voltar a ser premium.
+   */
+  it('quem cancelou pode assinar de novo, e o pagamento anterior continua no histórico', async () => {
+    const perfil = await api().get('/api/auth/me').set(bearer(leitor));
+    expect(perfil.body.user.plan).toBe('GRATUITO');
+
+    const aberta = await api().post('/api/me/plan/subscribe').set(bearer(leitor)).send({ method: 'PIX' });
+    expect(aberta.status).toBe(201);
+    await api().post(`/api/purchases/${aberta.body.purchase.id}/confirm`).set(bearer(leitor));
+
+    expect((await api().get('/api/auth/me').set(bearer(leitor))).body.user.plan).toBe('PREMIUM');
+
+    const historico = await api().get('/api/me/purchases').set(bearer(leitor));
+    const confirmadas = historico.body.filter(
+      (p: { kind: string; status: string }) => p.kind === 'PLANO' && p.status === 'CONFIRMADA',
+    );
+    expect(confirmadas.length).toBe(2);
+  });
+
   it('exige conta', async () => {
     expect((await api().post('/api/me/plan/subscribe').send({ method: 'PIX' })).status).toBe(401);
     expect((await api().post('/api/me/plan/cancel')).status).toBe(401);

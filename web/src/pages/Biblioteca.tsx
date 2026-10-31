@@ -6,6 +6,7 @@ import { errorMessage } from '../lib/api';
 import { formatCents, formatDateTime } from '../lib/format';
 import { FORMAT_SHORT } from '../lib/labels';
 import type { PurchaseStatus } from '../types/api';
+import { useT } from '../i18n/I18nContext';
 
 /**
  * Biblioteca pessoal: as obras que a pessoa adquiriu.
@@ -24,6 +25,7 @@ const ROTULO_STATUS: Record<PurchaseStatus, string> = {
 };
 
 export default function Biblioteca() {
+  const t = useT();
   const biblioteca = useMyLibrary();
   const historico = useMyPurchases();
 
@@ -31,20 +33,20 @@ export default function Biblioteca() {
     <>
       <PageHeader
         eyebrow="Minha conta"
-        title="Minha biblioteca"
+        title={t('biblioteca.titulo')}
         description="As obras que você adquiriu ficam aqui e continuam disponíveis sempre que você voltar."
         icon={<Library className="h-6 w-6" aria-hidden />}
       />
 
-      {biblioteca.isLoading && <LoadingState label="Carregando sua biblioteca..." />}
+      {biblioteca.isLoading && <LoadingState label={t('biblioteca.carregando')} />}
       {biblioteca.isError && (
         <ErrorState message={errorMessage(biblioteca.error)} onRetry={() => void biblioteca.refetch()} />
       )}
 
       {biblioteca.data && biblioteca.data.length === 0 && (
         <EmptyState
-          title="Você ainda não adquiriu nenhuma obra"
-          description="Obras de leitura livre não precisam de aquisição: elas abrem direto no catálogo."
+          title={t('biblioteca.vazia')}
+          description={t('biblioteca.vaziaTexto')}
           action={
             <Link to="/" className="btn-primary">
               Ver o catálogo
@@ -97,10 +99,10 @@ export default function Biblioteca() {
             <table className="w-full min-w-[480px] text-sm">
               <thead>
                 <tr className="border-b border-outline/40 text-left">
-                  <th scope="col" className="py-2 pr-3 font-semibold text-ink">Obra</th>
-                  <th scope="col" className="py-2 pr-3 font-semibold text-ink">Valor</th>
-                  <th scope="col" className="py-2 pr-3 font-semibold text-ink">Situação</th>
-                  <th scope="col" className="py-2 font-semibold text-ink">Quando</th>
+                  <th scope="col" className="py-2 pr-3 font-semibold text-ink">{t('biblioteca.colObra')}</th>
+                  <th scope="col" className="py-2 pr-3 font-semibold text-ink">{t('biblioteca.colValor')}</th>
+                  <th scope="col" className="py-2 pr-3 font-semibold text-ink">{t('biblioteca.colSituacao')}</th>
+                  <th scope="col" className="py-2 font-semibold text-ink">{t('biblioteca.colQuando')}</th>
                 </tr>
               </thead>
               <tbody>

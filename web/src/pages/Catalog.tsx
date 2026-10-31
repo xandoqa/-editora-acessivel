@@ -9,6 +9,7 @@ import { speak, speechSupported, stopSpeaking } from '../lib/speech';
 import WorkCard from '../components/works/WorkCard';
 import { EmptyState, ErrorState, LoadingState, Pagination } from '../components/ui';
 import { OndaDivisoria, OndasDeSom, Rabisco } from '../components/ui/Ornamentos';
+import { useT } from '../i18n/I18nContext';
 
 interface Filter {
   key: string;
@@ -33,6 +34,7 @@ const FILTERS: Filter[] = [
 const PAGE_SIZE = 9;
 
 export default function Catalog() {
+  const t = useT();
   const { user, isWriter } = useAuth();
   const [params, setParams] = useSearchParams();
   const q = params.get('q') ?? '';
@@ -144,10 +146,10 @@ export default function Catalog() {
           </h2>
           <div className="flex flex-wrap items-center gap-3">
             <label htmlFor="genero" className="text-sm text-ink-muted">
-              Categoria
+              {t('catalogo.categoria')}
             </label>
             <select id="genero" className="input w-auto py-2" value={genreId} onChange={(e) => update({ genero: e.target.value })}>
-              <option value="">Todas as categorias</option>
+              <option value="">{t('catalogo.todasCategorias')}</option>
               {genres.map((g) => (
                 <option key={g.id} value={g.id}>
                   {g.name}
@@ -155,19 +157,19 @@ export default function Catalog() {
               ))}
             </select>
             <label htmlFor="sort" className="text-sm text-ink-muted">
-              Ordenar por
+              {t('catalogo.ordenarPor')}
             </label>
             <select id="sort" className="input w-auto py-2" value={sort} onChange={(e) => update({ ordem: e.target.value })}>
-              <option value="recent">Mais recentes</option>
-              <option value="title">Título (A–Z)</option>
-              <option value="rating">Melhor avaliadas</option>
+              <option value="recent">{t('catalogo.maisRecentes')}</option>
+              <option value="title">{t('catalogo.tituloAZ')}</option>
+              <option value="rating">{t('catalogo.melhorAvaliadas')}</option>
             </select>
           </div>
         </div>
         <div
           className="scrollbar-thin -mx-1 mb-4 flex gap-5 overflow-x-auto border-b border-outline/25 px-1"
           role="group"
-          aria-label="Filtrar catálogo"
+          aria-label={t('catalogo.filtrar')}
         >
           {FILTERS.map((f) => {
             const active = f.key === filter.key;
@@ -209,16 +211,16 @@ export default function Catalog() {
       </section>
 
       {isLoading ? (
-        <LoadingState label="Carregando catálogo..." />
+        <LoadingState label={t('catalogo.carregando')} />
       ) : isError ? (
         <ErrorState message={errorMessage(error)} onRetry={() => refetch()} />
       ) : data && data.data.length === 0 ? (
         <EmptyState
-          title="Nenhuma obra encontrada"
-          description="Tente outro termo de busca ou remova os filtros para ver todo o catálogo."
+          title={t('catalogo.nenhumaObra')}
+          description={t('catalogo.nenhumaObraTexto')}
           action={
             <button type="button" className="btn-secondary" onClick={() => setParams(new URLSearchParams())}>
-              Ver todas as obras
+              {t('catalogo.verTodas')}
             </button>
           }
         />
@@ -236,7 +238,7 @@ export default function Catalog() {
       {/* Chamada para autores */}
       <section className="card mt-6 flex flex-col gap-6 p-6 md:flex-row md:items-center md:justify-between md:p-8" aria-labelledby="cta-title">
         <div className="max-w-md">
-          <p className="eyebrow mb-2 text-accent">Para quadrinistas & editoras</p>
+          <p className="eyebrow mb-2 text-accent">{t('catalogo.paraAutores')}</p>
           <h2 id="cta-title" className="text-3xl font-bold text-ink">
             Quer tornar sua obra acessível?
           </h2>

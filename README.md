@@ -8,7 +8,7 @@ Plataforma editorial aberta para quadrinhos e livros independentes, com acessibi
 
 O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. **A autoria decide como cada obra é disponibilizada** — leitura livre, obra paga ou leitura livre com publicidade — e leitura livre continua sendo o padrão. O apoio financeiro ao projeto é voluntário e nunca condiciona o acesso a uma obra: só a obra que a própria autoria marcou como paga exige aquisição.
 
-**Versão 3.5.4** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; e a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede.
+**Versão 3.5.5** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede; e a 3.5.5 trouxe os seis temas e o sistema de tradução.
 
 ---
 
@@ -29,6 +29,7 @@ O Livrin existe para que quem não tem como bancar um lançamento tradicional co
 - [Solução de problemas](#solução-de-problemas)
 - [Antes da apresentação](#antes-da-apresentação)
 - [Correções recentes](#correções-recentes)
+- [Idiomas e temas](#idiomas-e-temas)
 - [Direção visual](#direção-visual)
 - [Documentação completa](#documentação-completa)
 - [Licença e conteúdo de demonstração](#licença-e-conteúdo-de-demonstração)
@@ -620,6 +621,51 @@ As duas últimas versões não trouxeram funcionalidade nova: foram correções,
 Uma correção foi **recusada depois de implementada**: acrescentar `NULLS NOT DISTINCT` ao índice de compras pareceria resolver a assinatura duplicada, mas impediria quem cancelou o plano de assinar de novo — a cobrança anterior continua `CONFIRMADA`, porque cancelar não apaga o que foi pago. O raciocínio está na [ADR 018](docs/decisions/018-assinatura-concorrente.md), e há um teste cobrindo o caminho que o índice teria quebrado.
 
 O histórico completo está no [CHANGELOG](CHANGELOG.md); o que a auditoria verificou e achou em ordem está no [relatório final](docs/relatorio-final.md).
+
+---
+
+## Idiomas e temas
+
+### Três idiomas
+
+A interface fala **português do Brasil** (padrão), **English** e **Français**. O seletor fica na barra superior, ao lado dos recursos de acessibilidade, e a escolha permanece ao navegar e ao voltar depois.
+
+Cada idioma aparece escrito no próprio idioma — "Français", não "Francês" — porque quem caiu numa interface que não entende precisa reconhecer a própria língua na lista. O atributo `lang` do documento acompanha a escolha, que é o que faz o leitor de tela trocar de voz.
+
+**As obras não são traduzidas, e a interface diz isso.** Título, sinopse, avaliação e nome de autoria aparecem como foram escritos. Traduzir obra por máquina seria deturpar o trabalho de quem publicou.
+
+As traduções ficam em `web/src/i18n/`, uma por idioma, com **as chaves tipadas a partir do português**: acrescentar uma frase e esquecer de traduzi-la **não compila**. Tradução faltando é erro de build, não texto cru aparecendo na tela de quem trocou de idioma. Acrescentar um quarto idioma é criar um arquivo e registrá-lo em dois lugares — o compilador lista o que falta. Ver [ADR 019](docs/decisions/019-internacionalizacao.md).
+
+**Cobertura:** a navegação, as telas de acesso, o catálogo, a biblioteca e o histórico já saem do dicionário. O painel da autoria, a administração e o formulário de envio ainda não — e isso é medido, não estimado:
+
+```bash
+python3 ferramentas/conferir-traducao.py            # resumo por arquivo
+python3 ferramentas/conferir-traducao.py --detalhado  # cada trecho, com a linha
+```
+
+### Seis temas
+
+| Tema | Tom | Para quê |
+| --- | --- | --- |
+| **Papel** | claro | O padrão. Branco quente, tinta azul-escura |
+| **Sépia** | claro | Papel âmbar, tinta marrom. Leitura longa, menos luz azul |
+| **Tinta** | claro | Neutro frio, sem tom quente. O mais sóbrio — e o que resiste a projetor ruim |
+| **Noite** | escuro | Fundo arroxeado, pouco brilho |
+| **Grafite** | escuro | Cinza-azulado, sem o roxo do Noite |
+| **Índigo** | escuro | Destaque âmbar no lugar do azul |
+
+O **alto contraste** continua fora dessa lista, com botão próprio: é recurso de acessibilidade, não gosto, e vence qualquer tema escolhido.
+
+Alternar claro/escuro preserva a escolha de cada lado: quem está no Sépia vai para o escuro e volta para o Sépia, não para o Papel.
+
+**Todos os temas são medidos, não conferidos no olho.** São 39 pares por tema — texto sobre cada superfície, cor de ação, texto dentro de botão, limite de campo — pela fórmula da WCAG:
+
+```bash
+python3 ferramentas/conferir-contraste.py
+python3 ferramentas/conferir-contraste.py --detalhado
+```
+
+Os 273 pares passam: AAA (7:1) para texto, 3:1 para limite de componente. A verificação **roda na integração contínua** e reprova o PR se um token derrubar qualquer par. Os quatro temas novos não passaram de primeira — três tokens de texto discreto ficaram entre 6,43:1 e 7,00:1 e foram ajustados. A olho nu, 6,8:1 e 7,2:1 são indistinguíveis. Ver [ADR 020](docs/decisions/020-temas.md).
 
 ---
 

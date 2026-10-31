@@ -2,6 +2,45 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.5.5] — 2026-10-31
+
+### Seis temas, medidos
+
+Eram dois na lista — Papel e Noite — mais o alto contraste num botão à parte.
+Entraram **Sépia** (papel âmbar, leitura longa), **Tinta** (neutro frio, o mais
+sóbrio), **Grafite** (escuro sem o roxo do Noite) e **Índigo** (escuro com
+destaque âmbar — o único que troca a cor de ação, e por isso serve de prova de
+que o sistema de tokens aguenta isso sem nenhum componente saber).
+
+O alto contraste continua fora da lista, com botão próprio: é recurso de
+acessibilidade, não gosto, e vence qualquer tema escolhido. Alternar
+claro/escuro passou a preservar a escolha de cada lado.
+
+`ferramentas/conferir-contraste.py` mede **39 pares por tema** pela fórmula da
+WCAG e reprova se algum cair. Os três temas antigos passaram — a promessa de
+AAA do projeto estava certa e agora está medida. Os quatro novos **não passaram
+de primeira**: três tokens de texto discreto ficaram entre 6,43:1 e 7,00:1 e
+foram ajustados. A verificação entrou no CI. Ver [ADR 020](docs/decisions/020-temas.md).
+
+### Três idiomas
+
+Português do Brasil (padrão), English e Français, com seletor na barra
+superior, escolha preservada entre páginas e `lang` do documento acompanhando —
+que é o que faz o leitor de tela trocar de voz.
+
+Feito sem biblioteca, com **as chaves tipadas a partir do português**:
+acrescentar uma frase e esquecer de traduzi-la **não compila**. Tradução
+faltando virou erro de build em vez de texto cru na tela. Ver
+[ADR 019](docs/decisions/019-internacionalizacao.md).
+
+Obras não são traduzidas, e a interface diz isso: título, sinopse e avaliação
+aparecem como foram escritos.
+
+**Cobertura parcial, e medida.** Navegação, telas de acesso, catálogo,
+biblioteca e histórico já saem do dicionário; painel da autoria, administração
+e formulário de envio ainda não. `ferramentas/conferir-traducao.py` conta o que
+falta, por arquivo — o número está no README, não numa frase vaga.
+
 ## [3.5.4] — 2026-10-30
 
 ### Plano B da apresentação

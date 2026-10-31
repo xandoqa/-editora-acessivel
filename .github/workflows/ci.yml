@@ -80,6 +80,25 @@ jobs:
       - name: Compilar (inclui a checagem de tipos)
         run: npm run build
 
+  interface:
+    name: Interface — contraste dos temas
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Os temas prometem AAA (7:1) para texto e 3:1 para limite de componente.
+      # Promessa que ninguém mede é promessa que envelhece: basta alguém ajustar
+      # um token "só um tom" para um par cair sem que nada quebre na tela.
+      # São 39 pares por tema, e o script reprova se algum ficar abaixo.
+      - name: Medir o contraste dos sete temas
+        run: python3 ferramentas/conferir-contraste.py
+
+      # Informativo: mede quanto da interface ainda não passa pelo dicionário.
+      # Não reprova — a cobertura é parcial e declarada como tal.
+      - name: Medir a cobertura de tradução
+        run: python3 ferramentas/conferir-traducao.py
+
   docker:
     name: Docker — as imagens constroem
     runs-on: ubuntu-latest

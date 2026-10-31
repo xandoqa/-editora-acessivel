@@ -5,9 +5,11 @@ import { useAuth } from '../../auth/AuthContext';
 import { api, errorMessage } from '../../lib/api';
 import type { AuthResponse } from '../../types/api';
 import AuthShell from './AuthShell';
+import { useT } from '../../i18n/I18nContext';
 
 export default function Login() {
   const { login } = useAuth();
+  const t = useT();
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: string } | null)?.from;
@@ -27,20 +29,20 @@ export default function Login() {
       const destino = data.user.role === 'ADMIN' ? '/admin' : data.user.role === 'ESCRITOR' ? '/dashboard' : '/';
       navigate(from && from !== '/login' ? from : destino, { replace: true });
     } catch (err) {
-      setError(errorMessage(err, 'E-mail ou senha incorretos.'));
+      setError(errorMessage(err, t('login.credenciaisInvalidas')));
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <AuthShell subtitle="Publique sua história independente com acessibilidade universal">
+    <AuthShell subtitle={t('login.subtitulo')}>
       {error && (
         <div className="mb-6 flex gap-3 rounded-xl border-l-4 border-danger bg-surface-high p-4" role="alert">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-danger" aria-hidden />
           <div>
-            <p className="font-semibold text-danger">Falha na autenticação</p>
-            <p className="text-sm text-ink-muted">{error} Verifique seus dados cadastrais ou recupere o acesso.</p>
+            <p className="font-semibold text-danger">{t('login.falha')}</p>
+            <p className="text-sm text-ink-muted">{error} {t('login.falhaAjuda')}</p>
           </div>
         </div>
       )}
@@ -49,9 +51,9 @@ export default function Login() {
         <div>
           <div className="flex items-baseline justify-between">
             <label htmlFor="email" className="label">
-              E-mail do autor ou leitor
+              {t('login.email')}
             </label>
-            <span className="text-xs font-semibold text-ink-subtle">Obrigatório</span>
+            <span className="text-xs font-semibold text-ink-subtle">{t('login.obrigatorio')}</span>
           </div>
           <div className="relative">
             <AtSign className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ink-muted" aria-hidden />
@@ -71,10 +73,10 @@ export default function Login() {
         <div>
           <div className="flex items-baseline justify-between">
             <label htmlFor="password" className="label">
-              Senha de acesso
+              {t('login.senha')}
             </label>
             <Link to="/forgot-password" className="text-xs font-semibold text-primary hover:underline">
-              Esqueceu a senha?
+              {t('login.esqueceu')}
             </Link>
           </div>
           <div className="relative">
@@ -93,7 +95,7 @@ export default function Login() {
               type="button"
               className="absolute right-1 top-1/2 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-lg text-ink-muted hover:text-ink"
               onClick={() => setShowPassword((s) => !s)}
-              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+              aria-label={showPassword ? t('login.ocultarSenha') : t('login.mostrarSenha')}
               aria-pressed={showPassword}
             >
               {showPassword ? <EyeOff className="h-5 w-5" aria-hidden /> : <Eye className="h-5 w-5" aria-hidden />}
@@ -102,14 +104,14 @@ export default function Login() {
         </div>
         <button type="submit" className="btn-brand w-full py-3 text-base" disabled={busy}>
           {busy ? <Loader2 className="h-5 w-5 animate-spin" aria-hidden /> : null}
-          Entrar na Plataforma <ArrowRight className="h-4 w-4" aria-hidden />
+          {t('login.entrarPlataforma')} <ArrowRight className="h-4 w-4" aria-hidden />
         </button>
       </form>
 
       <p className="mt-6 text-center text-sm text-ink-muted">
-        Não possui uma conta?{' '}
+        {t('login.semConta')}{' '}
         <Link to="/register" className="font-semibold text-primary underline underline-offset-4">
-          Cadastre-se como autor ou leitor
+          {t('login.cadastrese')}
         </Link>
       </p>
     </AuthShell>

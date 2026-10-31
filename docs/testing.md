@@ -6,6 +6,17 @@ Nenhuma delas usa banco fingido. Um teste que passa contra um banco simulado nã
 
 ---
 
+## Verificações da interface
+
+Duas ferramentas em `ferramentas/`, sem dependência além da biblioteca padrão do Python.
+
+```bash
+python3 ferramentas/conferir-contraste.py     # 39 pares por tema, reprova se algum cair
+python3 ferramentas/conferir-traducao.py      # quanto da interface ainda não passa pelo dicionário
+```
+
+A de contraste **roda na integração contínua** e reprova o PR: os temas prometem AAA (7:1) para texto e 3:1 para limite de componente, e promessa que ninguém mede envelhece. A de tradução é informativa — a cobertura é parcial e declarada como tal.
+
 ## API
 
 ### Banco de teste
@@ -98,6 +109,7 @@ Um teste automatizado desse leitor exigiria `vitest` + `jsdom` no front-end, que
 | --- | --- |
 | `api` | `npm ci`, `npm run typecheck`, `npm run build` e `npm test` contra um PostgreSQL de serviço |
 | `web` | `npm ci` e `npm run build` (que inclui a checagem de tipos) |
+| `interface` | Mede o contraste dos sete temas (reprova se um par cair) e a cobertura de tradução (informativo) |
 | `docker` | Constrói as duas imagens de produção |
 
 Nenhum segredo do repositório é usado: o banco é efêmero e o `JWT_SECRET` dos testes é gerado na hora.
@@ -110,7 +122,8 @@ Honestidade sobre a cobertura:
 
 - **Leitores de tela.** NVDA, VoiceOver e TalkBack exigem verificação manual. Os atributos ARIA e a ordem de foco são conferidos no código, não por robô.
 - **Síntese de voz.** Depende de vozes instaladas no sistema operacional.
-- **Contraste.** Calculado a partir dos tokens, não medido na tela renderizada.
+- **Contraste.** Calculado a partir dos tokens, pela fórmula da WCAG, e não medido na tela renderizada — o cálculo não enxerga texto sobre imagem nem opacidade aplicada em cima. Dentro desse limite, os 273 pares dos sete temas são conferidos a cada push.
+- **Tradução.** A cobertura é parcial e medida; o que falta está listado por arquivo em `ferramentas/conferir-traducao.py`. Nenhum robô confere se a tradução está *boa* — só se existe.
 - **Linter.** O projeto não traz ESLint instalado: adicioná-lo exige regenerar os `package-lock.json`, o que precisa de acesso ao registro npm. Para habilitar:
   ```bash
   cd api && npm i -D eslint @eslint/js typescript-eslint

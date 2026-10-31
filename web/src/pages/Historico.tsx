@@ -7,6 +7,7 @@ import { useApagarHistorico, useReadingHistory } from '../hooks/purchases';
 import { errorMessage } from '../lib/api';
 import { formatDateTime } from '../lib/format';
 import { FORMAT_SHORT } from '../lib/labels';
+import { useT } from '../i18n/I18nContext';
 
 /**
  * Histórico de leitura.
@@ -19,6 +20,7 @@ import { FORMAT_SHORT } from '../lib/labels';
  * novo, e acompanha a pessoa em outro aparelho.
  */
 export default function Historico() {
+  const t = useT();
   const historico = useReadingHistory();
   const apagar = useApagarHistorico();
   const toast = useToast();
@@ -41,7 +43,7 @@ export default function Historico() {
     <>
       <PageHeader
         eyebrow="Minha conta"
-        title="Histórico de leitura"
+        title={t('historico.titulo')}
         description="As obras que você abriu, da mais recente para a mais antiga. Fica ligado à sua conta, então continua aqui quando você voltar."
         icon={<History className="h-6 w-6" aria-hidden />}
         actions={
@@ -53,14 +55,14 @@ export default function Historico() {
         }
       />
 
-      {historico.isLoading && <LoadingState label="Carregando seu histórico..." />}
+      {historico.isLoading && <LoadingState label={t('historico.carregando')} />}
       {historico.isError && (
         <ErrorState message={errorMessage(historico.error)} onRetry={() => void historico.refetch()} />
       )}
 
       {historico.data && historico.data.length === 0 && (
         <EmptyState
-          title="Você ainda não leu nenhuma obra"
+          title={t('historico.vazio')}
           description="Assim que abrir uma obra no leitor, ela aparece aqui — com a página em que você parou."
           action={
             <Link to="/" className="btn-primary">
@@ -134,7 +136,7 @@ export default function Historico() {
 
       <ConfirmDialog
         open={confirmando}
-        title="Apagar o histórico de leitura?"
+        title={t('historico.apagarTitulo')}
         message="As obras somem desta lista e o progresso de leitura deixa de aparecer. As obras adquiridas continuam na sua biblioteca, e as estatísticas de quem publicou seguem contando a leitura, sem ligação com a sua conta."
         confirmLabel="Apagar histórico"
         danger

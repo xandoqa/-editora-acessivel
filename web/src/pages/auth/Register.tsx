@@ -7,15 +7,25 @@ import type { AuthResponse, Role } from '../../types/api';
 import { ROLE_DESCRIPTION } from '../../lib/labels';
 import { TextInput } from '../../components/ui';
 import AuthShell from './AuthShell';
+import { useT } from '../../i18n/I18nContext';
+import type { ChaveDeTraducao } from '../../i18n/tipos';
 
-/** Perfis que o cadastro público oferece. Administrador só a própria administração concede. */
-const PERFIS: { value: Role; label: string }[] = [
-  { value: 'LEITOR', label: 'Quero ler' },
-  { value: 'ESCRITOR', label: 'Quero publicar' },
+/**
+ * Perfis que o cadastro público oferece. Administrador só a própria
+ * administração concede.
+ *
+ * O rótulo é uma CHAVE de tradução, não um texto: a lista é module-level e
+ * roda uma vez, antes de qualquer idioma ser escolhido. Guardar o texto aqui
+ * congelaria o português no primeiro carregamento.
+ */
+const PERFIS: { value: Role; label: ChaveDeTraducao }[] = [
+  { value: 'LEITOR', label: 'cadastro.queroLer' },
+  { value: 'ESCRITOR', label: 'cadastro.queroPublicar' },
 ];
 
 export default function Register() {
   const { login } = useAuth();
+  const t = useT();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: '', email: '', password: '', confirm: '', headline: '' });
   const [role, setRole] = useState<Role>('LEITOR');
@@ -28,7 +38,7 @@ export default function Register() {
     e.preventDefault();
     setError('');
     if (form.password !== form.confirm) {
-      setErrors({ confirm: 'As senhas não conferem.' });
+      setErrors({ confirm: t('cadastro.senhasNaoConferem') });
       return;
     }
     setErrors({});
@@ -52,7 +62,7 @@ export default function Register() {
   };
 
   return (
-    <AuthShell subtitle="Crie sua conta para publicar obras, avaliar leituras e acompanhar a curadoria">
+    <AuthShell subtitle={t('cadastro.subtitulo')}>
       {error && (
         <p className="mb-5 rounded-xl border-l-4 border-danger bg-surface-high p-4 text-sm text-ink" role="alert">
           {error}
@@ -60,8 +70,8 @@ export default function Register() {
       )}
       <form onSubmit={onSubmit} className="space-y-5">
         <fieldset>
-          <legend className="label">Como você vai usar a Livrin?</legend>
-          <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label="Perfil da conta">
+          <legend className="label">{t('cadastro.comoVaiUsar')}</legend>
+          <div className="grid gap-3 sm:grid-cols-2" role="radiogroup" aria-label={t('cadastro.perfilDaConta')}>
             {PERFIS.map((p) => {
               const ativo = role === p.value;
               return (
@@ -75,7 +85,7 @@ export default function Register() {
                     ativo ? 'border-primary bg-primary-container' : 'border-outline/60 bg-surface-high hover:bg-surface-highest'
                   }`}
                 >
-                  <span className={`block font-semibold ${ativo ? 'text-primary-onContainer' : 'text-ink'}`}>{p.label}</span>
+                  <span className={`block font-semibold ${ativo ? 'text-primary-onContainer' : 'text-ink'}`}>{t(p.label)}</span>
                   <span className={`mt-1 block text-sm ${ativo ? 'text-primary-onContainer' : 'text-ink-muted'}`}>
                     {ROLE_DESCRIPTION[p.value]}
                   </span>
@@ -84,40 +94,40 @@ export default function Register() {
             })}
           </div>
           <p className="mt-2 text-xs text-ink-subtle">
-            Dá para mudar depois: leitores ativam o perfil de escritor em “Meu perfil”.
+            {t('cadastro.daParaMudar')}
           </p>
         </fieldset>
-        <TextInput label="Nome completo" required autoComplete="name" value={form.name} onChange={set('name')} error={errors.name} />
-        <TextInput label="E-mail" type="email" required autoComplete="email" value={form.email} onChange={set('email')} error={errors.email} />
+        <TextInput label={t('cadastro.nomeCompleto')} required autoComplete="name" value={form.name} onChange={set('name')} error={errors.name} />
+        <TextInput label={t('cadastro.email')} type="email" required autoComplete="email" value={form.email} onChange={set('email')} error={errors.email} />
         <TextInput
-          label="Como você se apresenta (opcional)"
+          label={t('cadastro.apresentacao')}
           value={form.headline}
           onChange={set('headline')}
           error={errors.headline}
-          placeholder="Ex.: Quadrinista independente · Baixa visão"
-          hint="Aparece junto às suas avaliações e mensagens. Compartilhe apenas o que quiser."
+          placeholder={t('cadastro.apresentacaoEx')}
+          hint={t('cadastro.apresentacaoDica')}
           maxLength={160}
         />
         <TextInput
-          label="Senha"
+          label={t('cadastro.senha')}
           type="password"
           required
           autoComplete="new-password"
           value={form.password}
           onChange={set('password')}
           error={errors.password}
-          hint="Mínimo de 8 caracteres, com letras e números."
+          hint={t('cadastro.senhaDica')}
         />
-        <TextInput label="Confirme a senha" type="password" required autoComplete="new-password" value={form.confirm} onChange={set('confirm')} error={errors.confirm} />
+        <TextInput label={t('cadastro.confirmeSenha')} type="password" required autoComplete="new-password" value={form.confirm} onChange={set('confirm')} error={errors.confirm} />
         <button type="submit" className="btn-brand w-full py-3 text-base" disabled={busy}>
           {busy && <Loader2 className="h-5 w-5 animate-spin" aria-hidden />}
-          Criar minha conta <ArrowRight className="h-4 w-4" aria-hidden />
+          {t('cadastro.criarConta')} <ArrowRight className="h-4 w-4" aria-hidden />
         </button>
       </form>
       <p className="mt-6 text-center text-sm text-ink-muted">
-        Já tem conta?{' '}
+        {t('cadastro.jaTemConta')}{' '}
         <Link to="/login" className="font-semibold text-primary underline underline-offset-4">
-          Entrar na plataforma
+          {t('cadastro.entrarPlataforma')}
         </Link>
       </p>
     </AuthShell>

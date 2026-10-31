@@ -3,6 +3,7 @@ import { BookOpenText, ClipboardList, Crown, History, LayoutDashboard, Library, 
 import type { ReactNode } from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import { useMySummary } from '../../hooks/queries';
+import { useT } from '../../i18n/I18nContext';
 import { ROLE_LABEL } from '../../lib/labels';
 import Logo from './Logo';
 
@@ -42,57 +43,58 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { user, isAdmin, isWriter, logout } = useAuth();
   const { data: summary } = useMySummary();
   const navigate = useNavigate();
+  const t = useT();
   const inReview = summary?.inReview ?? 0;
 
   // A navegação acompanha o papel: leitores não veem a área de publicação.
   // Esconder o menu é conveniência; quem recusa de fato é a API.
-  const items: NavItem[] = [{ to: '/', label: 'Início / Catálogo', icon: <BookOpenText className="h-5 w-5" />, end: true }];
+  const items: NavItem[] = [{ to: '/', label: t('nav.inicio'), icon: <BookOpenText className="h-5 w-5" />, end: true }];
 
   if (isWriter) {
     items.push(
-      { to: '/submit', label: 'Publicar Obra', icon: <SquarePlus className="h-5 w-5" /> },
+      { to: '/submit', label: t('nav.publicarObra'), icon: <SquarePlus className="h-5 w-5" /> },
       {
         to: '/review',
-        label: 'Em Análise',
+        label: t('nav.emAnalise'),
         icon: <ClipboardList className="h-5 w-5" />,
         badge:
           inReview > 0 ? (
-            <span className="rounded-md bg-surface-highest px-2 py-0.5 text-xs font-bold text-ink" aria-label={`${inReview} obra(s) em análise`}>
+            <span className="rounded-md bg-surface-highest px-2 py-0.5 text-xs font-bold text-ink" aria-label={t('nav.emAnaliseContagem', { n: inReview })}>
               {inReview}
             </span>
           ) : undefined,
       },
-      { to: '/dashboard', label: 'Meu Painel', icon: <LayoutDashboard className="h-5 w-5" /> },
+      { to: '/dashboard', label: t('nav.meuPainel'), icon: <LayoutDashboard className="h-5 w-5" /> },
     );
   }
 
   items.push({
     to: '/leitor',
-    label: 'Leitor Acessível',
+    label: t('nav.leitorAcessivel'),
     icon: <LibraryBig className="h-5 w-5" />,
-    badge: <span className="chip bg-accent-container text-accent">Áudio</span>,
+    badge: <span className="chip bg-accent-container text-accent">{t('nav.audio')}</span>,
   });
 
   // A biblioteca e o histórico só existem para quem tem conta: os dois
   // pertencem à conta, não ao navegador.
   if (user) {
-    items.push({ to: '/biblioteca', label: 'Minha biblioteca', icon: <Library className="h-5 w-5" /> });
-    items.push({ to: '/historico', label: 'Histórico de leitura', icon: <History className="h-5 w-5" /> });
+    items.push({ to: '/biblioteca', label: t('nav.biblioteca'), icon: <Library className="h-5 w-5" /> });
+    items.push({ to: '/historico', label: t('nav.historico'), icon: <History className="h-5 w-5" /> });
   }
   // Planos aparece para todo mundo: no cabeçalho ele some em tela pequena, e
   // é aqui que quem usa celular vai encontrá-lo.
-  items.push({ to: '/planos', label: 'Planos do Livrin', icon: <Crown className="h-5 w-5" /> });
+  items.push({ to: '/planos', label: t('nav.planos'), icon: <Crown className="h-5 w-5" /> });
   if (user && !isWriter) {
-    items.push({ to: '/profile', label: 'Quero publicar', icon: <SquarePlus className="h-5 w-5" /> });
+    items.push({ to: '/profile', label: t('nav.queroPublicar'), icon: <SquarePlus className="h-5 w-5" /> });
   }
-  if (isAdmin) items.push({ to: '/admin', label: 'Administração', icon: <ShieldCheck className="h-5 w-5 text-admin" /> });
+  if (isAdmin) items.push({ to: '/admin', label: t('conta.administracao'), icon: <ShieldCheck className="h-5 w-5 text-admin" /> });
 
   return (
     <div className="flex h-full flex-col bg-bg">
       <div className="flex h-[72px] items-center border-b border-outline/25 px-5">
         <Logo />
       </div>
-      <nav className="flex-1 space-y-1.5 overflow-y-auto px-3 py-5" aria-label="Navegação principal">
+      <nav className="flex-1 space-y-1.5 overflow-y-auto px-3 py-5" aria-label={t('nav.principal')}>
         {items.map((item) => (
           <Item key={item.to} item={item} onNavigate={onNavigate} />
         ))}
@@ -101,9 +103,13 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         <div className="card-high flex items-center gap-3 px-4 py-3">
           <PersonStanding className="h-6 w-6 shrink-0 text-accent" aria-hidden />
           <p className="text-xs font-semibold leading-snug text-ink">
-            Contraste de texto AAA
-            <br />
-            Foco visível e navegação por teclado
+            {t('nav.selo')
+              .split('\n')
+              .map((linha) => (
+                <span key={linha} className="block">
+                  {linha}
+                </span>
+              ))}
           </p>
         </div>
         {user ? (
@@ -122,7 +128,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
               }}
             >
               <LogOut className="h-5 w-5" aria-hidden />
-              Sair da conta
+              {t('conta.sairDaConta')}
             </button>
           </>
         ) : (
@@ -135,7 +141,7 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
             }}
           >
             <UserRoundCog className="h-5 w-5" aria-hidden />
-            Entrar / Criar Conta
+            {t('conta.entrarOuCriar')}
           </button>
         )}
       </div>

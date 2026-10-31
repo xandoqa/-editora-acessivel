@@ -12,6 +12,7 @@ import './styles/global.css';
 import App from './App';
 import { AuthProvider } from './auth/AuthContext';
 import { PreferencesProvider } from './preferences/PreferencesContext';
+import { I18nProvider } from './i18n/I18nContext';
 import { ToastProvider } from './components/ui/Toast';
 
 const queryClient = new QueryClient({
@@ -31,13 +32,15 @@ const queryClient = new QueryClient({
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <PreferencesProvider>
-        <ToastProvider>
-          <AuthProvider>
-            <App />
-          </AuthProvider>
-        </ToastProvider>
-      </PreferencesProvider>
+      <I18nProvider>
+        <PreferencesProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <App />
+            </AuthProvider>
+          </ToastProvider>
+        </PreferencesProvider>
+      </I18nProvider>
     </QueryClientProvider>
   </React.StrictMode>,
 );

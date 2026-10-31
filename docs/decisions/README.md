@@ -22,3 +22,5 @@ Cada arquivo responde: o que foi escolhido, por quê, quais alternativas existia
 | [016](016-janela-de-libras.md) | Janela de Libras com VLibras, opcional e carregada sob demanda |
 | [017](017-bandeira-do-cartao.md) | Bandeira do cartão detectada pelo número, sem seletor; Luhn e vencimento nos dois lados |
 | [018](018-assinatura-concorrente.md) | Assinatura simultânea travada por transação, e não por índice único; revisa parte da 014 |
+| [019](019-internacionalizacao.md) | Internacionalização sem biblioteca, com as chaves tipadas a partir do português |
+| [020](020-temas.md) | Seis temas escolhidos por motivo e verificados por medição de contraste |

@@ -301,7 +301,20 @@ html {
 
 body {
   @apply bg-bg font-sans text-ink antialiased;
+  /*
+   * `dvh` depois de `vh`, de propósito.
+   *
+   * Em celular, `100vh` é a altura da janela COM a barra de endereço recolhida.
+   * Enquanto ela está visível — que é a maior parte do tempo — a página fica
+   * mais alta do que a tela e sobra um pedaço de rolagem que não leva a lugar
+   * nenhum. `100dvh` é a altura real do momento.
+   *
+   * A primeira linha fica como reserva para quem não entende `dvh`; o piso de
+   * navegadores do projeto (Safari 15.4) entende, então na prática vale a
+   * segunda.
+   */
   min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
 }
 

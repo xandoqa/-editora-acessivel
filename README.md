@@ -8,7 +8,7 @@ Plataforma editorial aberta para quadrinhos e livros independentes, com acessibi
 
 O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. **A autoria decide como cada obra é disponibilizada** — leitura livre, obra paga ou leitura livre com publicidade — e leitura livre continua sendo o padrão. O apoio financeiro ao projeto é voluntário e nunca condiciona o acesso a uma obra: só a obra que a própria autoria marcou como paga exige aquisição.
 
-**Versão 3.5.6** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede; a 3.5.5 trouxe os seis temas e o sistema de tradução; e a 3.5.6 levou os seletores de tema e idioma para junto do perfil, onde aparecem em qualquer largura de tela.
+**Versão 3.5.7** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede; a 3.5.5 trouxe os seis temas e o sistema de tradução; a 3.5.6 levou os seletores de tema e idioma para junto do perfil; e a 3.5.7 arrumou o celular, levando os recursos de acessibilidade para o menu lateral.
 
 ---
 
@@ -29,6 +29,7 @@ O Livrin existe para que quem não tem como bancar um lançamento tradicional co
 - [Solução de problemas](#solução-de-problemas)
 - [Antes da apresentação](#antes-da-apresentação)
 - [Correções recentes](#correções-recentes)
+- [Abrir no celular](#abrir-no-celular)
 - [Idiomas e temas](#idiomas-e-temas)
 - [Direção visual](#direção-visual)
 - [Documentação completa](#documentação-completa)
@@ -623,6 +624,35 @@ Uma correção foi **recusada depois de implementada**: acrescentar `NULLS NOT D
 O histórico completo está no [CHANGELOG](CHANGELOG.md); o que a auditoria verificou e achou em ordem está no [relatório final](docs/relatorio-final.md).
 
 ---
+
+## Abrir no celular
+
+**Já funciona, e não exige configuração nenhuma.** O site é responsivo e o servidor escuta em todas as interfaces da máquina, então qualquer celular na **mesma rede Wi-Fi** abre o Livrin.
+
+1. Descubra o IP do computador onde o projeto está rodando:
+
+   ```bash
+   hostname -I | awk '{print $1}'       # Linux
+   ipconfig getifaddr en0               # macOS (Wi-Fi)
+   ipconfig                             # Windows — procure "Endereço IPv4"
+   ```
+
+2. No celular, abra `http://SEU_IP:5173` — por exemplo `http://192.168.0.12:5173`.
+
+Não é preciso mexer em `CORS_ORIGINS`: o Nginx serve a API na **mesma origem** do site (`/api/...`), então o navegador nem chega a fazer requisição entre origens. O mesmo vale no modo de desenvolvimento, onde o Vite faz o mesmo papel e já escuta fora de `localhost`.
+
+Se não abrir, quase sempre é o **firewall do computador** bloqueando a porta na rede local — e não o projeto.
+
+### O que foi feito para a tela pequena
+
+| O quê | Onde |
+| --- | --- |
+| **Recursos de acessibilidade no menu lateral** | Alto contraste, A-/A+, leitura em voz alta e janela de Libras passam a estar no menu da gaveta abaixo de 640px. Antes ficavam só no cabeçalho, num grupo que **some no celular** — ou seja, eram inalcançáveis justamente em quem mais precisa deles |
+| **Alvos de toque de 44px** | No painel do menu lateral, contra os 40px do cabeçalho. É o alvo mínimo recomendado pelo critério 2.5.5 da WCAG para dedo |
+| **Altura real da janela** | `100dvh` além de `100vh`: em celular, `100vh` é a altura com a barra de endereço recolhida, e sobrava um pedaço de rolagem que não levava a lugar nenhum |
+| **Painéis que não estouram** | Os menus de tema, idioma e da leitura em voz alta ganharam largura máxima presa à tela |
+| Navegação em gaveta | Já existia: abaixo de 1024px o menu lateral vira gaveta com `aria-modal` e fecha no Esc |
+| Tabelas com rolagem própria | Já existia: biblioteca e administração rolam na horizontal dentro do próprio quadro, sem empurrar a página |
 
 ## Idiomas e temas
 

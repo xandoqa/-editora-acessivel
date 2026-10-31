@@ -107,7 +107,7 @@ export default function LeituraEmVoz({ classeBotao }: { classeBotao: string }) {
       </span>
 
       {painel && (
-        <div className="card absolute right-0 top-12 z-40 w-[20rem] p-4 text-sm" role="dialog" aria-label="Ajustes da leitura em voz alta">
+        <div className="card absolute right-0 top-12 z-40 w-[20rem] max-w-[calc(100vw-2rem)] p-4 text-sm" role="dialog" aria-label="Ajustes da leitura em voz alta">
           <p className="eyebrow mb-2 text-ink-subtle">Leitura em voz alta</p>
           <p className="mb-3 leading-relaxed text-ink-muted">
             Ligada, o Livrin fala a palavra sob o ponteiro. Sem mouse, use <kbd className="font-semibold text-ink">←</kbd> e{' '}

@@ -2,6 +2,39 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.5.7] — 2026-10-31
+
+### Os recursos de acessibilidade voltaram a existir no celular
+
+O grupo do cabeçalho é `hidden sm:flex`: abaixo de 640px ele não existe. Isso
+significava que **no telefone não havia como ligar o alto contraste, aumentar o
+texto, usar a leitura em voz alta ou abrir a janela de Libras**. Numa plataforma
+cuja razão de existir é acessibilidade, era o defeito mais grave da versão para
+celular — e não aparecia em teste nenhum, porque a suíte roda em tela de
+computador.
+
+Eles passam a aparecer no **menu lateral**, abaixo de 640px, com alvos de toque
+de 44px (critério 2.5.5 da WCAG para dedo) em vez dos 40px que bastam para
+ponteiro. O painel não duplica lógica: usa os mesmos componentes e as mesmas
+preferências do cabeçalho.
+
+### Outros acertos de tela pequena
+
+`100dvh` além de `100vh` no `body`: em celular, `100vh` é a altura da janela com
+a barra de endereço recolhida, e enquanto ela está visível sobra um pedaço de
+rolagem que não leva a lugar nenhum. Os painéis de tema, idioma e da leitura em
+voz alta ganharam largura máxima presa à tela, para não estourarem num aparelho
+estreito.
+
+### Abrir no celular está documentado
+
+Não era um recurso faltando — **já funcionava** e não estava escrito em lugar
+nenhum. O Vite escuta fora de `localhost`, o compose publica em todas as
+interfaces e o Nginx serve a API na mesma origem, então qualquer celular na
+mesma rede abre o site pelo IP do computador. O README agora traz o passo a
+passo e diz o que **não** precisa ser mexido — `CORS_ORIGINS`, por exemplo — e
+que o suspeito mais provável, quando não abre, é o firewall do computador.
+
 ## [3.5.6] — 2026-10-31
 
 ### Os seletores de tema e idioma foram para junto do perfil

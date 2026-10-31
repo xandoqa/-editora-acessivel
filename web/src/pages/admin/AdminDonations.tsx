@@ -64,22 +64,22 @@ export default function AdminDonations() {
         <section className="mb-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Indicadores de apoio">
           <div className="card p-5">
             <p className="text-sm font-medium text-ink-muted">Total arrecadado</p>
-            <p className="mt-2 font-display text-4xl font-bold text-ink">{formatCents(stats.centavosConfirmados)}</p>
+            <p className="mt-2 font-display text-3xl sm:text-4xl font-bold text-ink">{formatCents(stats.centavosConfirmados)}</p>
             <p className="mt-1 text-sm text-ink-muted">somente apoios confirmados</p>
           </div>
           <div className="card p-5">
             <p className="text-sm font-medium text-ink-muted">Apoios confirmados</p>
-            <p className="mt-2 font-display text-4xl font-bold text-ink">{formatNumber(stats.confirmadas)}</p>
+            <p className="mt-2 font-display text-3xl sm:text-4xl font-bold text-ink">{formatNumber(stats.confirmadas)}</p>
             <p className="mt-1 text-sm text-ink-muted">de {formatNumber(stats.total)} abertos</p>
           </div>
           <div className="card p-5">
             <p className="text-sm font-medium text-ink-muted">Pessoas apoiadoras</p>
-            <p className="mt-2 font-display text-4xl font-bold text-ink">{formatNumber(stats.apoiadores)}</p>
+            <p className="mt-2 font-display text-3xl sm:text-4xl font-bold text-ink">{formatNumber(stats.apoiadores)}</p>
             <p className="mt-1 text-sm text-ink-muted">contas identificadas</p>
           </div>
           <div className="card p-5">
             <p className="text-sm font-medium text-ink-muted">Ticket médio</p>
-            <p className="mt-2 font-display text-4xl font-bold text-ink">
+            <p className="mt-2 font-display text-3xl sm:text-4xl font-bold text-ink">
               {stats.confirmadas ? formatCents(Math.round(stats.centavosConfirmados / stats.confirmadas)) : '—'}
             </p>
             <p className="mt-1 text-sm text-ink-muted">por apoio confirmado</p>

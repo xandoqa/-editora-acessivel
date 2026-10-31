@@ -16,7 +16,7 @@ function Kpi({ icon, label, value, detail, to }: { icon: React.ReactNode; label:
           {icon}
         </span>
       </div>
-      <p className="mt-2 font-display text-4xl font-bold text-ink">{value}</p>
+      <p className="mt-2 font-display text-3xl sm:text-4xl font-bold text-ink">{value}</p>
       {detail && <p className="mt-1 text-sm text-ink-muted">{detail}</p>}
     </>
   );

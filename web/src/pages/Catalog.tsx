@@ -10,10 +10,19 @@ import WorkCard from '../components/works/WorkCard';
 import { EmptyState, ErrorState, LoadingState, Pagination } from '../components/ui';
 import { OndaDivisoria, OndasDeSom, Rabisco } from '../components/ui/Ornamentos';
 import { useT } from '../i18n/I18nContext';
+import type { ChaveDeTraducao } from '../i18n/tipos';
 
 interface Filter {
   key: string;
-  label: string;
+  /**
+   * Chave de tradução, não texto.
+   *
+   * A lista é declarada no nível do módulo e roda uma vez, antes de qualquer
+   * idioma ser escolhido. Guardar o texto aqui congelaria o português no
+   * primeiro carregamento — foi exatamente assim que os chips de filtro
+   * continuaram em português depois de trocar o idioma.
+   */
+  label: ChaveDeTraducao;
   icon: React.ReactNode;
   format?: string;
   feature?: string;
@@ -21,14 +30,14 @@ interface Filter {
 
 /** Chips de "Formatos & Recursos Assistivos" do protótipo, mapeados para filtros reais da API. */
 const FILTERS: Filter[] = [
-  { key: 'todos', label: 'Todos os Títulos', icon: <Sparkles className="h-4 w-4" /> },
-  { key: 'quadrinhos', label: 'Quadrinhos', icon: <LayoutGrid className="h-4 w-4" />, format: 'QUADRINHO' },
-  { key: 'livros', label: 'Livros', icon: <BookOpen className="h-4 w-4" />, format: 'LIVRO' },
-  { key: 'manga', label: 'Mangás & Webcomics', icon: <LayoutGrid className="h-4 w-4" />, format: 'MANGA_WEBCOMIC' },
-  { key: 'zines', label: 'Zines & Poesia', icon: <Feather className="h-4 w-4" />, format: 'ZINE' },
-  { key: 'hq-audio', label: 'Com Audiodescrição', icon: <AudioLines className="h-4 w-4" />, feature: 'audiodescricao' },
-  { key: 'libras', label: 'Com Libras no conteúdo', icon: <Video className="h-4 w-4" />, feature: 'libras' },
-  { key: 'facil', label: 'Leitura Fácil', icon: <SpellCheck2 className="h-4 w-4" />, feature: 'facil-leitura' },
+  { key: 'todos', label: 'filtro.todos', icon: <Sparkles className="h-4 w-4" /> },
+  { key: 'quadrinhos', label: 'filtro.quadrinhos', icon: <LayoutGrid className="h-4 w-4" />, format: 'QUADRINHO' },
+  { key: 'livros', label: 'filtro.livros', icon: <BookOpen className="h-4 w-4" />, format: 'LIVRO' },
+  { key: 'manga', label: 'filtro.manga', icon: <LayoutGrid className="h-4 w-4" />, format: 'MANGA_WEBCOMIC' },
+  { key: 'zines', label: 'filtro.zines', icon: <Feather className="h-4 w-4" />, format: 'ZINE' },
+  { key: 'hq-audio', label: 'filtro.comAudiodescricao', icon: <AudioLines className="h-4 w-4" />, feature: 'audiodescricao' },
+  { key: 'libras', label: 'filtro.comLibras', icon: <Video className="h-4 w-4" />, feature: 'libras' },
+  { key: 'facil', label: 'filtro.leituraFacil', icon: <SpellCheck2 className="h-4 w-4" />, feature: 'facil-leitura' },
 ];
 
 const PAGE_SIZE = 9;
@@ -99,41 +108,43 @@ export default function Catalog() {
         <OndasDeSom className="pointer-events-none absolute -bottom-2 right-8 hidden h-14 w-14 text-accent/20 lg:block" />
 
         <p className="eyebrow text-ink-subtle">
-          Catálogo editorial aberto · {formatNumber(data?.catalogTotal ?? 0)} títulos inclusivos
+          {t('catalogo.olho', { n: formatNumber(data?.catalogTotal ?? 0) })}
         </p>
 
         <h1
           id="catalog-title"
-          className="mt-3 max-w-3xl font-display text-[2.75rem] font-semibold leading-[1.05] tracking-tight text-ink md:text-6xl"
+          /* 2,75rem (44px) num aparelho de 375px ocupava a tela inteira com
+             duas palavras. A escala agora sobe com a largura: 32px no celular,
+             40px a partir de 640px, 60px no computador. */
+          className="mt-3 max-w-3xl font-display text-[2rem] font-semibold leading-[1.08] tracking-tight text-ink sm:text-[2.5rem] sm:leading-[1.05] md:text-6xl"
         >
-          Leituras em destaque
+          {t('catalogo.titulo')}
         </h1>
 
-        <p className="mt-5 max-w-2xl text-lg leading-relaxed text-ink-muted">
-          Histórias plurais que todo mundo pode ler e sentir. Narrativas visuais independentes com tecnologia assistiva integrada,
-          audiodescrição imersiva e tipografia universal.
+        <p className="mt-4 max-w-2xl text-base leading-relaxed text-ink-muted sm:mt-5 sm:text-lg">
+          {t('catalogo.chamada')}
         </p>
 
         <ul className="mt-6 flex flex-wrap gap-x-7 gap-y-2 text-sm text-ink-muted">
           <li className="flex items-center gap-2">
-            <Headphones className="h-4 w-4" aria-hidden /> Audiodescrição nativa
+            <Headphones className="h-4 w-4" aria-hidden /> {t('catalogo.audiodescricaoNativa')}
           </li>
           <li className="flex items-center gap-2">
-            <span className="font-bold text-primary" aria-hidden>A+</span> Compatível com leitores de tela
+            <span className="font-bold text-primary" aria-hidden>A+</span> {t('catalogo.compativelLeitores')}
           </li>
           <li className="flex items-center gap-2">
-            <Ear className="h-4 w-4" aria-hidden /> Libras no conteúdo
+            <Ear className="h-4 w-4" aria-hidden /> {t('catalogo.librasConteudo')}
           </li>
         </ul>
 
         <div className="mt-8 flex flex-wrap gap-3">
           <Link to={isWriter ? '/submit' : user ? '/profile' : '/register'} className="btn-primary py-3">
             <PlusCircle className="h-5 w-5" aria-hidden />
-            {isWriter ? 'Nova obra independente' : 'Quero publicar minha obra'}
+            {isWriter ? t('catalogo.novaObra') : t('catalogo.queroPublicarObra')}
           </Link>
           <button type="button" className="btn-ghost py-3" onClick={readIntro} disabled={!speechSupported} aria-pressed={readingIntro}>
             {readingIntro ? <VolumeX className="h-5 w-5 text-accent" aria-hidden /> : <Volume2 className="h-5 w-5 text-accent" aria-hidden />}
-            {readingIntro ? 'Parar introdução' : 'Ouvir introdução da página'}
+            {readingIntro ? t('catalogo.pararIntroducao') : t('catalogo.ouvirIntroducao')}
           </button>
         </div>
       </section>
@@ -142,7 +153,7 @@ export default function Catalog() {
       <section aria-labelledby="filters-title">
         <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
           <h2 id="filters-title" className="eyebrow font-sans text-ink-muted">
-            Formatos & recursos assistivos
+            {t('catalogo.formatosRecursos')}
           </h2>
           <div className="flex flex-wrap items-center gap-3">
             <label htmlFor="genero" className="text-sm text-ink-muted">
@@ -186,7 +197,7 @@ export default function Catalog() {
                 }`}
               >
                 <span aria-hidden>{f.icon}</span>
-                {f.label}
+                {t(f.label)}
               </button>
             );
           })}
@@ -204,7 +215,8 @@ export default function Catalog() {
           )}
           {data && (
             <p className="font-semibold text-accent" aria-live="polite">
-              Exibindo {data.data.length} de {data.meta.total} obras{isFetching ? '…' : ''}
+              {t('catalogo.exibindo', { n: data.data.length, total: data.meta.total })}
+              {isFetching ? '…' : ''}
             </p>
           )}
         </div>
@@ -239,22 +251,21 @@ export default function Catalog() {
       <section className="card mt-6 flex flex-col gap-6 p-6 md:flex-row md:items-center md:justify-between md:p-8" aria-labelledby="cta-title">
         <div className="max-w-md">
           <p className="eyebrow mb-2 text-accent">{t('catalogo.paraAutores')}</p>
-          <h2 id="cta-title" className="text-3xl font-bold text-ink">
-            Quer tornar sua obra acessível?
+          <h2 id="cta-title" className="text-2xl font-bold text-ink sm:text-3xl">
+            {t('catalogo.quererPublicar')}
           </h2>
           <p className="mt-2 text-ink-muted">
-            Nossa equipe e ferramentas automatizadas convertem HQs, livros e mangás para o padrão de acessibilidade Livrin Universal, com
-            suporte a audiodescrição quadro a quadro.
+            {t('catalogo.ctaTexto')}
           </p>
         </div>
         <div className="flex flex-col gap-3 sm:flex-row">
           <Link to={isWriter ? '/submit' : user ? '/profile' : '/register'} className="btn-primary px-6 py-3">
             <Upload className="h-4 w-4" aria-hidden />
-            {isWriter ? 'Submeter meu manuscrito' : 'Virar escritor na Livrin'}
+            {isWriter ? t('catalogo.submeterManuscrito') : t('catalogo.virarEscritor')}
           </Link>
           {isWriter && (
             <Link to="/review" className="btn-secondary px-6 py-3">
-              Acompanhar análise <ArrowRight className="h-4 w-4" aria-hidden />
+              {t('catalogo.acompanharAnalise')} <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           )}
         </div>

@@ -9,9 +9,11 @@ import { FORMAT_SHORT, STATUS_LABEL } from '../../lib/labels';
 import type { WorkStatus } from '../../types/api';
 import { SearchBox, SortHeader, TableShell, Th, rowClass, theadClass } from '../../components/admin/AdminTable';
 import { Cover, ErrorState, LoadingState, PageHeader, Pagination, StatusBadge } from '../../components/ui';
+import { useT } from '../../i18n/I18nContext';
 
 /** Listagem administrativa de obras com busca, filtros, ordenação e paginação no servidor. */
 export default function AdminWorks() {
+  const t = useT();
   const [params, setParams] = useSearchParams();
   const [q, setQ] = useState(params.get('q') ?? '');
   const debouncedQ = useDebounced(q);
@@ -94,7 +96,7 @@ export default function AdminWorks() {
                       <div>
                         <p className="font-semibold text-ink">{w.title}</p>
                         <p className="text-xs text-ink-subtle">
-                          #{w.id} · {FORMAT_SHORT[w.format]} · {w.genre.name} · {w.file?.type ?? 'sem arquivo'}
+                          #{w.id} · {t(FORMAT_SHORT[w.format])} · {w.genre.name} · {w.file?.type ?? 'sem arquivo'}
                         </p>
                       </div>
                     </div>

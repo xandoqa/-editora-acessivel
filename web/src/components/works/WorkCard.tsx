@@ -8,22 +8,27 @@ import { speak, speechSupported, stopSpeaking } from '../../lib/speech';
 import { Cover } from '../ui';
 import { Modalidade } from './Modalidade';
 import { SeloCompacto } from './SeloLivrin';
+import { useT } from '../../i18n/I18nContext';
+import type { ChaveDeTraducao } from '../../i18n/tipos';
+
+/** O `t` do contexto, passado às funções deste módulo que nascem fora do componente. */
+type Traduzir = (chave: ChaveDeTraducao) => string;
 
 /** Selo superior (recurso de destaque) e etiqueta lateral, como nos cards do protótipo. */
-const TOP_BADGE: Partial<Record<FeatureFlag, { label: string; icon: ReactNode }>> = {
-  hasAudioDesc: { label: 'Áudio sincronizado', icon: <AudioLines className="h-3.5 w-3.5" /> },
-  hasLibras: { label: 'Libras no conteúdo', icon: <Video className="h-3.5 w-3.5" /> },
-  hasFacilLeitura: { label: 'Fácil leitura', icon: <SpellCheck2 className="h-3.5 w-3.5" /> },
-  hasLeitorTela: { label: 'Texto ampliado', icon: <Type className="h-3.5 w-3.5" /> },
-  hasTextoAlt: { label: 'Descrição de cenas', icon: <Square className="h-3.5 w-3.5" /> },
-  hasAltoContraste: { label: 'Alto contraste', icon: <Eye className="h-3.5 w-3.5" /> },
+const TOP_BADGE: Partial<Record<FeatureFlag, { label: ChaveDeTraducao; icon: ReactNode }>> = {
+  hasAudioDesc: { label: 'recurso.audioSincronizado', icon: <AudioLines className="h-3.5 w-3.5" /> },
+  hasLibras: { label: 'recurso.librasConteudo', icon: <Video className="h-3.5 w-3.5" /> },
+  hasFacilLeitura: { label: 'recurso.facilLeitura', icon: <SpellCheck2 className="h-3.5 w-3.5" /> },
+  hasLeitorTela: { label: 'recurso.textoAmpliado', icon: <Type className="h-3.5 w-3.5" /> },
+  hasTextoAlt: { label: 'recurso.descricaoCenas', icon: <Square className="h-3.5 w-3.5" /> },
+  hasAltoContraste: { label: 'recurso.altoContraste', icon: <Eye className="h-3.5 w-3.5" /> },
 };
-const SIDE_TAG: Partial<Record<FeatureFlag, { label: string; icon: ReactNode; tone: string }>> = {
-  hasAltoContraste: { label: 'Alto contraste', icon: <Eye className="h-3.5 w-3.5" />, tone: 'text-accent' },
-  hasAudioDesc: { label: 'Audio HQ', icon: <Ear className="h-3.5 w-3.5" />, tone: 'text-primary' },
-  hasLibras: { label: 'Libras', icon: <Video className="h-3.5 w-3.5" />, tone: 'text-primary' },
-  hasFacilLeitura: { label: 'Lexical', icon: <SpellCheck2 className="h-3.5 w-3.5" />, tone: 'text-primary' },
-  hasLeitorTela: { label: 'Leitor de tela', icon: <PersonStanding className="h-3.5 w-3.5" />, tone: 'text-accent' },
+const SIDE_TAG: Partial<Record<FeatureFlag, { label: ChaveDeTraducao; icon: ReactNode; tone: string }>> = {
+  hasAltoContraste: { label: 'recurso.altoContraste', icon: <Eye className="h-3.5 w-3.5" />, tone: 'text-accent' },
+  hasAudioDesc: { label: 'recurso.audioHq', icon: <Ear className="h-3.5 w-3.5" />, tone: 'text-primary' },
+  hasLibras: { label: 'recurso.libras', icon: <Video className="h-3.5 w-3.5" />, tone: 'text-primary' },
+  hasFacilLeitura: { label: 'recurso.lexical', icon: <SpellCheck2 className="h-3.5 w-3.5" />, tone: 'text-primary' },
+  hasLeitorTela: { label: 'recurso.leitorDeTela', icon: <PersonStanding className="h-3.5 w-3.5" />, tone: 'text-accent' },
 };
 
 function pick<T>(work: Work, map: Partial<Record<FeatureFlag, T>>): T | undefined {
@@ -38,8 +43,8 @@ function pick<T>(work: Work, map: Partial<Record<FeatureFlag, T>>): T | undefine
  * "Ficção Histórica"), o que imprime a mesma palavra duas vezes com caixa
  * diferente. Compara sem acento e sem caixa antes de juntar.
  */
-function ficha(work: Work): string {
-  const partes = [work.editionLabel ?? FORMAT_SHORT[work.format], work.genre.name, `${work.pages}p`];
+function ficha(work: Work, t: Traduzir): string {
+  const partes = [work.editionLabel ?? t(FORMAT_SHORT[work.format]), work.genre.name, `${work.pages}p`];
   const vistas = new Set<string>();
   return partes
     .filter((parte) => {
@@ -52,6 +57,7 @@ function ficha(work: Work): string {
 }
 
 export default function WorkCard({ work }: { work: Work }) {
+  const t = useT();
   const [speaking, setSpeaking] = useState(false);
   const top = pick(work, TOP_BADGE);
   const side = pick(
@@ -103,7 +109,7 @@ export default function WorkCard({ work }: { work: Work }) {
       </Link>
 
       <div className="flex flex-1 flex-col pt-3">
-        <p className="eyebrow text-ink-subtle">{ficha(work)}</p>
+        <p className="eyebrow text-ink-subtle">{ficha(work, t)}</p>
 
         <h3 id={`work-${work.id}-title`} className="mt-1.5 font-display text-[1.375rem] font-semibold leading-[1.15] text-ink">
           {work.title}
@@ -118,13 +124,13 @@ export default function WorkCard({ work }: { work: Work }) {
             {top && (
               <li className="flex items-center gap-1.5">
                 {top.icon}
-                {top.label}
+                {t(top.label)}
               </li>
             )}
             {side && side.label !== top?.label && (
               <li className="flex items-center gap-1.5">
                 {side.icon}
-                {side.label}
+                {t(side.label)}
               </li>
             )}
           </ul>
@@ -150,13 +156,13 @@ export default function WorkCard({ work }: { work: Work }) {
             <Link
               to={`/reader/${work.id}#aquisicao`}
               className="btn-secondary flex-1"
-              aria-label={`Adquirir ${work.title} por ${formatCents(work.priceCents ?? 0)}`}
+              aria-label={t('obra.adquirirAria', { titulo: work.title, preco: formatCents(work.priceCents ?? 0) })}
             >
-              <ShoppingBag className="h-4 w-4" aria-hidden /> Adquirir
+              <ShoppingBag className="h-4 w-4" aria-hidden /> {t('obra.adquirir')}
             </Link>
           ) : (
-            <Link to={`/reader/${work.id}`} className="btn-secondary flex-1" aria-label={`Ler agora: ${work.title}`}>
-              <BookOpen className="h-4 w-4" aria-hidden /> Ler agora
+            <Link to={`/reader/${work.id}`} className="btn-secondary flex-1" aria-label={t('obra.lerAgoraAria', { titulo: work.title })}>
+              <BookOpen className="h-4 w-4" aria-hidden /> {t('obra.lerAgora')}
             </Link>
           )}
           <button

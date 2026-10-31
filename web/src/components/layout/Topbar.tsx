@@ -1,16 +1,20 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Link, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { ChevronDown, Contrast, Crown, LayoutDashboard, LogOut, Menu, Moon, Plus, Search, ShieldCheck, Sun, UserRound } from 'lucide-react';
+import { ChevronDown, Contrast, Crown, LayoutDashboard, LogOut, Menu, Plus, Search, ShieldCheck, UserRound } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext';
 import { FONT_MAX, FONT_MIN, usePreferences } from '../../preferences/PreferencesContext';
+import { useT } from '../../i18n/I18nContext';
 import { ROLE_LABEL } from '../../lib/labels';
 import { stopSpeaking } from '../../lib/speech';
 import JanelaDeLibras from './JanelaDeLibras';
 import LeituraEmVoz from './LeituraEmVoz';
+import SeletorDeIdioma from './SeletorDeIdioma';
+import SeletorDeTema from './SeletorDeTema';
 import { Avatar } from '../ui';
 
 function UserMenu() {
   const { user, isAdmin, isWriter, logout } = useAuth();
+  const t = useT();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -30,7 +34,7 @@ function UserMenu() {
   if (!user) {
     return (
       <Link to="/login" className="btn-secondary">
-        <UserRound className="h-4 w-4" aria-hidden /> Entrar
+        <UserRound className="h-4 w-4" aria-hidden /> {t('comum.entrar')}
       </Link>
     );
   }
@@ -42,7 +46,7 @@ function UserMenu() {
         className="flex items-center gap-1.5 rounded-full p-1 hover:bg-surface-high"
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label={`Menu da conta de ${user.name}`}
+        aria-label={t('conta.menu', { nome: user.name })}
         onClick={() => setOpen((o) => !o)}
       >
         <span className="relative">
@@ -61,15 +65,15 @@ function UserMenu() {
           <div className="pt-2">
             {isWriter && (
               <Link role="menuitem" to="/dashboard" className={item} onClick={() => setOpen(false)}>
-                <LayoutDashboard className="h-4 w-4" aria-hidden /> Meu painel
+                <LayoutDashboard className="h-4 w-4" aria-hidden /> {t('conta.painel')}
               </Link>
             )}
             <Link role="menuitem" to="/profile" className={item} onClick={() => setOpen(false)}>
-              <UserRound className="h-4 w-4" aria-hidden /> Meu perfil
+              <UserRound className="h-4 w-4" aria-hidden /> {t('conta.perfil')}
             </Link>
             {isAdmin && (
               <Link role="menuitem" to="/admin" className={item} onClick={() => setOpen(false)}>
-                <ShieldCheck className="h-4 w-4 text-admin" aria-hidden /> Administração
+                <ShieldCheck className="h-4 w-4 text-admin" aria-hidden /> {t('conta.administracao')}
               </Link>
             )}
             <button
@@ -82,7 +86,7 @@ function UserMenu() {
                 navigate('/login');
               }}
             >
-              <LogOut className="h-4 w-4" aria-hidden /> Sair
+              <LogOut className="h-4 w-4" aria-hidden /> {t('comum.sair')}
             </button>
           </div>
         </div>
@@ -93,6 +97,7 @@ function UserMenu() {
 
 export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
   const prefs = usePreferences();
+  const t = useT();
   const { isWriter } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -119,7 +124,7 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
 
   return (
     <header className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b border-outline/25 bg-bg/95 px-4 backdrop-blur md:px-6">
-      <button type="button" className="icon-btn lg:hidden" onClick={onOpenMenu} aria-label="Abrir menu de navegação">
+      <button type="button" className="icon-btn lg:hidden" onClick={onOpenMenu} aria-label={t('nav.abrirMenu')}>
         <Menu className="h-6 w-6" aria-hidden />
       </button>
 
@@ -140,39 +145,31 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
       >
         <Search className="h-5 w-5 shrink-0 text-ink-muted" aria-hidden />
         <label htmlFor="global-search" className="sr-only">
-          Buscar obras
+          {t('nav.buscarObras')}
         </label>
         <input
           id="global-search"
           type="search"
           value={term}
           onChange={(e) => setTerm(e.target.value)}
-          placeholder="Buscar HQs, graphic novels, autores e obras com audiodescrição..."
+          placeholder={t('nav.buscaPlaceholder')}
           className="h-11 min-w-0 flex-1 bg-transparent text-sm text-ink placeholder:text-ink-subtle"
         />
       </form>
 
-      <div className="relative hidden items-center gap-0.5 rounded-full border border-outline bg-surface p-1 sm:flex" role="group" aria-label="Recursos de acessibilidade">
-        <button
-          type="button"
-          className={tool}
-          onClick={prefs.toggleTheme}
-          aria-pressed={prefs.theme === 'noite'}
-          title={prefs.theme === 'noite' ? 'Voltar ao tema Papel (claro)' : 'Mudar para o tema Noite (escuro)'}
-        >
-          {prefs.theme === 'noite' ? <Sun className="h-5 w-5" aria-hidden /> : <Moon className="h-5 w-5" aria-hidden />}
-          <span className="sr-only">{prefs.theme === 'noite' ? 'Tema Papel' : 'Tema Noite'}</span>
-        </button>
-        <button type="button" className={tool} onClick={prefs.toggleHighContrast} aria-pressed={prefs.highContrast} title="Alto contraste (amarelo/preto)">
+      <div className="relative hidden items-center gap-0.5 rounded-full border border-outline bg-surface p-1 sm:flex" role="group" aria-label={t('a11y.grupo')}>
+        <SeletorDeTema classeBotao={tool} />
+        <button type="button" className={tool} onClick={prefs.toggleHighContrast} aria-pressed={prefs.highContrast} title={t('a11y.altoContrasteTitulo')}>
           <Contrast className="h-5 w-5" aria-hidden />
-          <span className="sr-only">Alto contraste</span>
+          <span className="sr-only">{t('a11y.altoContraste')}</span>
         </button>
-        <button type="button" className={tool} onClick={prefs.decreaseFont} disabled={prefs.fontScale <= FONT_MIN} aria-label="Diminuir tamanho do texto">
+        <button type="button" className={tool} onClick={prefs.decreaseFont} disabled={prefs.fontScale <= FONT_MIN} aria-label={t('a11y.diminuirTexto')}>
           A-
         </button>
-        <button type="button" className={tool} onClick={prefs.increaseFont} disabled={prefs.fontScale >= FONT_MAX} aria-label="Aumentar tamanho do texto">
+        <button type="button" className={tool} onClick={prefs.increaseFont} disabled={prefs.fontScale >= FONT_MAX} aria-label={t('a11y.aumentarTexto')}>
           A+
         </button>
+        <SeletorDeIdioma classeBotao={tool} />
         <LeituraEmVoz classeBotao={tool} />
         <JanelaDeLibras classeBotao={tool} />
       </div>
@@ -181,12 +178,12 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
           inclusive visitante sem conta: quem ainda não assinou é justamente
           quem precisa encontrar a página. */}
       <Link to="/planos" className="btn-secondary hidden md:inline-flex">
-        <Crown className="h-4 w-4" aria-hidden /> Planos do Livrin
+        <Crown className="h-4 w-4" aria-hidden /> {t('nav.planos')}
       </Link>
 
       {isWriter && (
         <Link to="/submit" className="btn-primary hidden md:inline-flex">
-          <Plus className="h-4 w-4" aria-hidden /> Publique sua obra
+          <Plus className="h-4 w-4" aria-hidden /> {t('nav.publicar')}
         </Link>
       )}
       <div className="mx-1 hidden h-8 w-px bg-outline/60 md:block" aria-hidden />

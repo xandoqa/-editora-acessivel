@@ -23,6 +23,7 @@
    os campos de formulário tinham 1,1:1 contra o fundo e eram invisíveis.
    ========================================================================== */
 
+/* tema: papel — Papel (claro, padrão) */
 :root {
   /* --- Papel: superfícies -------------------------------------------- */
   --c-bg: 246 243 236;
@@ -62,7 +63,7 @@
   color-scheme: light;
 }
 
-/* Tema Noite — para quem lê melhor com pouco brilho. */
+/* tema: noite — Noite (escuro). Para quem lê melhor com pouco brilho. */
 :root.tema-escuro {
   --c-bg: 21 20 26;
   --c-surface: 30 28 37;
@@ -92,7 +93,156 @@
   color-scheme: dark;
 }
 
-/* Alto contraste (amarelo/preto) — vence os demais temas. */
+/* ==========================================================================
+   Temas adicionais (3.5.5)
+   --------------------------------------------------------------------------
+   Cada um existe por um motivo, não para encher lista. Todos os pares de texto
+   passam em AAA (7:1) sobre TODAS as superfícies do próprio tema, e todo limite
+   de componente passa no critério 1.4.11 (3:1) — medido por
+   `ferramentas/conferir-contraste.py`, que reprova a construção se algum par
+   cair.
+
+   Nenhum deles mexe no tema Papel nem no Noite, que seguem exatamente como
+   estavam.
+   ========================================================================== */
+
+/* tema: sepia — Sépia (claro)
+   A convenção dos leitores de tinta eletrônica: papel âmbar, tinta marrom.
+   Reduz a componente azul da luz emitida, que é a queixa mais comum de quem
+   lê muitas horas seguidas. É o tema de leitura longa. */
+:root.tema-sepia {
+  --c-bg: 243 234 215;
+  --c-surface: 250 242 226;
+  --c-surface-low: 247 238 220;
+  --c-surface-high: 236 225 202;
+  --c-surface-highest: 226 212 184;
+  --c-outline: 59 42 24;
+  --c-outline-strong: 59 42 24;
+  --c-ink: 43 30 17;
+  --c-ink-muted: 77 56 33;
+  --c-ink-subtle: 79 56 32;
+  --c-primary: 20 56 120;
+  --c-on-primary: 253 247 235;
+  --c-primary-container: 214 225 245;
+  --c-on-primary-container: 16 42 92;
+  --c-accent: 22 76 48;
+  --c-accent-container: 211 233 216;
+  --c-on-accent: 253 247 235;
+  --c-warn: 106 56 6;
+  --c-warn-container: 247 227 192;
+  --c-danger: 128 32 16;
+  --c-danger-container: 247 218 209;
+  --c-admin: 92 40 124;
+  --c-admin-container: 231 216 241;
+  --sombra-tinta: rgb(59 42 24);
+  --grao-opacidade: 0.04;
+  color-scheme: light;
+}
+
+/* tema: tinta — Tinta (claro, sóbrio)
+   O oposto do Papel: neutro frio, sem o tom quente. Para quem acha o bege
+   sujo e quer a legibilidade mais seca possível — e para projetor ruim, onde
+   o fundo quente lava. */
+:root.tema-tinta {
+  --c-bg: 246 247 249;
+  --c-surface: 255 255 255;
+  --c-surface-low: 251 252 253;
+  --c-surface-high: 239 241 245;
+  --c-surface-highest: 226 230 236;
+  --c-outline: 17 19 24;
+  --c-outline-strong: 17 19 24;
+  --c-ink: 17 19 24;
+  --c-ink-muted: 54 59 69;
+  --c-ink-subtle: 61 66 77;
+  --c-primary: 21 52 140;
+  --c-on-primary: 255 255 255;
+  --c-primary-container: 218 227 250;
+  --c-on-primary-container: 14 36 99;
+  --c-accent: 13 74 50;
+  --c-accent-container: 211 236 224;
+  --c-on-accent: 255 255 255;
+  --c-warn: 92 57 0;
+  --c-warn-container: 250 233 196;
+  --c-danger: 126 26 11;
+  --c-danger-container: 250 221 214;
+  --c-admin: 86 35 128;
+  --c-admin-container: 231 218 246;
+  --sombra-tinta: rgb(17 19 24);
+  --grao-opacidade: 0.015;
+  color-scheme: light;
+}
+
+/* tema: grafite — Grafite (escuro)
+   Escuro sem o roxo do Noite e sem preto puro. Fundo cinza-azulado e tinta
+   levemente quebrada: a combinação de branco puro sobre preto puro produz
+   halo em volta das letras para muita gente, e é por isso que nenhum tema
+   escuro daqui usa 255 sobre 0. */
+:root.tema-grafite {
+  --c-bg: 26 28 32;
+  --c-surface: 34 37 43;
+  --c-surface-low: 29 32 37;
+  --c-surface-high: 43 47 54;
+  --c-surface-highest: 56 61 70;
+  --c-outline: 142 149 162;
+  --c-outline-strong: 186 193 206;
+  --c-ink: 236 239 244;
+  --c-ink-muted: 207 212 221;
+  --c-ink-subtle: 207 213 224;
+  --c-primary: 160 194 255;
+  --c-on-primary: 8 30 82;
+  --c-primary-container: 38 58 110;
+  --c-on-primary-container: 219 229 255;
+  --c-accent: 116 222 170;
+  --c-accent-container: 17 64 42;
+  --c-on-accent: 4 45 26;
+  --c-warn: 242 199 110;
+  --c-warn-container: 66 49 12;
+  --c-danger: 255 175 160;
+  --c-danger-container: 84 31 20;
+  --c-admin: 212 178 252;
+  --c-admin-container: 59 34 86;
+  --sombra-tinta: rgb(0 0 0);
+  --grao-opacidade: 0.03;
+  color-scheme: dark;
+}
+
+/* tema: indigo — Índigo (escuro, destaque âmbar)
+   O único que troca a cor de ação: âmbar no lugar do azul. Serve de prova de
+   que o sistema de tokens aguenta mudar a cor de destaque sem que nenhum
+   componente precise saber — e é a opção mais expressiva da lista, para quem
+   quer algo além de cinza. */
+:root.tema-indigo {
+  --c-bg: 18 20 38;
+  --c-surface: 26 29 50;
+  --c-surface-low: 21 24 43;
+  --c-surface-high: 35 39 64;
+  --c-surface-highest: 48 53 82;
+  --c-outline: 141 148 188;
+  --c-outline-strong: 184 191 224;
+  --c-ink: 238 236 248;
+  --c-ink-muted: 209 208 228;
+  --c-ink-subtle: 203 202 225;
+  --c-primary: 249 199 118;
+  --c-on-primary: 58 36 0;
+  --c-primary-container: 92 62 10;
+  --c-on-primary-container: 253 229 186;
+  --c-accent: 125 226 198;
+  --c-accent-container: 18 68 58;
+  --c-on-accent: 3 45 37;
+  --c-warn: 246 205 120;
+  --c-warn-container: 70 52 14;
+  --c-danger: 255 173 160;
+  --c-danger-container: 88 30 22;
+  --c-admin: 206 180 255;
+  --c-admin-container: 58 38 94;
+  --sombra-tinta: rgb(0 0 0);
+  --grao-opacidade: 0.035;
+  color-scheme: dark;
+}
+
+/* tema: hc — Alto contraste (amarelo sobre preto). Vence os demais temas: é
+   recurso de acessibilidade, não gosto, e por isso tem botão próprio em vez de
+   virar item de lista. */
 :root.hc {
   --c-bg: 0 0 0;
   --c-surface: 0 0 0;

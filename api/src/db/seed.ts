@@ -146,7 +146,7 @@ async function seedDemoRecords(
     for (const u of DEMO_USERS) {
       const [row] = await tx
         .insert(users)
-        .values({ name: u.name, email: u.email, role: u.role, headline: u.headline, passwordHash })
+        .values({ name: u.name, email: u.email, role: u.role, headline: u.headline, bio: u.bio, passwordHash })
         .returning({ id: users.id });
       userIds[u.key] = row.id;
     }

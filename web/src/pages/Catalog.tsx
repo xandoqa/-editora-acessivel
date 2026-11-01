@@ -7,6 +7,8 @@ import { errorMessage } from '../lib/api';
 import { formatNumber } from '../lib/format';
 import { speak, speechSupported, stopSpeaking } from '../lib/speech';
 import WorkCard from '../components/works/WorkCard';
+import Vitrine from '../components/home/Vitrine';
+import RoletaDeAutores from '../components/home/RoletaDeAutores';
 import { EmptyState, ErrorState, LoadingState, Pagination } from '../components/ui';
 import { OndaDivisoria, OndasDeSom, Rabisco } from '../components/ui/Ornamentos';
 import { useT } from '../i18n/I18nContext';
@@ -148,6 +150,15 @@ export default function Catalog() {
           </button>
         </div>
       </section>
+
+      {/*
+        Vitrine e roleta entram ENTRE a abertura e os filtros, e não acima de
+        tudo: quem chega procurando uma obra específica usa a busca da barra,
+        e quem chega para folhear encontra a estante antes da lista. Pôr o
+        carrossel acima do título empurraria o H1 para fora da primeira tela.
+      */}
+      <Vitrine />
+      <RoletaDeAutores />
 
       {/* Filtros */}
       <section aria-labelledby="filters-title">

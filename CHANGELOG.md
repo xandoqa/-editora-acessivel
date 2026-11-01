@@ -2,6 +2,106 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.7.0] — 2026-11-01
+
+Três seções novas e duas rotas públicas, todas ligadas à API. Nenhuma
+funcionalidade removida, nenhuma rota alterada, nenhum componente substituído.
+
+### Coleções por autor
+
+`/autores` lista quem tem obra publicada; `/autores/:id` mostra a coleção
+completa, com retrato, apresentação, gêneros, formatos, total de páginas e a
+média ponderada das avaliações.
+
+**Autor não virou tabela nova.** No Livrin, autor é quem publicou —
+`works.author_id` aponta para `users` desde a primeira versão. Uma tabela
+`authors` ao lado seria uma segunda fonte para o mesmo fato, e no dia em que
+as duas discordassem a página de autores mostraria uma coleção que o catálogo
+não confirma. A lista é derivada: **quem publica aparece no mesmo instante**,
+quem tem só rascunho não aparece, e conta sem obra aprovada recebe 404 — um
+200 com coleção vazia contaria a um visitante quem tem cadastro aqui.
+
+A migration 0009 acrescenta `users.bio`, aditiva e anulável. É coluna própria
+em vez de esticar `headline` porque as duas têm funções diferentes: headline é
+etiqueta de uma linha ao lado do nome, bio é parágrafo de apresentação.
+
+A página do autor usa o **mesmo `WorkCard` do catálogo**, de propósito: selo de
+curadoria, preço, recursos de acessibilidade e estado de aquisição aparecem
+exatamente como aparecem lá. Um segundo card seria uma segunda chance de
+mostrar "gratuita" numa obra paga.
+
+### Vitrine de lançamentos
+
+As obras aprovadas mais recentes, vindas da mesma rota do catálogo. O volume
+dos livros — lombada, corte das páginas, giro de 13° — é CSS, não imagem:
+nenhum mockup, nenhuma textura, nada que precise de arquivo.
+
+**Só a capa gira.** Na primeira versão o cartão inteiro girava, texto junto, e
+o resultado era uma frase em perspectiva: legível, mas pior de ler.
+
+**Não gira sozinha.** Carrossel que avança sem ser pedido reprova no critério
+2.2.2 da WCAG e, antes de reprovar, atrapalha: quem lê devagar perde o cartão
+no meio da frase, e quem amplia a tela perde a posição. O movimento só acontece
+quando alguém pede — seta, rolagem ou tecla. As setas se **desabilitam** nas
+pontas em vez de sumirem: botão que desaparece tira a referência de quem está
+com a tela ampliada.
+
+### Roleta de autores
+
+Uma roda com quem publica no acervo, e ao lado a apresentação de quem está
+selecionado. É um `radiogroup` de verdade, com foco itinerante: setas trocam a
+seleção, Home e End vão às pontas, e só o retrato selecionado entra na ordem de
+tabulação — quem navega por teclado percorre a roda inteira sem seis paradas
+antes do conteúdo seguinte. A troca é anunciada por `aria-live`.
+
+**Sobre a referência.** A imagem que inspirou esta seção é uma fileira de
+fotografias de quadrinistas reais sob "compre por mestre". Aqui não há foto de
+pessoa real e não há declaração atribuída a ninguém: os autores são os do
+acervo de demonstração, fictícios desde a 1.0, e o que aparece de cada um é a
+linha de apresentação do próprio cadastro — não um depoimento inventado sobre
+a plataforma. O aviso de ficção fica **na própria seção**, visível, porque é
+ali que alguém poderia ler "gente importante apoia isto".
+
+### Retratos desenhados, não fotografados
+
+Cada autoria tem um retrato em SVG montado a partir de um hash do nome: busto,
+cabeça redonda ou quadrada, gola e um ornamento entre seis. São mais de quatro
+mil combinações, e o desenho é **determinístico** — o mesmo nome dá sempre o
+mesmo retrato, em qualquer navegador. Todas as cores saem dos tokens, então o
+retrato acompanha os sete temas, alto contraste incluído.
+
+O desenho mora em `retrato.ts`, separado do componente, porque
+`ferramentas/previa-retratos.mjs` importa **esse mesmo módulo** para gerar
+`docs/design/previa-retratos.png`. Não é zelo teórico: a primeira versão do
+busto usava um arco de raio igual à meia-largura dos ombros — um semicírculo
+que subia até a altura da cabeça e a engolia. SVG válido, tipos válidos,
+contraste intacto, e o desenho errado. Foi olhando a prévia que apareceu.
+
+### A linha "Livraria acessível" saiu
+
+Repetia em versalete miúdo o que a página inteira já diz — o título do
+catálogo, a lista de recursos assistivos, a página Sobre — e empurrava o
+logotipo para baixo numa barra de 72px. O que ela carregava de útil era o
+significado para quem não vê o desenho, e isso continua no `aria-label` do
+link, que é onde o leitor de tela procura.
+
+### Movimento reduzido
+
+`prefers-reduced-motion` e o Leitor Otimizado desligam a **rotação inteira**,
+não só a transição. Desligar a transição e manter o giro entregaria capas
+tortas e paradas — o pior dos dois mundos para quem tem vertigem ou usa
+ampliação: a imagem fica deformada e nada explica por quê.
+
+### A regra 3 da verificação ficou menos agressiva
+
+`conferir-posicionamento.py` reprovava qualquer `absolute right-0`, e pegou o
+corte de páginas da capa, que não é painel. Agora exige `absolute right-0`
+**junto de um `z-`**: o que distingue um painel flutuante é empilhar-se acima
+do conteúdo. Conferida nos dois sentidos — painel novo sem proteção reprova,
+decoração dentro de card passa.
+
+Decisões e alternativas descartadas: [ADR 021](docs/decisions/021-autores-e-retratos.md).
+
 ## [3.6.4] — 2026-11-01
 
 ### Correção: o painel dos seletores saía da tela no celular

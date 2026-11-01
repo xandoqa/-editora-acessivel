@@ -8,7 +8,7 @@ Plataforma editorial aberta para quadrinhos e livros independentes, com acessibi
 
 O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. **A autoria decide como cada obra é disponibilizada** — leitura livre, obra paga ou leitura livre com publicidade — e leitura livre continua sendo o padrão. O apoio financeiro ao projeto é voluntário e nunca condiciona o acesso a uma obra: só a obra que a própria autoria marcou como paga exige aquisição.
 
-**Versão 3.6.4** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede; a 3.5.5 trouxe os seis temas e o sistema de tradução; a 3.5.6 levou os seletores de tema e idioma para junto do perfil; a 3.5.7 levou os recursos de acessibilidade para o menu lateral; a 3.5.8 traduziu o catálogo inteiro e acertou a tipografia e a busca no celular; a 3.6.0 trouxe o rodapé completo e a página **Sobre o Livrin**; a 3.6.1 corrigiu três defeitos encontrados em auditoria; a 3.6.2 trocou as linhas de borda do cabeçalho e da barra lateral por sombra em degradê; a 3.6.3 corrigiu o layout que essa troca quebrou — o cabeçalho voltou a grudar no topo e a barra lateral à altura da tela; e a 3.6.4 tirou de fora da tela o painel dos seletores de tema e idioma no celular.
+**Versão 3.7.0** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede; a 3.5.5 trouxe os seis temas e o sistema de tradução; a 3.5.6 levou os seletores de tema e idioma para junto do perfil; a 3.5.7 levou os recursos de acessibilidade para o menu lateral; a 3.5.8 traduziu o catálogo inteiro e acertou a tipografia e a busca no celular; a 3.6.0 trouxe o rodapé completo e a página **Sobre o Livrin**; a 3.6.1 corrigiu três defeitos encontrados em auditoria; a 3.6.2 trocou as linhas de borda do cabeçalho e da barra lateral por sombra em degradê; a 3.6.3 corrigiu o layout que essa troca quebrou — o cabeçalho voltou a grudar no topo e a barra lateral à altura da tela; a 3.6.4 tirou de fora da tela o painel dos seletores de tema e idioma no celular; e a 3.7.0 trouxe as coleções por autor, a vitrine de lançamentos e a roleta de autores.
 
 ---
 
@@ -734,6 +734,51 @@ python3 ferramentas/conferir-posicionamento.py
 Verificação criada na 3.6.3, depois de a 3.6.2 quebrar o layout sem que nada reprovasse. O CSS era válido, os tipos passavam, o contraste estava intacto — e o cabeçalho tinha caído no meio da página, porque uma classe nossa declarou `position: relative` e empatou em especificidade (0-1-0) com as utilitárias `sticky` e `fixed` do Tailwind, vencendo pela ordem no arquivo.
 
 O script guarda três regras: **nenhuma regra de classe única do `global.css` declara `position`, `display` ou `z-index`** — são exatamente as propriedades que o Tailwind entrega em classe única, onde quem chega depois ganha —, **todo elemento que usa `borda-degrade-*` carrega a própria classe de posicionamento**, e **nenhum painel novo é ancorado na borda direita do botão** — regra que entrou na 3.6.4, quando o painel dos seletores de tema e idioma crescia para a esquerda a partir de um botão no meio da barra e saía da tela no celular. As duas exceções legítimas (o menu do avatar, último controle da barra, e o painel de leitura em voz, que não existe abaixo de 640px) estão registradas com o motivo dentro do script. Roda na integração contínua, não precisa de navegador e leva menos de um segundo.
+
+---
+
+## Autores, vitrine e roleta
+
+Três entradas para o acervo que não existiam até a 3.7.0 — e as três leem a mesma fonte do catálogo, então publicar uma obra muda as três de uma vez.
+
+### Coleções por autor
+
+| Rota | O que mostra |
+| --- | --- |
+| `/autores` | Quem tem obra publicada, com retrato, apresentação, gêneros, formatos e total de páginas |
+| `/autores/:id` | A coleção completa daquela autoria |
+| `GET /api/authors` | A mesma lista, pública |
+| `GET /api/authors/:id` | Autoria + obras aprovadas. **404** para conta sem obra publicada |
+
+**Autor não é uma tabela.** É quem publicou: `works.author_id` aponta para `users` desde a primeira versão. A lista é derivada das obras aprovadas, então quem publica aparece no mesmo instante e quem tem só rascunho não aparece. Uma tabela `authors` ao lado seria uma segunda fonte para o mesmo fato — e, no dia em que discordassem, a página de autores mostraria uma coleção que o catálogo não confirma.
+
+A página do autor usa o **mesmo `WorkCard` do catálogo**: selo, preço e recursos de acessibilidade aparecem ali exatamente como aparecem lá.
+
+### Vitrine de lançamentos
+
+As obras aprovadas mais recentes, com volume feito em CSS — lombada, corte das páginas, giro de 13°. Nenhuma imagem de mockup, nenhuma textura baixada.
+
+**Não gira sozinha**, de propósito: carrossel com avanço automático reprova no critério 2.2.2 da WCAG e atrapalha justamente quem este projeto existe para atender. O movimento só acontece quando alguém pede, e as setas se desabilitam nas pontas em vez de sumirem.
+
+**Só a capa gira.** Título e autoria ficam fora da transformação — frase em perspectiva é pior de ler.
+
+### Roleta de autores
+
+Uma roda com quem publica no acervo. É um `radiogroup` de verdade: setas trocam a seleção, Home e End vão às pontas, só o selecionado entra na ordem de tabulação, e a troca é anunciada por `aria-live`.
+
+**Os autores são fictícios e a interface diz isso.** A referência desta seção era uma fileira de fotografias de quadrinistas reais sob "compre por mestre". Aqui não há foto de pessoa real nem frase atribuída a ninguém: os autores são os do acervo de demonstração, e o que aparece de cada um é a linha de apresentação do próprio cadastro. O aviso de ficção fica visível na seção, não num rodapé.
+
+### Retratos desenhados
+
+Cada autoria tem um retrato em SVG montado a partir de um hash do nome — busto, cabeça redonda ou quadrada, gola e um ornamento entre seis, mais de quatro mil combinações. É determinístico (o mesmo nome dá sempre o mesmo retrato) e usa só tokens, então acompanha os sete temas.
+
+```bash
+node --experimental-strip-types ferramentas/previa-retratos.mjs
+```
+
+Gera [docs/design/previa-retratos.png](docs/design/previa-retratos.png) importando **o mesmo módulo que o site desenha**. Existe porque a primeira versão do busto tinha um erro que nenhum teste pegaria: o arco dos ombros era um semicírculo, subia até a altura da cabeça e a engolia. SVG válido, tipos válidos, contraste intacto — e o desenho errado.
+
+Decisões e alternativas descartadas: [ADR 021](docs/decisions/021-autores-e-retratos.md).
 
 ---
 

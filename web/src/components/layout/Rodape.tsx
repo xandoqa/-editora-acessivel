@@ -43,6 +43,7 @@ interface ItemDeMenu {
 const LER: ItemDeMenu[] = [
   { rotulo: 'nav.inicio', para: '/' },
   { rotulo: 'nav.leitorAcessivel', para: '/leitor' },
+  { rotulo: 'nav.autores', para: '/autores' },
   { rotulo: 'nav.planos', para: '/planos' },
   { rotulo: 'nav.biblioteca', para: '/biblioteca' },
   { rotulo: 'nav.historico', para: '/historico' },

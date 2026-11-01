@@ -25,15 +25,23 @@ export interface DemoUser {
   email: string;
   role: UserRole;
   headline?: string;
+  /**
+   * Parágrafo de apresentação da página de coleção.
+   *
+   * São autores FICTÍCIOS, escritos para este projeto, e as biografias falam
+   * só das obras que existem no acervo de demonstração. Nenhuma frase aqui é
+   * atribuída a pessoa real, e nenhuma é depoimento inventado de alguém.
+   */
+  bio?: string;
 }
 
 export const DEMO_USERS: DemoUser[] = [
-  { key: 'marina', name: 'Marina Bastos', email: 'marina@livrin.com', role: 'ESCRITOR', headline: 'Autora e quadrinista independente' },
-  { key: 'lorena', name: 'Lorena Campolina', email: 'lorena@livrin.com', role: 'ESCRITOR', headline: 'Roteiro e Ilustrações Originais' },
-  { key: 'eloa', name: 'Eloá Santana', email: 'eloa@livrin.com', role: 'ESCRITOR', headline: 'Escritora' },
-  { key: 'caua', name: 'Cauã Pataxó', email: 'caua@livrin.com', role: 'ESCRITOR', headline: 'Autor de leitura fácil' },
-  { key: 'mduarte', name: 'Marina Duarte', email: 'marina.duarte@livrin.com', role: 'ESCRITOR', headline: 'Graphic novelist' },
-  { key: 'tiago', name: 'Tiago Medeiros', email: 'tiago@livrin.com', role: 'ESCRITOR', headline: 'Poeta visual' },
+  { key: 'marina', name: 'Marina Bastos', email: 'marina@livrin.com', role: 'ESCRITOR', headline: 'Autora e quadrinista independente' , bio: 'Desenha e escreve as próprias histórias desde os fanzines que fotocopiava na faculdade. Trabalha em quadrinho e webcomic, quase sempre em ficção científica, e tem uma teimosia declarada: nenhuma página sai do estúdio sem audiodescrição escrita por ela mesma. Diz que descrever a própria arte mudou o jeito como ela desenha.'},
+  { key: 'lorena', name: 'Lorena Campolina', email: 'lorena@livrin.com', role: 'ESCRITOR', headline: 'Roteiro e Ilustrações Originais' , bio: 'Faz roteiro e arte no mesmo caderno, sem separar as duas coisas. Gosta de naves velhas, de silêncio entre balões e de personagens que erram o caminho. Publica em quadrinho e mantém o hábito de testar cada página com quem lê por leitor de tela antes de considerá-la pronta.'},
+  { key: 'eloa', name: 'Eloá Santana', email: 'eloa@livrin.com', role: 'ESCRITOR', headline: 'Escritora' , bio: 'Escreve ficção histórica e organiza seleções de poesia. Pesquisa em arquivo, anota em caderno de capa dura e desconfia de qualquer cena que não consiga contar em voz alta. Trabalha também com obras em domínio público, cuidando de edição e notas.'},
+  { key: 'caua', name: 'Cauã Pataxó', email: 'caua@livrin.com', role: 'ESCRITOR', headline: 'Autor de leitura fácil' , bio: 'Escreve em leitura fácil por escolha, não por limitação: frases curtas, uma ideia por parágrafo e nenhuma metáfora que precise de explicação. Seus livros nascem de oficinas com leitores que o texto comum deixava de fora.'},
+  { key: 'mduarte', name: 'Marina Duarte', email: 'marina.duarte@livrin.com', role: 'ESCRITOR', headline: 'Graphic novelist' , bio: 'Graphic novelist. Trabalha o drama em tempo lento — chuva, cozinha, conversa pela metade — e publica em português e em espanhol. Acredita que legenda e audiodescrição são parte do desenho, não acabamento posterior.'},
+  { key: 'tiago', name: 'Tiago Medeiros', email: 'tiago@livrin.com', role: 'ESCRITOR', headline: 'Poeta visual' , bio: 'Poeta visual. Faz zines de bolso, poesia tátil e peças que só funcionam quando lidas em voz alta. Boa parte do que publica nasceu em oficina com pessoas cegas, e é por isso que o som vem antes da página.'},
   { key: 'lucas', name: 'Lucas Camargo', email: 'lucas@livrin.com', role: 'LEITOR', headline: 'Baixa Visão Severa · Leitor de Tela' },
   { key: 'tatiane', name: 'Tatiane Rocha', email: 'tatiane@livrin.com', role: 'LEITOR', headline: 'Deficiência Motora · Switch Access' },
   { key: 'gabriel', name: 'Gabriel Miranda', email: 'gabriel@livrin.com', role: 'LEITOR', headline: 'Dislexia & TDAH' },

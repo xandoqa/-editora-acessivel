@@ -233,4 +233,54 @@ export const fr: Dicionario = {
   'idioma.fr': 'Français',
   'idioma.aviso':
     'Cela change l’interface. Les œuvres, résumés et avis restent dans la langue dans laquelle ils ont été écrits.',
+  // --- Vitrine des nouveautés (3.7.0) ------------------------------------
+  'vitrine.olho': 'Vient de paraître',
+  'vitrine.titulo': 'Étagère en mouvement',
+  'vitrine.chamada':
+    'Les parutions les plus récentes du fonds, avec couverture, format et les fonctions d’accessibilité de chacune.',
+  'vitrine.anterior': 'Voir les titres précédents',
+  'vitrine.proximo': 'Voir les titres suivants',
+  'vitrine.verTudo': 'Parcourir tout le catalogue',
+  'vitrine.vazio': 'Aucune œuvre publiée pour l’instant. Dès que la première sera approuvée, elle apparaîtra ici.',
+  'vitrine.posicao': 'Titre {n} sur {total}',
+  'vitrine.paginas': '{n} pages',
+  'vitrine.semCapa': 'Œuvre sans couverture envoyée',
+  'vitrine.instrucao': 'Utilisez les flèches du clavier pour parcourir les titres.',
+
+  // --- Roue des auteurs (3.7.0) ------------------------------------------
+  'roleta.olho': 'Qui écrit ici',
+  'roleta.titulo': 'Les auteurs qui portent Livrin',
+  'roleta.chamada': 'Faites tourner la roue pour découvrir qui publie ici et ouvrir chaque collection.',
+  'roleta.ficcao':
+    'Auteurs fictifs, créés pour cette démonstration. Les portraits sont des dessins géométriques générés à partir du nom — aucune photo de personne réelle, et aucune phrase ici n’est un témoignage attribué à quelqu’un.',
+  'roleta.girar': 'Faire tourner la roue',
+  'roleta.anterior': 'Auteur précédent',
+  'roleta.proximo': 'Auteur suivant',
+  'roleta.verColecao': 'Voir la collection',
+  'roleta.selecionar': 'Sélectionner {nome}',
+  'roleta.grupo': 'Auteurs du fonds',
+  'roleta.obras': '{n} œuvres',
+  'roleta.umaObra': '1 œuvre',
+
+  // --- Auteurs et collections (3.7.0) ------------------------------------
+  'autores.titulo': 'Collections par auteur',
+  'autores.subtitulo':
+    'Chaque auteur du fonds avec son étagère complète. La liste découle des œuvres approuvées : qui publie apparaît ici aussitôt.',
+  'autores.vazio': 'Aucun auteur n’a encore d’œuvre publiée.',
+  'autores.erro': 'Impossible de charger les auteurs.',
+  'autores.obras': 'œuvres',
+  'autores.umaObra': 'œuvre',
+  'autores.paginas': 'pages',
+  'autores.generos': 'Genres',
+  'autores.verColecao': 'Voir la collection complète',
+  'autores.colecaoDe': 'Collection de {nome}',
+  'autores.sobre': 'À propos de l’auteur',
+  'autores.naLista': 'Tous les auteurs',
+  'autores.destaque': 'La plus récente',
+  'autores.avaliacao': '{nota} de moyenne sur {n} avis',
+  'autores.semAvaliacao': 'Pas encore d’avis',
+  'autores.naoEncontrado': 'Auteur introuvable, ou sans œuvre publiée.',
+  'autores.estante': 'L’étagère complète',
+  'autores.ficcional': 'Auteur fictif, créé pour la démonstration du projet.',
+  'nav.autores': 'Auteurs',
 };

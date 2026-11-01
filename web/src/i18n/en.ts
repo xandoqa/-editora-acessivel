@@ -232,4 +232,54 @@ export const en: Dicionario = {
   'idioma.fr': 'Français',
   'idioma.aviso':
     'This changes the interface. Works, synopses and reviews stay in the language they were written in.',
+  // --- New releases shelf (3.7.0) ----------------------------------------
+  'vitrine.olho': 'Just arrived',
+  'vitrine.titulo': 'Shelf in motion',
+  'vitrine.chamada':
+    'The most recent additions to the library, with cover, format and the accessibility features each one carries.',
+  'vitrine.anterior': 'See previous titles',
+  'vitrine.proximo': 'See next titles',
+  'vitrine.verTudo': 'Browse the whole catalogue',
+  'vitrine.vazio': 'No works published yet. As soon as the first one is approved, it shows up here.',
+  'vitrine.posicao': 'Title {n} of {total}',
+  'vitrine.paginas': '{n} pages',
+  'vitrine.semCapa': 'Work with no cover uploaded',
+  'vitrine.instrucao': 'Use the arrow keys to move through the titles.',
+
+  // --- Authors wheel (3.7.0) ---------------------------------------------
+  'roleta.olho': 'Who writes here',
+  'roleta.titulo': 'The authors behind Livrin',
+  'roleta.chamada': 'Spin the wheel to meet who publishes here and open each collection.',
+  'roleta.ficcao':
+    'Fictional authors, created for this demo. The portraits are geometric drawings generated from each name — no photograph of a real person, and no sentence here is a testimonial attributed to anyone.',
+  'roleta.girar': 'Spin the wheel',
+  'roleta.anterior': 'Previous author',
+  'roleta.proximo': 'Next author',
+  'roleta.verColecao': 'See the collection',
+  'roleta.selecionar': 'Select {nome}',
+  'roleta.grupo': 'Authors in the library',
+  'roleta.obras': '{n} works',
+  'roleta.umaObra': '1 work',
+
+  // --- Authors and collections (3.7.0) -----------------------------------
+  'autores.titulo': 'Collections by author',
+  'autores.subtitulo':
+    'Every author in the library with their full shelf. The list is derived from approved works: whoever publishes shows up here at once.',
+  'autores.vazio': 'No author has a published work yet.',
+  'autores.erro': 'The authors could not be loaded.',
+  'autores.obras': 'works',
+  'autores.umaObra': 'work',
+  'autores.paginas': 'pages',
+  'autores.generos': 'Genres',
+  'autores.verColecao': 'See the full collection',
+  'autores.colecaoDe': '{nome}’s collection',
+  'autores.sobre': 'About the author',
+  'autores.naLista': 'All authors',
+  'autores.destaque': 'Most recent',
+  'autores.avaliacao': '{nota} average across {n} reviews',
+  'autores.semAvaliacao': 'No reviews yet',
+  'autores.naoEncontrado': 'Author not found, or no published work yet.',
+  'autores.estante': 'The full shelf',
+  'autores.ficcional': 'Fictional author, created for the project demo.',
+  'nav.autores': 'Authors',
 };

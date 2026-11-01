@@ -667,6 +667,127 @@ p {
   :root.hc .onda {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='10' viewBox='0 0 28 10'%3E%3Cpath d='M0 7 Q 7 0 14 7 T 28 7' fill='none' stroke='%23B8B2C8' stroke-width='2'/%3E%3C/svg%3E");
   }
+
+  /* --- Vitrine de lançamentos (3.7.0) ----------------------------------
+   *
+   * O livro na vitrine é um OBJETO, não um retângulo: tem lombada, tem
+   * espessura e gira um pouco quando recebe o foco. O 3D aqui não é enfeite —
+   * é o que faz uma fileira de capas parecer uma estante em vez de uma
+   * planilha de imagens.
+   *
+   * Três cuidados que o tornam aceitável num projeto de acessibilidade:
+   *
+   *  1. `:focus-visible` recebe o MESMO destaque de `:hover`. Quem chega pelo
+   *     teclado vê o livro girar igual a quem chega pelo mouse.
+   *  2. `prefers-reduced-motion` desliga a rotação inteira, não só a transição.
+   *     Para quem pediu menos movimento, a vitrine é uma fileira de capas
+   *     paradas — e continua completa.
+   *  3. Nada aqui declara `position`, `display` ou `z-index`: são as
+   *     propriedades que o Tailwind entrega em utilitária de classe única, e
+   *     disputá-las foi o bug da 3.6.2. O layout fica na marcação.
+   * -------------------------------------------------------------------- */
+
+  .vitrine-palco {
+    perspective: 1300px;
+    perspective-origin: 50% 45%;
+  }
+
+  /*
+   * Só a CAPA gira. O título e a autoria ficam fora da transformação, de pé.
+   *
+   * Na primeira versão o cartão inteiro girava, texto junto, e o resultado era
+   * uma frase em perspectiva: legível, mas pior de ler — exatamente o tipo de
+   * concessão que este projeto não faz por enfeite. O volume não precisa do
+   * texto para funcionar.
+   */
+  .vitrine-livro {
+    transform-style: preserve-3d;
+    transform: rotateY(-13deg);
+    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.3, 1), filter 0.5s ease;
+    filter: drop-shadow(9px 12px 16px rgb(var(--c-outline) / 0.26));
+  }
+
+  /*
+   * O destaque é disparado pelo LINK inteiro, e não pela capa.
+   *
+   * `.vitrine-livro:hover` sozinho não cobria quem passa o mouse sobre o
+   * título, que faz parte do mesmo alvo clicável — e `:focus-visible` nunca
+   * chegaria à capa, porque quem recebe o foco é o link, que está acima dela.
+   */
+  .vitrine-link:hover .vitrine-livro,
+  .vitrine-link:focus-visible .vitrine-livro {
+    transform: rotateY(-3deg) translateZ(24px) translateY(-6px);
+    filter: drop-shadow(15px 20px 24px rgb(var(--c-outline) / 0.34));
+  }
+
+  /*
+   * A lombada é pintada SOBRE a borda esquerda da capa, não atrás dela.
+   *
+   * Atrás era onde ela estava, e era invisível: a capa é um elemento
+   * posicionado e cobria a faixa inteira. Como sombra impressa na lateral do
+   * volume, ela funciona em qualquer capa e não depende de ordenação 3D.
+   */
+  .vitrine-lombada {
+    background: linear-gradient(
+      to right,
+      rgb(var(--c-outline) / 0.62) 0%,
+      rgb(var(--c-outline) / 0.3) 55%,
+      rgb(var(--c-outline) / 0) 100%
+    );
+    box-shadow: inset 1px 0 0 rgb(var(--c-surface) / 0.35);
+  }
+
+  /* O corte das páginas, do lado oposto da lombada: é ele que dá espessura. */
+  .vitrine-corte {
+    background: repeating-linear-gradient(
+      to right,
+      rgb(var(--c-surface)) 0 1px,
+      rgb(var(--c-surface-highest)) 1px 2px
+    );
+    box-shadow: inset -1px 0 0 rgb(var(--c-outline) / 0.4);
+  }
+
+  /* --- Roleta de autores (3.7.0) --------------------------------------- */
+
+  .roleta-anel {
+    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.3, 1);
+  }
+  .roleta-retrato {
+    transition: transform 0.45s cubic-bezier(0.25, 0.8, 0.3, 1), opacity 0.45s ease;
+  }
+
+  /*
+   * Movimento reduzido: a preferência do sistema vence tudo acima.
+   *
+   * Importante que seja a ROTAÇÃO que sai, e não só a transição. Desligar a
+   * transição e manter `rotateY(-16deg)` entregaria capas tortas e paradas,
+   * que é o pior dos dois mundos para quem tem vertigem ou usa ampliação de
+   * tela — a imagem fica deformada e nada explica por quê.
+   */
+  @media (prefers-reduced-motion: reduce) {
+    .vitrine-livro,
+    .vitrine-link:hover .vitrine-livro,
+    .vitrine-link:focus-visible .vitrine-livro {
+      transform: none;
+      transition: none;
+    }
+    .roleta-anel,
+    .roleta-retrato {
+      transition: none;
+    }
+  }
+
+  /*
+   * Leitor Otimizado: mesma decisão, por outro motivo. O modo existe para
+   * reforçar contornos e tirar distração; uma capa girada é distração.
+   */
+  :root.reader-optimized .vitrine-livro,
+  :root.reader-optimized .vitrine-link:hover .vitrine-livro,
+  :root.reader-optimized .vitrine-link:focus-visible .vitrine-livro {
+    transform: none;
+    filter: none;
+  }
+
 }
 
 /* Utilitário para conteúdo somente para leitores de tela. */

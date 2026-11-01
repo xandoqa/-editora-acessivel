@@ -4,6 +4,8 @@ import { useAuth } from '../auth/AuthContext';
 import type {
   AudioDescription,
   AuthorDashboard,
+  AutorDetalhe,
+  AutorResumo,
   CatalogResponse,
   Feedback,
   Genre,
@@ -37,6 +39,30 @@ export function useGenres() {
   return useQuery({
     queryKey: ['genres'],
     queryFn: async () => (await api.get<Genre[]>('/genres')).data,
+    staleTime: 5 * 60_000,
+  });
+}
+
+/**
+ * Autorias com obra publicada.
+ *
+ * `staleTime` longo de propósito: a lista só muda quando uma obra é aprovada,
+ * o que não acontece enquanto alguém navega. Reconsultar a cada foco de janela
+ * seria pedir ao servidor a mesma resposta várias vezes por minuto.
+ */
+export function useAutores() {
+  return useQuery({
+    queryKey: ['autores'],
+    queryFn: async () => (await api.get<AutorResumo[]>('/authors')).data,
+    staleTime: 5 * 60_000,
+  });
+}
+
+export function useAutor(id: number | undefined) {
+  return useQuery({
+    queryKey: ['autor', id],
+    queryFn: async () => (await api.get<AutorDetalhe>(`/authors/${id}`)).data,
+    enabled: !!id,
     staleTime: 5 * 60_000,
   });
 }

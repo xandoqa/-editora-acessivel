@@ -24,3 +24,4 @@ Cada arquivo responde: o que foi escolhido, por quê, quais alternativas existia
 | [018](018-assinatura-concorrente.md) | Assinatura simultânea travada por transação, e não por índice único; revisa parte da 014 |
 | [019](019-internacionalizacao.md) | Internacionalização sem biblioteca, com as chaves tipadas a partir do português |
 | [020](020-temas.md) | Seis temas escolhidos por motivo e verificados por medição de contraste |
+| [021](021-autores-e-retratos.md) | Coleções por autor derivadas das obras; retratos desenhados em vez de fotos de pessoas reais |

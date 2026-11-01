@@ -2,6 +2,57 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.6.3] — 2026-11-01
+
+### Correção: a 3.6.2 quebrou o layout
+
+O cabeçalho saiu do topo e caiu no meio da página; a barra lateral virou uma
+caixa de 72px em vez de ocupar a altura da tela.
+
+**Causa.** Para o `::after` do degradê se ancorar, as classes
+`.borda-degrade-b` e `.borda-degrade-r` declararam `position: relative` no
+`global.css`. Essas classes e as utilitárias `sticky`/`fixed` do Tailwind têm a
+**mesma especificidade** (0-1-0), e empate de especificidade é decidido pela
+ordem no arquivo. As nossas regras ficam depois do `@tailwind utilities`
+(linha 3), então `relative` venceu: o cabeçalho deixou de ser `sticky` e a
+barra lateral deixou de ser `fixed`.
+
+**Correção.** As classes não declaram mais `position`. Quem precisa de bloco de
+contenção declara na marcação: o cabeçalho já é `sticky`, a lateral já é
+`fixed`, a gaveta já era `relative`, e a única caixa que faltava — a linha do
+logo na barra lateral — recebeu `relative`. O degradê continua igual; só o
+`position` saiu do CSS.
+
+### Por que nada reprovou
+
+Nem o `tsc`, nem o build, nem a medição de contraste olham para posicionamento:
+o CSS era válido, os tipos passavam, os 273 pares de contraste continuavam
+acima do mínimo — e a tela estava quebrada. A conferência que eu havia feito
+antes de subir a 3.6.2 simulava as caixas com `position: absolute`, que
+"sobrevive" à sobrescrita e parecia idêntica. Medi o que não era o problema.
+
+Agora existe `ferramentas/conferir-posicionamento.py`, que **roda na integração
+contínua** e guarda as duas metades do contrato:
+
+- nenhuma regra de **classe única** do `global.css` declara `position`,
+  `display` ou `z-index` — são as propriedades que o Tailwind entrega em classe
+  única, onde quem chega depois no arquivo ganha;
+- todo elemento que usa `borda-degrade-*` carrega a **própria** classe de
+  posicionamento.
+
+O script foi conferido nos dois sentidos antes de entrar: com o bug de volta no
+arquivo ele reprova (código 1) e aponta `global.css:378`; tirando o `relative`
+da marcação da barra lateral ele reprova e aponta `Sidebar.tsx:99`. Um teste que
+nunca foi visto falhando não prova nada. O comportamento também foi conferido em
+navegador headless: cabeçalho `sticky` grudado no topo depois de rolar 1200px,
+lateral `fixed` com 800px de altura, degradê de 14px nos dois eixos.
+
+### Nada mais mudou
+
+Nenhuma funcionalidade removida, nenhuma API alterada, nenhum token de cor
+tocado. A mudança são três linhas de CSS a menos, uma classe a mais na
+marcação, e a verificação que faltava.
+
 ## [3.6.2] — 2026-11-01
 
 ### Sombra em degradê no lugar das linhas de borda

@@ -8,7 +8,7 @@ Plataforma editorial aberta para quadrinhos e livros independentes, com acessibi
 
 O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. **A autoria decide como cada obra é disponibilizada** — leitura livre, obra paga ou leitura livre com publicidade — e leitura livre continua sendo o padrão. O apoio financeiro ao projeto é voluntário e nunca condiciona o acesso a uma obra: só a obra que a própria autoria marcou como paga exige aquisição.
 
-**Versão 3.6.2** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede; a 3.5.5 trouxe os seis temas e o sistema de tradução; a 3.5.6 levou os seletores de tema e idioma para junto do perfil; a 3.5.7 levou os recursos de acessibilidade para o menu lateral; a 3.5.8 traduziu o catálogo inteiro e acertou a tipografia e a busca no celular; a 3.6.0 trouxe o rodapé completo e a página **Sobre o Livrin**; a 3.6.1 corrigiu três defeitos encontrados em auditoria; e a 3.6.2 trocou as linhas de borda do cabeçalho e da barra lateral por sombra em degradê.
+**Versão 3.6.3** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede; a 3.5.5 trouxe os seis temas e o sistema de tradução; a 3.5.6 levou os seletores de tema e idioma para junto do perfil; a 3.5.7 levou os recursos de acessibilidade para o menu lateral; a 3.5.8 traduziu o catálogo inteiro e acertou a tipografia e a busca no celular; a 3.6.0 trouxe o rodapé completo e a página **Sobre o Livrin**; a 3.6.1 corrigiu três defeitos encontrados em auditoria; a 3.6.2 trocou as linhas de borda do cabeçalho e da barra lateral por sombra em degradê; e a 3.6.3 corrigiu o layout que essa troca quebrou — o cabeçalho voltou a grudar no topo e a barra lateral à altura da tela.
 
 ---
 
@@ -724,6 +724,16 @@ python3 ferramentas/conferir-contraste.py --detalhado
 ```
 
 Os 273 pares passam: AAA (7:1) para texto, 3:1 para limite de componente. A verificação **roda na integração contínua** e reprova o PR se um token derrubar qualquer par. Os quatro temas novos não passaram de primeira — três tokens de texto discreto ficaram entre 6,43:1 e 7,00:1 e foram ajustados. A olho nu, 6,8:1 e 7,2:1 são indistinguíveis. Ver [ADR 020](docs/decisions/020-temas.md).
+
+### Posicionamento do cabeçalho e da barra lateral
+
+```bash
+python3 ferramentas/conferir-posicionamento.py
+```
+
+Verificação criada na 3.6.3, depois de a 3.6.2 quebrar o layout sem que nada reprovasse. O CSS era válido, os tipos passavam, o contraste estava intacto — e o cabeçalho tinha caído no meio da página, porque uma classe nossa declarou `position: relative` e empatou em especificidade (0-1-0) com as utilitárias `sticky` e `fixed` do Tailwind, vencendo pela ordem no arquivo.
+
+O script guarda as duas metades do contrato: **nenhuma regra de classe única do `global.css` declara `position`, `display` ou `z-index`** — são exatamente as propriedades que o Tailwind entrega em classe única, onde quem chega depois ganha —, e **todo elemento que usa `borda-degrade-*` carrega a própria classe de posicionamento**. Roda na integração contínua, não precisa de navegador e leva menos de um segundo.
 
 ---
 

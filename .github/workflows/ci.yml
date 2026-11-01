@@ -94,6 +94,13 @@ jobs:
       - name: Medir o contraste dos sete temas
         run: python3 ferramentas/conferir-contraste.py
 
+      # A 3.6.2 quebrou o layout com CSS válido: uma classe nossa declarou
+      # `position: relative` e venceu as utilitárias `sticky`/`fixed` do
+      # Tailwind por empate de especificidade (0-1-0) e ordem no arquivo.
+      # Nem o tsc, nem o build, nem o contraste viam isso. Este passo vê.
+      - name: Conferir o posicionamento do cabeçalho e da lateral
+        run: python3 ferramentas/conferir-posicionamento.py
+
       # Informativo: mede quanto da interface ainda não passa pelo dicionário.
       # Não reprova — a cobertura é parcial e declarada como tal.
       - name: Medir a cobertura de tradução

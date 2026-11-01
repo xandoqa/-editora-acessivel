@@ -361,12 +361,19 @@ body > * {
    No ALTO CONTRASTE a linha volta. Ali o objetivo é limite inequívoco, e
    degradê é o oposto disso — um limite que some aos poucos é exatamente o
    que quem usa esse tema não consegue enxergar.
-   ========================================================================== */
 
-.borda-degrade-b,
-.borda-degrade-r {
-  position: relative;
-}
+   ATENÇÃO — estas classes NÃO declaram `position`. A versão 3.6.2 declarava
+   `position: relative` aqui, e isso quebrou o layout: `.borda-degrade-r` e
+   as utilitárias `sticky`/`fixed` do Tailwind têm a mesma especificidade
+   (0-1-0), então quem vence é a última no arquivo — a nossa. O cabeçalho
+   deixou de ser `sticky` e caiu no meio da página; a barra lateral deixou de
+   ser `fixed` e perdeu a altura inteira.
+
+   Quem precisa do bloco de contenção para o ::after declara isso na própria
+   marcação (`relative`); quem já é `sticky` ou `fixed` não precisa de nada.
+   Se um dia alguém for tentado a "simplificar" devolvendo o `position` para
+   cá: é este bug.
+   ========================================================================== */
 
 .borda-degrade-b::after,
 .borda-degrade-r::after {

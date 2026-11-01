@@ -688,41 +688,63 @@ p {
    * -------------------------------------------------------------------- */
 
   .vitrine-palco {
-    perspective: 1400px;
-    perspective-origin: 50% 40%;
+    perspective: 1300px;
+    perspective-origin: 50% 45%;
   }
 
+  /*
+   * Só a CAPA gira. O título e a autoria ficam fora da transformação, de pé.
+   *
+   * Na primeira versão o cartão inteiro girava, texto junto, e o resultado era
+   * uma frase em perspectiva: legível, mas pior de ler — exatamente o tipo de
+   * concessão que este projeto não faz por enfeite. O volume não precisa do
+   * texto para funcionar.
+   */
   .vitrine-livro {
     transform-style: preserve-3d;
-    transform: rotateY(-16deg);
+    transform: rotateY(-13deg);
     transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.3, 1), filter 0.5s ease;
-    filter: drop-shadow(10px 14px 18px rgb(var(--c-outline) / 0.22));
-  }
-  .vitrine-livro:hover,
-  .vitrine-livro:focus-within {
-    transform: rotateY(-4deg) translateZ(26px) translateY(-6px);
-    filter: drop-shadow(16px 22px 26px rgb(var(--c-outline) / 0.3));
+    filter: drop-shadow(9px 12px 16px rgb(var(--c-outline) / 0.26));
   }
 
-  /* A lombada: uma fatia vertical à esquerda da capa, girada para dentro.
-     É ela que transforma a imagem num volume. */
+  /*
+   * O destaque é disparado pelo LINK inteiro, e não pela capa.
+   *
+   * `.vitrine-livro:hover` sozinho não cobria quem passa o mouse sobre o
+   * título, que faz parte do mesmo alvo clicável — e `:focus-visible` nunca
+   * chegaria à capa, porque quem recebe o foco é o link, que está acima dela.
+   */
+  .vitrine-link:hover .vitrine-livro,
+  .vitrine-link:focus-visible .vitrine-livro {
+    transform: rotateY(-3deg) translateZ(24px) translateY(-6px);
+    filter: drop-shadow(15px 20px 24px rgb(var(--c-outline) / 0.34));
+  }
+
+  /*
+   * A lombada é pintada SOBRE a borda esquerda da capa, não atrás dela.
+   *
+   * Atrás era onde ela estava, e era invisível: a capa é um elemento
+   * posicionado e cobria a faixa inteira. Como sombra impressa na lateral do
+   * volume, ela funciona em qualquer capa e não depende de ordenação 3D.
+   */
   .vitrine-lombada {
-    transform: rotateY(78deg);
-    transform-origin: left center;
     background: linear-gradient(
       to right,
-      rgb(var(--c-outline) / 0.55),
-      rgb(var(--c-outline) / 0.18)
+      rgb(var(--c-outline) / 0.62) 0%,
+      rgb(var(--c-outline) / 0.3) 55%,
+      rgb(var(--c-outline) / 0) 100%
     );
+    box-shadow: inset 1px 0 0 rgb(var(--c-surface) / 0.35);
   }
 
-  /* O corte das páginas, do lado oposto da lombada. */
+  /* O corte das páginas, do lado oposto da lombada: é ele que dá espessura. */
   .vitrine-corte {
     background: repeating-linear-gradient(
       to right,
       rgb(var(--c-surface)) 0 1px,
       rgb(var(--c-surface-highest)) 1px 2px
     );
+    box-shadow: inset -1px 0 0 rgb(var(--c-outline) / 0.4);
   }
 
   /* --- Roleta de autores (3.7.0) --------------------------------------- */
@@ -744,8 +766,8 @@ p {
    */
   @media (prefers-reduced-motion: reduce) {
     .vitrine-livro,
-    .vitrine-livro:hover,
-    .vitrine-livro:focus-within {
+    .vitrine-link:hover .vitrine-livro,
+    .vitrine-link:focus-visible .vitrine-livro {
       transform: none;
       transition: none;
     }
@@ -760,8 +782,8 @@ p {
    * reforçar contornos e tirar distração; uma capa girada é distração.
    */
   :root.reader-optimized .vitrine-livro,
-  :root.reader-optimized .vitrine-livro:hover,
-  :root.reader-optimized .vitrine-livro:focus-within {
+  :root.reader-optimized .vitrine-link:hover .vitrine-livro,
+  :root.reader-optimized .vitrine-link:focus-visible .vitrine-livro {
     transform: none;
     filter: none;
   }

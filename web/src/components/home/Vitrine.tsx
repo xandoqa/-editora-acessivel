@@ -50,41 +50,44 @@ function Livro({ obra, indice, total }: { obra: Work; indice: number; total: num
       className="vitrine-palco snap-start pl-1 pr-6 pt-2 first:pl-0"
       aria-label={t('vitrine.posicao', { n: indice + 1, total })}
     >
-      <Link
-        to={`/reader/${obra.id}`}
-        className="vitrine-livro group/livro relative block w-[170px] rounded-sm sm:w-[196px]"
-      >
-        {/* O volume: lombada à esquerda, corte das páginas à direita. Os dois
-            são decorativos — quem não enxerga a profundidade não perde nada,
-            porque título, formato e nota estão escritos abaixo. */}
-        <span
-          className="vitrine-lombada absolute left-0 top-0 h-full w-[18px] rounded-l-sm"
-          aria-hidden
-        />
-        <span
-          className="vitrine-corte absolute right-0 top-[3px] h-[calc(100%-6px)] w-[7px] translate-x-[6px] rounded-r-[2px]"
-          aria-hidden
-        />
+      <Link to={`/reader/${obra.id}`} className="vitrine-link group/livro block w-[170px] rounded-sm sm:w-[196px]">
+        {/* O palco guarda a perspectiva; o volume gira dentro dele. O texto
+            abaixo fica FORA dos dois, de pé: frase em perspectiva é pior de
+            ler, e isso não se paga com enfeite. */}
+        <span className="vitrine-palco block">
+          <span className="vitrine-livro relative block">
+            <span className="relative block aspect-[2/3] w-full overflow-hidden rounded-sm border border-outline bg-surface-high">
+              {obra.coverUrl ? (
+                <img
+                  src={obra.coverUrl}
+                  alt={obra.coverAlt ?? obra.title}
+                  loading="lazy"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="flex h-full w-full items-center justify-center px-3 text-center font-display text-sm font-bold leading-tight text-ink-muted">
+                  {obra.title}
+                  <span className="sr-only"> — {t('vitrine.semCapa')}</span>
+                </span>
+              )}
 
-        <span className="relative block aspect-[2/3] w-full overflow-hidden rounded-sm border border-outline bg-surface-high">
-          {obra.coverUrl ? (
-            <img
-              src={obra.coverUrl}
-              alt={obra.coverAlt ?? obra.title}
-              loading="lazy"
-              className="h-full w-full object-cover"
+              {/* Lombada e corte das páginas são decorativos: quem não enxerga
+                  a profundidade não perde nada, porque título, formato e nota
+                  estão escritos logo abaixo em texto. */}
+              <span className="vitrine-lombada absolute inset-y-0 left-0 w-[15px]" aria-hidden />
+
+              {obra.editionLabel && (
+                <span className="absolute left-[15px] top-3 rounded-r-full bg-accent px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-on-accent">
+                  {obra.editionLabel}
+                </span>
+              )}
+            </span>
+
+            <span
+              className="vitrine-corte absolute right-0 top-[4px] h-[calc(100%-8px)] w-[7px] translate-x-[6px] rounded-r-[2px]"
+              aria-hidden
             />
-          ) : (
-            <span className="flex h-full w-full items-center justify-center px-3 text-center font-display text-sm font-bold leading-tight text-ink-muted">
-              {obra.title}
-              <span className="sr-only"> — {t('vitrine.semCapa')}</span>
-            </span>
-          )}
-          {obra.editionLabel && (
-            <span className="absolute left-0 top-3 rounded-r-full bg-accent px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-on-accent">
-              {obra.editionLabel}
-            </span>
-          )}
+          </span>
         </span>
 
         <span className="mt-3 block font-display text-[15px] font-bold leading-snug text-ink group-hover/livro:underline">

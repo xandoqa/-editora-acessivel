@@ -47,6 +47,32 @@ export const cobrancaLimiter = rateLimit({
 });
 
 /**
+ * Fale Conosco.
+ *
+ * Formulário público e sem conta é o alvo preferido de robô de varredura, e
+ * aqui o sucesso conta: abuso tem a forma de muitas mensagens enviadas, não de
+ * muitas recusadas. Cinco em quinze minutos é apertado para robô e generoso
+ * para gente — ninguém escreve seis mensagens diferentes para uma editora em
+ * quinze minutos.
+ *
+ * Não substitui o campo-armadilha do formulário; os dois atacam o problema por
+ * lados diferentes. Este limita volume por IP; aquele reconhece quem preenche
+ * tudo sem olhar.
+ */
+export const contatoLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: env.isTest ? 1000 : 5,
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: {
+    error: {
+      code: 'TOO_MANY_REQUESTS',
+      message: 'Muitas mensagens enviadas em pouco tempo. Aguarde alguns minutos e tente de novo.',
+    },
+  },
+});
+
+/**
  * Abertura de sessões de leitura. A rota aceita visitantes anônimos, então sem
  * um limite próprio daria para criar milhares de sessões e inflar as métricas
  * dos painéis. 60 por minuto cobre com folga qualquer leitura real.

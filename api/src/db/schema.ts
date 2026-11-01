@@ -57,6 +57,8 @@ export const donationStatusEnum = pgEnum('donation_status', ['PENDENTE', 'CONFIR
 /** Meios de pagamento oferecidos na tela de apoio e na aquisição de obras. */
 export const paymentMethodEnum = pgEnum('payment_method', ['PIX', 'CARTAO', 'BOLETO']);
 
+export const contactStatusEnum = pgEnum('contact_status', ['NOVA', 'LIDA', 'RESPONDIDA', 'ARQUIVADA']);
+
 /**
  * Como o autor decidiu disponibilizar a obra.
  *
@@ -461,6 +463,40 @@ export const purchases = pgTable(
 /*                                    TIPOS                                   */
 /* -------------------------------------------------------------------------- */
 
+/**
+ * Mensagens do "Fale Conosco".
+ *
+ * A mensagem é gravada ANTES de qualquer tentativa de envio por e-mail. A
+ * ordem importa: entrega falha — servidor fora, senha trocada, rede caída —, e
+ * uma mensagem que só existisse no caminho do envio sumiria junto com a falha.
+ * Gravada primeiro, ela nunca se perde; o envio vira segunda etapa, e o que
+ * aconteceu com ele fica em `deliveredAt` / `deliveryError`.
+ */
+export const contactMessages = pgTable(
+  'contact_messages',
+  {
+    id: serial('id').primaryKey(),
+    name: varchar('name', { length: 120 }).notNull(),
+    email: varchar('email', { length: 255 }).notNull(),
+    subject: varchar('subject', { length: 60 }).notNull(),
+    /** Número de pedido, quando o assunto é sobre uma aquisição. Opcional. */
+    orderRef: varchar('order_ref', { length: 60 }),
+    message: text('message').notNull(),
+    status: contactStatusEnum('status').notNull().default('NOVA'),
+    /**
+     * Quem estava logado ao escrever, se alguém estava. Nulo para visitante.
+     * `set null` na exclusão: o que foi dito continua dito, mesmo que a conta
+     * deixe de existir.
+     */
+    userId: integer('user_id').references(() => users.id, { onDelete: 'set null' }),
+    /** Quando o e-mail saiu. Nulo = ainda não entregue (ou SMTP não configurado). */
+    deliveredAt: timestamp('delivered_at', { withTimezone: true }),
+    deliveryError: text('delivery_error'),
+    ...timestamps,
+  },
+  (t) => [index('contact_messages_status_idx').on(t.status), index('contact_messages_created_idx').on(t.createdAt)],
+);
+
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 export type Genre = typeof genres.$inferSelect;
@@ -484,3 +520,5 @@ export type Purchase = typeof purchases.$inferSelect;
 export type NewPurchase = typeof purchases.$inferInsert;
 export type PurchaseStatus = (typeof purchaseStatusEnum.enumValues)[number];
 export type PurchaseKind = (typeof purchaseKindEnum.enumValues)[number];
+export type ContactMessage = typeof contactMessages.$inferSelect;
+export type ContactStatus = (typeof contactStatusEnum.enumValues)[number];

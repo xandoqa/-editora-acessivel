@@ -80,6 +80,29 @@ const envSchema = z.object({
    * e deixa isso explícito na interface (ver services/payments).
    */
   PAYMENT_PROVIDER: z.string().default('simulado'),
+
+  /*
+   * Fale Conosco.
+   *
+   * Todas opcionais, de propósito: sem nenhuma delas o formulário continua
+   * funcionando por inteiro — a mensagem é gravada e aparece na caixa de
+   * entrada da administração. O que as variáveis acrescentam é a SEGUNDA
+   * etapa, o e-mail saindo para uma caixa de verdade.
+   *
+   * `CONTATO_EMAIL_DESTINO` não tem valor padrão escrito aqui de propósito:
+   * endereço de e-mail pessoal em repositório público vira alimento de robô
+   * de spam em questão de dias. Ele mora no `.env`, que não é versionado.
+   *
+   * `SMTP_PASS` é SENHA DE APP do provedor, nunca a senha da conta. No Gmail,
+   * ela é gerada em Conta Google → Segurança → Senhas de app, e só funciona
+   * com a verificação em duas etapas ligada.
+   */
+  CONTATO_EMAIL_DESTINO: z.string().email().optional().or(z.literal('').transform(() => undefined)),
+  SMTP_HOST: z.string().optional().or(z.literal('').transform(() => undefined)),
+  SMTP_PORT: z.coerce.number().int().positive().default(465),
+  SMTP_USER: z.string().optional().or(z.literal('').transform(() => undefined)),
+  SMTP_PASS: z.string().optional().or(z.literal('').transform(() => undefined)),
+  SMTP_FROM_NAME: z.string().default('Livrin — Fale Conosco'),
 });
 
 const parsed = envSchema.safeParse(process.env);

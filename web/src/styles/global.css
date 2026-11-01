@@ -58,6 +58,8 @@
 
   /* --- Materiais ------------------------------------------------------- */
   --sombra-tinta: rgb(23 22 26);
+  /* Degradê curto que substitui a linha de borda. Ver `.borda-degrade-*`. */
+  --sombra-degrade: rgb(23 22 26 / 0.13);
   --grao-opacidade: 0.03;
   --font-scale: 1;
   color-scheme: light;
@@ -89,6 +91,7 @@
   --c-admin: 217 180 255;
   --c-admin-container: 62 35 89;
   --sombra-tinta: rgb(0 0 0);
+  --sombra-degrade: rgb(0 0 0 / 0.5);
   --grao-opacidade: 0.035;
   color-scheme: dark;
 }
@@ -135,6 +138,7 @@
   --c-admin: 92 40 124;
   --c-admin-container: 231 216 241;
   --sombra-tinta: rgb(59 42 24);
+  --sombra-degrade: rgb(59 42 24 / 0.15);
   --grao-opacidade: 0.04;
   color-scheme: light;
 }
@@ -168,6 +172,7 @@
   --c-admin: 86 35 128;
   --c-admin-container: 231 218 246;
   --sombra-tinta: rgb(17 19 24);
+  --sombra-degrade: rgb(17 19 24 / 0.12);
   --grao-opacidade: 0.015;
   color-scheme: light;
 }
@@ -202,6 +207,7 @@
   --c-admin: 212 178 252;
   --c-admin-container: 59 34 86;
   --sombra-tinta: rgb(0 0 0);
+  --sombra-degrade: rgb(0 0 0 / 0.5);
   --grao-opacidade: 0.03;
   color-scheme: dark;
 }
@@ -236,6 +242,7 @@
   --c-admin: 206 180 255;
   --c-admin-container: 58 38 94;
   --sombra-tinta: rgb(0 0 0);
+  --sombra-degrade: rgb(0 0 0 / 0.55);
   --grao-opacidade: 0.035;
   color-scheme: dark;
 }
@@ -268,6 +275,7 @@
   --c-admin: 255 255 0;
   --c-admin-container: 0 0 0;
   --sombra-tinta: rgb(255 255 0);
+  --sombra-degrade: rgb(255 255 0 / 0.35);
   --grao-opacidade: 0;
   color-scheme: dark;
 }
@@ -335,6 +343,77 @@ body::before {
 body > * {
   position: relative;
   z-index: 1;
+}
+
+/* ==========================================================================
+   Borda em degradê (3.6.2)
+   --------------------------------------------------------------------------
+   No lugar do fio de 1px que separava cabeçalho, barra lateral e conteúdo,
+   um degradê curto que some. A diferença é de significado, não de enfeite:
+   uma linha diz "aqui termina uma caixa"; uma sombra diz "isto está por
+   cima daquilo" — e é isso que acontece, já que o cabeçalho é `sticky` e o
+   conteúdo passa por baixo dele ao rolar.
+
+   O degradê sai de um token por tema (`--sombra-degrade`), porque sombra
+   preta sobre fundo escuro não existe: os temas escuros usam o dobro de
+   opacidade dos claros.
+
+   No ALTO CONTRASTE a linha volta. Ali o objetivo é limite inequívoco, e
+   degradê é o oposto disso — um limite que some aos poucos é exatamente o
+   que quem usa esse tema não consegue enxergar.
+   ========================================================================== */
+
+.borda-degrade-b,
+.borda-degrade-r {
+  position: relative;
+}
+
+.borda-degrade-b::after,
+.borda-degrade-r::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+}
+
+.borda-degrade-b::after {
+  inset-inline: 0;
+  top: 100%;
+  height: 14px;
+  background: linear-gradient(to bottom, var(--sombra-degrade), transparent);
+}
+
+.borda-degrade-r::after {
+  inset-block: 0;
+  left: 100%;
+  width: 14px;
+  background: linear-gradient(to right, var(--sombra-degrade), transparent);
+}
+
+:root.hc .borda-degrade-b,
+:root.hc .borda-degrade-r {
+  border-color: rgb(var(--c-outline));
+}
+
+:root.hc .borda-degrade-b {
+  border-bottom-width: 2px;
+}
+
+:root.hc .borda-degrade-r {
+  border-right-width: 2px;
+}
+
+:root.hc .borda-degrade-b::after,
+:root.hc .borda-degrade-r::after {
+  display: none;
+}
+
+/* O Leitor Otimizado também pede limite firme, não insinuado. */
+:root.reader-optimized .borda-degrade-b {
+  border-bottom: 1px solid rgb(var(--c-outline) / 0.6);
+}
+
+:root.reader-optimized .borda-degrade-r {
+  border-right: 1px solid rgb(var(--c-outline) / 0.6);
 }
 
 h1,

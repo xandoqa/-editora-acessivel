@@ -134,7 +134,7 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
     'inline-flex h-10 min-w-[40px] items-center justify-center rounded-full px-2 text-sm font-bold text-ink-muted hover:bg-surface-high hover:text-ink disabled:opacity-40';
 
   return (
-    <header className="sticky top-0 z-30 flex h-[72px] items-center gap-3 border-b border-outline/25 bg-bg/95 px-4 backdrop-blur md:px-6">
+    <header className="borda-degrade-b sticky top-0 z-30 flex h-[72px] items-center gap-3 bg-bg/95 px-4 backdrop-blur md:px-6">
       <button
         type="button"
         className={`icon-btn lg:hidden ${buscaAberta ? 'hidden sm:inline-flex lg:hidden' : ''}`}
@@ -245,7 +245,14 @@ export default function Topbar({ onOpenMenu }: { onOpenMenu: () => void }) {
         <SeletorDeIdioma classeBotao={tool} />
       </div>
 
-      <div className="mx-1 hidden h-8 w-px bg-outline/60 md:block" aria-hidden />
+      {/*
+        O traço vertical que ficava aqui saiu.
+
+        Sombra serve para dizer "isto está por cima daquilo", e um risco de
+        32px entre dois botões não está por cima de nada — trocá-lo por um
+        degradê seria enfeite sem significado. E a separação que ele fazia já
+        é feita pelas cápsulas com borda em volta de cada grupo de controles.
+      */}
       <div className={buscaAberta ? 'hidden sm:block' : 'block'}>
         <UserMenu />
       </div>

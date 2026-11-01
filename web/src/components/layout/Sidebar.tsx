@@ -92,7 +92,11 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex h-full flex-col bg-bg">
-      <div className="borda-degrade-b flex h-[72px] items-center px-5">
+      {/* `relative` aqui, e não na classe `.borda-degrade-b`: esta é a única
+          caixa que usa o degradê sem já ser `sticky` ou `fixed`, e declarar
+          `position` dentro da classe sobrescrevia o posicionamento das
+          outras (bug da 3.6.2). */}
+      <div className="borda-degrade-b relative flex h-[72px] items-center px-5">
         <Logo />
       </div>
       <nav className="flex-1 space-y-1.5 overflow-y-auto px-3 py-5" aria-label={t('nav.principal')}>

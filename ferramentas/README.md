@@ -1,5 +1,30 @@
 # Ferramentas
 
+Duas famílias de script, nenhuma delas parte da aplicação: os que **geram**
+conteúdo de demonstração (rodam à mão, quando se quer refazer os arquivos) e os
+que **conferem** o que o compilador não vê.
+
+## Conferência
+
+| Script | O que mede | Reprova o PR? |
+| --- | --- | --- |
+| `conferir-contraste.py` | 39 pares de cor por tema, 273 no total, pela fórmula da WCAG | sim |
+| `conferir-posicionamento.py` | Que nenhuma classe única do `global.css` dispute `position`/`display`/`z-index` com as utilitárias do Tailwind | sim |
+| `conferir-traducao.py` | Quanto da interface ainda não passa pelo dicionário | não — cobertura é parcial e declarada |
+
+```bash
+python3 ferramentas/conferir-contraste.py
+python3 ferramentas/conferir-posicionamento.py
+python3 ferramentas/conferir-traducao.py --detalhado
+```
+
+Os três rodam na integração contínua e não precisam de dependência nenhuma além
+do Python. Existem porque **cada um nasceu de um defeito que passou**: tokens de
+texto discreto abaixo de 7:1, o layout quebrado da 3.6.2 e listas de texto fixo
+que nunca eram traduzidas.
+
+## Geração
+
 Scripts que **geram** conteúdo do projeto. Não fazem parte da aplicação e não são executados por ela: rodam à mão, quando se quer refazer os arquivos de demonstração.
 
 Guardar a fonte em texto, e o gerador junto, torna a autoria verificável, o conteúdo corrigível e o arquivo reproduzível.

@@ -101,10 +101,21 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         ))}
       </nav>
       <div className="space-y-2 border-t border-outline/25 p-3">
-        {/* Só aparece abaixo de 640px, que é onde o grupo do cabeçalho some.
-            É o que torna alto contraste, tamanho do texto, leitura em voz alta
-            e Libras alcançáveis no celular. */}
-        <PainelDeAcessibilidade />
+        {/*
+          Só na gaveta, e só abaixo de 640px.
+
+          A `Sidebar` é montada DUAS vezes: na barra lateral fixa do
+          computador, que fica no DOM em qualquer largura (escondida por CSS
+          abaixo de 1024px), e na gaveta do celular. Sem o `onNavigate` abaixo,
+          o painel existia nas duas — e com ele uma segunda instância da janela
+          de Libras, que restaura a escolha anterior ao montar. Resultado: quem
+          tivesse ligado o Libras alguma vez via DOIS avatares desenhados no
+          `body`, em qualquer tela.
+
+          Na barra fixa o painel nunca era visível de qualquer forma: ela só
+          aparece a partir de 1024px, e o painel é `sm:hidden`.
+        */}
+        {onNavigate && <PainelDeAcessibilidade />}
         <div className="card-high flex items-center gap-3 px-4 py-3">
           <PersonStanding className="h-6 w-6 shrink-0 text-accent" aria-hidden />
           <p className="text-xs font-semibold leading-snug text-ink">

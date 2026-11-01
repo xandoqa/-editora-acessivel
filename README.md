@@ -8,7 +8,7 @@ Plataforma editorial aberta para quadrinhos e livros independentes, com acessibi
 
 O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. **A autoria decide como cada obra é disponibilizada** — leitura livre, obra paga ou leitura livre com publicidade — e leitura livre continua sendo o padrão. O apoio financeiro ao projeto é voluntário e nunca condiciona o acesso a uma obra: só a obra que a própria autoria marcou como paga exige aquisição.
 
-**Versão 3.6.0** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede; a 3.5.5 trouxe os seis temas e o sistema de tradução; a 3.5.6 levou os seletores de tema e idioma para junto do perfil; a 3.5.7 levou os recursos de acessibilidade para o menu lateral; a 3.5.8 traduziu o catálogo inteiro e acertou a tipografia e a busca no celular; e a 3.6.0 trouxe o rodapé completo e a página **Sobre o Livrin**.
+**Versão 3.6.1** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede; a 3.5.5 trouxe os seis temas e o sistema de tradução; a 3.5.6 levou os seletores de tema e idioma para junto do perfil; a 3.5.7 levou os recursos de acessibilidade para o menu lateral; a 3.5.8 traduziu o catálogo inteiro e acertou a tipografia e a busca no celular; a 3.6.0 trouxe o rodapé completo e a página **Sobre o Livrin**; e a 3.6.1 corrigiu três defeitos encontrados em auditoria.
 
 ---
 
@@ -608,10 +608,13 @@ Dois comandos resolvem quase tudo. Na véspera, com internet: `docker compose bu
 
 ## Correções recentes
 
-As duas últimas versões não trouxeram funcionalidade nova: foram correções, a maior parte vinda de uma auditoria completa do repositório.
+As versões de correção não trazem funcionalidade nova. A tabela começa pela mais recente.
 
 | Versão | O que foi corrigido | Por que importava |
 | --- | --- | --- |
+| 3.6.1 | A suíte de navegador rodava em inglês e falhava inteira | Desde a 3.5.5 o idioma segue o do navegador, e o Chromium do Playwright é `en-US`. Os seletores procuram texto em português |
+| 3.6.1 | A janela de Libras era desenhada duas vezes | O painel de acessibilidade era montado também na barra lateral fixa, onde nunca ficava visível. Quem tivesse ligado o Libras via dois avatares |
+| 3.6.1 | O histórico perdia o formato da obra em valor desconhecido | A reserva existia antes da 3.5.8 e foi removida sem querer ao traduzir |
 | 3.5.4 | A janela de Libras passou a avisar **na hora** quando a máquina está sem rede, em vez de girar dez segundos antes de desistir | Numa apresentação, dez segundos de ampulheta não parecem espera: parecem defeito |
 | 3.5.3 | O limite de login deixou de contar tentativas **bem-sucedidas** | Numa sala atrás do mesmo Wi-Fi, a cota se esgotava com todo mundo entrando com a senha certa. Força bruta é feita de erros |
 | 3.5.3 | Rotas que abrem cobrança ganharam limitador próprio | Ali o oposto vale: o acerto repetido é que precisa de freio |

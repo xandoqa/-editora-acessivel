@@ -87,7 +87,10 @@ export default function Historico() {
 
               <div className="min-w-0 flex-1">
                 <p className="eyebrow text-ink-subtle">
-                  {t(FORMAT_SHORT[item.work.format as keyof typeof FORMAT_SHORT])} ·{' '}
+                  {/* `format` chega como `string` neste endpoint, não como o
+                      enum: valor fora dos quatro conhecidos cai no texto cru em
+                      vez de sumir. A reserva existia antes da 3.5.8 e voltou. */}
+                  {t(FORMAT_SHORT[item.work.format as keyof typeof FORMAT_SHORT]) ?? item.work.format} ·{' '}
                   {item.work.pages}p
                 </p>
                 <h2 className="mt-0.5 font-display text-lg font-semibold leading-tight text-ink">

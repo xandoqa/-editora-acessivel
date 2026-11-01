@@ -2,6 +2,63 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.6.1] — 2026-11-01
+
+Auditoria do projeto inteiro. Três defeitos comprovados, corrigidos com a menor
+alteração possível. Nenhuma funcionalidade removida, nenhuma API alterada,
+nenhuma migration nova.
+
+### A suíte de navegador rodava em inglês
+
+**Local:** `e2e/playwright.config.ts`.
+**Causa:** desde a 3.5.5 a interface escolhe o idioma pelo `navigator.language`
+quando não há escolha salva. O Chromium do Playwright roda em `en-US`, então o
+site subia em inglês — e todos os seletores da suíte, que procuram "Entrar na
+Plataforma", "Criar minha conta" e "Aprovar e publicar", falhavam.
+**Impacto:** a suíte de ponta a ponta estava inteira quebrada. Como ela não roda
+na integração contínua, passou despercebida desde a 3.5.5.
+**Correção:** `locale: 'pt-BR'` na configuração. Uma linha, nenhum código de
+aplicação tocado.
+
+### A janela de Libras era desenhada duas vezes
+
+**Local:** `web/src/components/layout/Sidebar.tsx`.
+**Causa:** a `Sidebar` é montada duas vezes — na barra lateral fixa, que fica no
+DOM em qualquer largura, e na gaveta do celular. O painel de acessibilidade
+acrescentado na 3.5.7 vinha nas duas, e com ele uma segunda instância da janela
+de Libras, que restaura a escolha anterior ao montar.
+**Impacto:** quem tivesse ligado o Libras alguma vez passava a ter **dois**
+avatares desenhados no `body`, em qualquer tela, a cada carregamento.
+**Correção:** o painel só é montado dentro da gaveta. Na barra fixa ele nunca
+era visível de qualquer forma — ela só aparece a partir de 1024px, e o painel é
+`sm:hidden`.
+
+### O histórico perdia o formato da obra
+
+**Local:** `web/src/pages/Historico.tsx`.
+**Causa:** `format` chega como `string` neste endpoint, não como o enum, e havia
+uma reserva para valor desconhecido. Ela foi removida sem querer ao envolver o
+rótulo em `t()`, na 3.5.8.
+**Impacto:** formato fora dos quatro conhecidos sumiria da ficha em vez de
+aparecer cru.
+**Correção:** a reserva voltou.
+
+### O que a auditoria verificou e estava correto
+
+Imports relativos dos dois pacotes; todas as chamadas de API do front contra as
+rotas do servidor; handlers de rota contra os controllers; tabelas e enums do
+schema contra as nove migrations; `meta/_journal.json` contra os arquivos; os 25
+arquivos citados pelo seed; contraste dos sete temas (273 pares); cobertura de
+tradução (inalterada em 370 trechos).
+
+### Não corrigido, por risco
+
+Com a **gaveta do celular aberta**, as duas instâncias da janela de Libras
+voltam a coexistir por alguns segundos. Resolver isso exige desmontar o grupo do
+cabeçalho enquanto a gaveta está aberta, o que interrompe uma leitura em voz
+alta em andamento — troca um defeito transitório e invisível por um visível.
+Fica registrado em vez de corrigido às pressas.
+
 ## [3.6.0] — 2026-10-31
 
 ### Rodapé completo

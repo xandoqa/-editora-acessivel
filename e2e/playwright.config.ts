@@ -17,6 +17,18 @@ export default defineConfig({
   reporter: [['list']],
   use: {
     baseURL: BASE_URL,
+    /*
+     * Idioma fixo em português.
+     *
+     * Desde a 3.5.5 a interface escolhe o idioma pelo `navigator.language`
+     * quando não há escolha salva. O Chromium do Playwright roda em `en-US`
+     * por padrão, então o site subia em INGLÊS e todos os seletores desta
+     * suíte — que procuram "Entrar na Plataforma", "Criar minha conta",
+     * "Aprovar e publicar" — falhavam.
+     *
+     * A suíte não roda na integração contínua, então isso passou despercebido.
+     */
+    locale: 'pt-BR',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },

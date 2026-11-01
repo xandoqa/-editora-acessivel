@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as authCtrl from '../controllers/auth.controller';
+import * as authorsCtrl from '../controllers/authors.controller';
 import * as donationsCtrl from '../controllers/donations.controller';
 import * as meCtrl from '../controllers/me.controller';
 import * as purchasesCtrl from '../controllers/purchases.controller';
@@ -33,6 +34,11 @@ router.get('/genres', meCtrl.listGenres); // público
 router.get('/me/works', authenticate, meCtrl.myWorks);
 router.get('/me/summary', authenticate, meCtrl.mySummary);
 router.get('/me/dashboard', authenticate, meCtrl.myDashboard);
+
+/* ------------------------------ Autores ------------------------------- */
+// Derivadas das obras aprovadas: não há cadastro de autor, há quem publicou.
+router.get('/authors', authorsCtrl.listAuthors); // público
+router.get('/authors/:id', authorsCtrl.getAuthor); // público
 
 /* ------------------------------- Obras -------------------------------- */
 router.get('/works', worksCtrl.listCatalog); // público (somente obras aprovadas)

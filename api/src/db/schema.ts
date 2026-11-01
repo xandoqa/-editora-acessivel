@@ -135,6 +135,14 @@ export const users = pgTable(
     isActive: boolean('is_active').notNull().default(true),
     /** Descrição curta exibida em avaliações/notas: ex. "Baixa Visão · Leitor de Tela". */
     headline: varchar('headline', { length: 160 }),
+    /**
+     * Parágrafo de apresentação, exibido na página de coleção do autor.
+     *
+     * Separado de `headline` porque os dois têm funções diferentes: a headline
+     * é etiqueta de uma linha ao lado do nome, a bio é texto corrido. Esticar a
+     * headline mudaria o sentido dela em todos os lugares onde já aparece.
+     */
+    bio: text('bio'),
     lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
     ...timestamps,
   },

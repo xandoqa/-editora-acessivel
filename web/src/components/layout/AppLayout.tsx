@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
 import { X } from 'lucide-react';
 import Rodape from './Rodape';
+import BotaoFaleConosco from '../contato/BotaoFaleConosco';
 import Sidebar from './Sidebar';
 import Topbar from './Topbar';
 import { OndaDivisoria } from '../ui/Ornamentos';
@@ -52,6 +53,8 @@ export default function AppLayout() {
         </main>
         <OndaDivisoria />
         <Rodape />
+        {/* O convite do Pingo. Ele mesmo decide onde não aparecer. */}
+        <BotaoFaleConosco />
       </div>
     </div>
   );

@@ -2,6 +2,38 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.6.2] — 2026-11-01
+
+### Sombra em degradê no lugar das linhas de borda
+
+O fio de 1px que separava cabeçalho, barra lateral e conteúdo virou um degradê
+curto que some. A diferença é de significado, não de enfeite: **uma linha diz
+"aqui termina uma caixa"; uma sombra diz "isto está por cima daquilo"** — e é
+isso que acontece, já que o cabeçalho é `sticky` e o conteúdo passa por baixo
+dele ao rolar.
+
+A linha do cabeçalho e a linha sob o logo da barra lateral estavam na mesma
+altura e formavam, na prática, **uma linha só** atravessando a tela. As duas
+foram trocadas juntas, para o degradê continuar contínuo.
+
+O degradê sai de um token por tema (`--sombra-degrade`): sombra preta sobre
+fundo escuro não existe, então os temas escuros usam o dobro da opacidade dos
+claros.
+
+### Onde a linha ficou, de propósito
+
+**No alto contraste.** Ali o objetivo é limite inequívoco, e degradê é o oposto
+disso — um limite que some aos poucos é exatamente o que quem usa esse tema não
+consegue enxergar. A borda volta, e mais grossa. O mesmo vale para o **Leitor
+Otimizado**, que existe para reforçar contornos.
+
+### O traço vertical antes do avatar foi removido
+
+Sombra serve para dizer "isto está por cima daquilo", e um risco de 32px entre
+dois botões não está por cima de nada — trocá-lo por um degradê seria enfeite
+sem significado. A separação que ele fazia já é feita pelas cápsulas com borda em
+volta de cada grupo de controles.
+
 ## [3.6.1] — 2026-11-01
 
 Auditoria do projeto inteiro. Três defeitos comprovados, corrigidos com a menor

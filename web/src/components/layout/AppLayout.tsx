@@ -29,14 +29,14 @@ export default function AppLayout() {
         Pular para o conteúdo
       </a>
 
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-[272px] border-r border-outline/30 lg:block">
+      <aside className="borda-degrade-r fixed inset-y-0 left-0 z-20 hidden w-[272px] lg:block">
         <Sidebar />
       </aside>
 
       {drawer && (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menu de navegação">
           <button type="button" className="absolute inset-0 bg-black/70" onClick={() => setDrawer(false)} aria-label="Fechar menu" />
-          <div className="relative h-full w-[290px] max-w-[85vw] border-r border-outline/30">
+          <div className="borda-degrade-r relative h-full w-[290px] max-w-[85vw]">
             <button type="button" className="icon-btn absolute right-2 top-3 z-10" onClick={() => setDrawer(false)} aria-label="Fechar menu">
               <X className="h-5 w-5" aria-hidden />
             </button>

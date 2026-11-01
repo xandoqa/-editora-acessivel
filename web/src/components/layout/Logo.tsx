@@ -95,10 +95,19 @@ export default function Logo() {
       aria-label="Livrin — livraria acessível, ir para o catálogo"
     >
       <LogoMark />
-      <span className="leading-tight">
-        <Wordmark />
-        <span className="mt-1 block text-[11px] font-bold uppercase tracking-wider text-ink-muted">Livraria acessível</span>
-      </span>
+      {/*
+        A linha "Livraria acessível" saiu na 3.7.0.
+
+        Ela repetia em versalete miúdo o que a página inteira já diz — o título
+        do catálogo, a lista de recursos assistivos, a página Sobre. Marca não
+        precisa se explicar duas vezes, e aquela segunda linha empurrava o
+        logotipo para baixo numa barra de 72px.
+
+        O que ela carregava de útil era o significado para quem não vê o
+        desenho, e isso continua: está no `aria-label` do link acima, que é
+        onde o leitor de tela procura.
+      */}
+      <Wordmark />
     </Link>
   );
 }

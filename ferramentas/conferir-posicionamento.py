@@ -163,7 +163,13 @@ def conferir_ancoragem() -> list[str]:
     for arquivo in sorted(COMPONENTES.rglob("*.tsx")):
         relativo = str(arquivo.relative_to(RAIZ))
         for n, linha in enumerate(arquivo.read_text(encoding="utf-8").split("\n"), 1):
-            if "absolute right-0" not in linha:
+            # `absolute right-0` sozinho não é painel: é também o corte de
+            # páginas de uma capa, uma etiqueta no canto de um card, um ícone
+            # sobreposto. O que distingue um painel flutuante é empilhar-se
+            # ACIMA do conteúdo — e para isso ele carrega um `z-`. Sem esta
+            # segunda condição a regra reprovava decoração dentro de card, que
+            # nunca teve o problema que ela existe para impedir.
+            if "absolute right-0" not in linha or not re.search(r"\bz-\d", linha):
                 continue
             if relativo in ANCORA_DIREITA_PERMITIDA:
                 continue

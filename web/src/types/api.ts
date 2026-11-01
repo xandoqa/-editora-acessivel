@@ -103,6 +103,31 @@ export interface Work extends Record<FeatureFlag, boolean> {
   access?: { required: boolean; granted: boolean; reason: MotivoAcesso };
 }
 
+/**
+ * Autoria com obra publicada. Não há cadastro de autor no Livrin: a lista é
+ * derivada das obras aprovadas, e quem publica aparece no mesmo instante.
+ */
+export interface AutorResumo {
+  id: number;
+  name: string;
+  headline: string | null;
+  bio: string | null;
+  worksCount: number;
+  /** Gêneros em que publicou, do mais frequente para o menos. */
+  genres: string[];
+  formats: WorkFormat[];
+  /** Soma de páginas publicadas — a medida honesta do tamanho de uma coleção. */
+  pagesTotal: number;
+  /** Capas das obras mais recentes, para a pilha do card. Até três. */
+  covers: { id: number; title: string; coverUrl: string | null; coverAlt: string | null }[];
+  rating: { average: number; count: number };
+}
+
+/** O mesmo resumo, com a coleção completa. */
+export interface AutorDetalhe extends AutorResumo {
+  works: Work[];
+}
+
 export interface MyWork extends Work {
   reviewProgress: number;
 }

@@ -23,6 +23,8 @@ const Biblioteca = lazy(() => import('./pages/Biblioteca'));
 const Historico = lazy(() => import('./pages/Historico'));
 const Planos = lazy(() => import('./pages/Planos'));
 const Sobre = lazy(() => import('./pages/Sobre'));
+const Autores = lazy(() => import('./pages/Autores'));
+const AutorColecao = lazy(() => import('./pages/AutorColecao'));
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
 const AdminWorks = lazy(() => import('./pages/admin/AdminWorks'));
@@ -66,6 +68,8 @@ export default function App() {
                 conseguir ler o que o plano oferece antes de criar uma. */}
             <Route path="/planos" element={<Planos />} />
             <Route path="/sobre" element={<Sobre />} />
+            <Route path="/autores" element={<Autores />} />
+            <Route path="/autores/:id" element={<AutorColecao />} />
             {/* Qualquer conta autenticada */}
             <Route element={<RequireAuth />}>
               <Route path="/profile" element={<Profile />} />

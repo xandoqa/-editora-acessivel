@@ -1,5 +1,5 @@
 import { NavLink, useNavigate } from 'react-router-dom';
-import { BookOpenText, ClipboardList, Crown, History, LayoutDashboard, Library, LibraryBig, LogOut, PersonStanding, ShieldCheck, SquarePlus, UserRoundCog } from 'lucide-react';
+import { BookOpenText, ClipboardList, Crown, History, Users, LayoutDashboard, Library, LibraryBig, LogOut, PersonStanding, ShieldCheck, SquarePlus, UserRoundCog } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import { useMySummary } from '../../hooks/queries';
@@ -50,6 +50,10 @@ export default function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   // A navegação acompanha o papel: leitores não veem a área de publicação.
   // Esconder o menu é conveniência; quem recusa de fato é a API.
   const items: NavItem[] = [{ to: '/', label: t('nav.inicio'), icon: <BookOpenText className="h-5 w-5" />, end: true }];
+
+  // Autores vem logo depois do início: é a outra forma de entrar no acervo
+  // — por quem escreveu, e não por formato ou recurso assistivo.
+  items.push({ to: '/autores', label: t('nav.autores'), icon: <Users className="h-5 w-5" /> });
 
   if (isWriter) {
     items.push(

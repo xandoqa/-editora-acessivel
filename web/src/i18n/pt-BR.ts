@@ -240,4 +240,54 @@ export const ptBR = {
   'idioma.fr': 'Français',
   'idioma.aviso':
     'A interface muda de idioma. As obras, sinopses e avaliações continuam no idioma em que foram escritas.',
+  // --- Vitrine de lançamentos (3.7.0) ------------------------------------
+  'vitrine.olho': 'Chegou agora',
+  'vitrine.titulo': 'Estante em movimento',
+  'vitrine.chamada':
+    'As publicações mais recentes do acervo, com capa, formato e os recursos de acessibilidade que cada uma traz.',
+  'vitrine.anterior': 'Ver títulos anteriores',
+  'vitrine.proximo': 'Ver próximos títulos',
+  'vitrine.verTudo': 'Ver o catálogo inteiro',
+  'vitrine.vazio': 'Nenhuma obra publicada ainda. Assim que a primeira for aprovada, ela aparece aqui.',
+  'vitrine.posicao': 'Título {n} de {total}',
+  'vitrine.paginas': '{n} páginas',
+  'vitrine.semCapa': 'Obra sem capa enviada',
+  'vitrine.instrucao': 'Use as setas do teclado para percorrer os títulos.',
+
+  // --- Roleta de autores (3.7.0) -----------------------------------------
+  'roleta.olho': 'Quem escreve aqui',
+  'roleta.titulo': 'Autores que sustentam o Livrin',
+  'roleta.chamada': 'Gire a roleta para conhecer quem publica no acervo e abrir a coleção de cada um.',
+  'roleta.ficcao':
+    'Autoria fictícia, criada para esta demonstração. Os retratos são desenhos geométricos gerados a partir do nome — não há foto de pessoa real, e nenhuma frase aqui é depoimento atribuído a alguém.',
+  'roleta.girar': 'Girar a roleta',
+  'roleta.anterior': 'Autor anterior',
+  'roleta.proximo': 'Próximo autor',
+  'roleta.verColecao': 'Ver a coleção',
+  'roleta.selecionar': 'Selecionar {nome}',
+  'roleta.grupo': 'Autores do acervo',
+  'roleta.obras': '{n} obras',
+  'roleta.umaObra': '1 obra',
+
+  // --- Autores e coleções (3.7.0) ----------------------------------------
+  'autores.titulo': 'Coleções por autor',
+  'autores.subtitulo':
+    'Cada autoria do acervo com a sua estante completa. A lista sai das obras aprovadas: quem publica aparece aqui no mesmo instante.',
+  'autores.vazio': 'Ainda não há autoria com obra publicada.',
+  'autores.erro': 'Não foi possível carregar os autores.',
+  'autores.obras': 'obras',
+  'autores.umaObra': 'obra',
+  'autores.paginas': 'páginas',
+  'autores.generos': 'Gêneros',
+  'autores.verColecao': 'Ver coleção completa',
+  'autores.colecaoDe': 'Coleção de {nome}',
+  'autores.sobre': 'Sobre a autoria',
+  'autores.naLista': 'Todos os autores',
+  'autores.destaque': 'Mais recente',
+  'autores.avaliacao': '{nota} de média em {n} avaliações',
+  'autores.semAvaliacao': 'Ainda sem avaliações',
+  'autores.naoEncontrado': 'Autoria não encontrada ou ainda sem obra publicada.',
+  'autores.estante': 'A estante completa',
+  'autores.ficcional': 'Autoria fictícia, criada para a demonstração do projeto.',
+  'nav.autores': 'Autores',
 } as const;

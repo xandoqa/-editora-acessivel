@@ -72,14 +72,15 @@ describe('POST /api/contato', () => {
   });
 
   it('recusa mensagem curta demais, e-mail inválido e assunto inventado', async () => {
+    // 400: é o que o tratador de erros devolve para ZodError em todo o projeto.
     const curta = await api().post('/api/contato').send({ ...MENSAGEM_VALIDA, message: 'oi' });
-    expect(curta.status).toBe(422);
+    expect(curta.status).toBe(400);
 
     const email = await api().post('/api/contato').send({ ...MENSAGEM_VALIDA, email: 'não-é-email' });
-    expect(email.status).toBe(422);
+    expect(email.status).toBe(400);
 
     const assunto = await api().post('/api/contato').send({ ...MENSAGEM_VALIDA, subject: 'QUALQUER_COISA' });
-    expect(assunto.status).toBe(422);
+    expect(assunto.status).toBe(400);
   });
 
   it('recusa quando o campo-armadilha vem preenchido', async () => {
@@ -89,7 +90,7 @@ describe('POST /api/contato', () => {
       .post('/api/contato')
       .send({ ...MENSAGEM_VALIDA, website: 'http://spam.example' });
 
-    expect(res.status).toBe(422);
+    expect(res.status).toBe(400);
     // E nada foi gravado: o robô não entra na caixa de entrada.
     expect((await db.select().from(contactMessages)).length).toBe(antes);
   });

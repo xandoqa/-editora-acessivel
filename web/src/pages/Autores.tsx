@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, BookMarked, Library, Users } from 'lucide-react';
+import { BookMarked, Library, Users } from 'lucide-react';
 import { useAutores } from '../hooks/queries';
 import { errorMessage } from '../lib/api';
 import { formatNumber } from '../lib/format';

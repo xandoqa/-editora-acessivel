@@ -3,6 +3,7 @@ import { Check, ChevronDown, Moon, Palette, Sun } from 'lucide-react';
 import { usePreferences } from '../../preferences/PreferencesContext';
 import { TEMAS, infoDoTema } from '../../preferences/temas';
 import { useT } from '../../i18n/I18nContext';
+import { PAINEL_FLUTUANTE } from './painelFlutuante';
 
 /**
  * Seletor de tema.
@@ -89,7 +90,11 @@ export default function SeletorDeTema({ classeBotao }: { classeBotao: string }) 
       </button>
 
       {aberto && (
-        <div role="menu" aria-label={t('tema.seletor')} className="card absolute right-0 top-12 z-40 w-72 max-w-[calc(100vw-1.5rem)] p-2 shadow-card">
+        <div
+          role="menu"
+          aria-label={t('tema.seletor')}
+          className={`card ${PAINEL_FLUTUANTE} z-40 max-w-[calc(100vw-1.5rem)] p-2 shadow-card sm:w-72`}
+        >
           <p className="px-3 pb-1 pt-1 text-xs font-bold uppercase tracking-wider text-ink-subtle">
             <Palette className="mr-1 inline h-3.5 w-3.5" aria-hidden />
             {t('tema.claros')}

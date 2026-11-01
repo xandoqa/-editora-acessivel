@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Check, ChevronDown, Languages } from 'lucide-react';
 import { useI18n } from '../../i18n/I18nContext';
 import { IDIOMAS, infoDoIdioma } from '../../i18n/tipos';
+import { PAINEL_FLUTUANTE } from './painelFlutuante';
 
 /**
  * Seletor de idioma.
@@ -59,7 +60,7 @@ export default function SeletorDeIdioma({ classeBotao }: { classeBotao: string }
         <div
           role="menu"
           aria-label={t('idioma.seletor')}
-          className="card absolute right-0 top-12 z-40 w-72 max-w-[calc(100vw-1.5rem)] p-2 shadow-card"
+          className={`card ${PAINEL_FLUTUANTE} z-40 max-w-[calc(100vw-1.5rem)] p-2 shadow-card sm:w-72`}
         >
           {IDIOMAS.map((info) => (
             <button

@@ -2,6 +2,62 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.6.4] — 2026-11-01
+
+### Correção: o painel dos seletores saía da tela no celular
+
+Abrir o seletor de tema (ou de idioma) num celular jogava metade do painel para
+fora da tela, pela esquerda. A parte de fora não dava para tocar — na prática,
+o seletor ficava inutilizável em tela estreita.
+
+**Causa.** O painel era `absolute right-0`: ancorado na borda direita do
+**botão**, crescendo para a esquerda. Isso serve para o último controle da
+barra — o menu do avatar está colado na direita e tem a tela inteira para
+crescer. Não serve para um botão no meio da barra. Numa tela de 412px, o botão
+de tema fica a uns 150px da esquerda; um painel de 288px crescendo dali começa
+em −138px.
+
+O `max-w-[calc(100vw-1.5rem)]` que já estava lá não protegia nada: o painel não
+era largo demais, estava no lugar errado. Largura e posição são problemas
+diferentes, e eu tinha tratado só o primeiro.
+
+**Correção.** Abaixo de 640px o painel deixa de ser ancorado no botão e vira
+uma faixa presa à tela, com folga nas duas bordas — não tem como sair, qualquer
+que seja a posição do botão. De 640px para cima continua o menu ancorado de
+sempre, que ali tem espaço de sobra. O posicionamento virou uma constante única
+(`web/src/components/layout/painelFlutuante.ts`) usada pelos dois seletores, em
+vez de duas cópias da mesma classe.
+
+### O que não mudou, de propósito
+
+O **menu do avatar** e o **painel da leitura em voz** continuam como estavam. O
+avatar é o último controle da barra, então `right-0` já o mantém dentro da
+tela; o painel de voz vive no grupo de acessibilidade, que é `hidden sm:flex` e
+não existe abaixo de 640px. Trocar o posicionamento dos dois seria mexer no que
+não está quebrado — e os dois estão registrados como exceção, com o motivo
+escrito, dentro da verificação.
+
+### A verificação ganhou uma terceira regra
+
+`ferramentas/conferir-posicionamento.py` agora também reprova **qualquer painel
+novo** com `absolute right-0` fora da lista de exceções. Quem escrever o
+próximo seletor é obrigado a decidir: ou usa `PAINEL_FLUTUANTE`, ou registra o
+motivo pelo qual aquele botão específico é seguro.
+
+A correção foi medida em navegador headless varrendo **a variável que causou o
+bug**: a posição do botão. Seis larguras de tela (360 a 1280) × seis posições de
+botão × com e sem `backdrop-filter` na barra — 72 medições —, conferindo que o
+painel fica dentro da tela e que os itens respondem a toque
+(`elementFromPoint`). Em 412px com o botão no meio da barra:
+
+| | borda esquerda → direita do painel |
+| --- | --- |
+| antes | −116 → 172 (tela 0 → 412) |
+| depois | 12 → 400 |
+
+O CSS antigo reprova nesse mesmo teste, que é como se sabe que ele mede alguma
+coisa.
+
 ## [3.6.3] — 2026-11-01
 
 ### Correção: a 3.6.2 quebrou o layout

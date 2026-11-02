@@ -28,6 +28,7 @@ Sem argumentos, confere todos os .tsx de web/src. Sai com 1 se achar problema.
 
 from __future__ import annotations
 
+import re
 import sys
 from pathlib import Path
 
@@ -215,6 +216,20 @@ def conferir(caminho: Path) -> list[str]:
 
     for nome, linha in pilha:
         problemas.append(f"{relativo}:{linha}  <{nome}> aberta e nunca fechada")
+
+    # RAIZ ÚNICA.
+    #
+    # `return (` seguido de um comentário JSX e DEPOIS do elemento deixa dois
+    # irmãos na raiz, e o compilador exige um pai só. O balanceamento de tags
+    # continua perfeito nesse caso — foi por isso que este verificador deixou
+    # passar exatamente esse erro, escrito por mim, na 3.8.3.
+    for m in re.finditer(r"return \(\s*\{\s*/\*", texto):
+        problemas.append(
+            f"{relativo}:{texto[: m.start()].count(chr(10)) + 1}  "
+            "`return (` seguido de comentário JSX e só então do elemento — "
+            "isso deixa dois irmãos na raiz. Ponha o comentário antes do "
+            "`return`, ou dentro do elemento."
+        )
     return problemas
 
 
@@ -237,6 +252,7 @@ def main() -> int:
     print(f"JSX: OK — {len(alvos)} arquivo(s)")
     print("  - todas as tags fecham na ordem certa")
     print("  - nenhum elemento clicável dentro de outro")
+    print("  - nenhum `return (` com comentário antes do elemento raiz")
     return 0
 
 

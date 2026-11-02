@@ -2,6 +2,59 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.8.3] — 2026-11-02
+
+Consistência de forma nos botões. Era o defeito que vinha sendo reportado desde
+o dia 1º e que eu diagnosticara errado duas vezes.
+
+### Botão de ícone é redondo
+
+`.icon-btn` era um quadrado de cantos irregulares (`12px 14px 12px 14px`), o
+mesmo recorte do `.card` e do `.btn`. Em botão com texto esse recorte é a
+identidade do projeto e continua valendo. Em botão de ícone, dois problemas se
+somavam:
+
+1. **A borda é transparente em repouso.** A forma só aparecia quando o mouse
+   chegava — e o que aparecia era um quadrado, do nada.
+2. **Esses botões convivem com coisas redondas o tempo todo:** as cápsulas de
+   acessibilidade (`rounded-full`), o avatar, os retratos dos autores, as setas
+   da roleta, a pílula do Fale Conosco. Metade redonda e metade quadrada, lado a
+   lado, na mesma barra.
+
+Uma linha resolveu em **31 botões de 15 arquivos** — todos têm altura igual à
+largura, então nenhum virou oval. Mais três botões de ícone que não usavam a
+classe e estavam quadrados: as duas setas de página do leitor e o olho de
+mostrar senha.
+
+Nas setas do leitor a forma ficou redonda mas o efeito continua sendo
+**opacidade**, e não o fundo preenchendo: aquela área usa a paleta de leitura
+escolhida pela pessoa, e um fundo tirado dos tokens do site destoaria dela.
+
+### Uma animação, não três
+
+O botão flutuante do Fale Conosco tinha três efeitos ao mesmo tempo: o cartão
+subia meio pixel, um balão de quadrinho aparecia por cima e o X mudava de cor.
+Subir no hover era o único lugar do site que fazia isso; balão era o único popup
+de passar o mouse.
+
+Ficou um: **o fundo preenche**, que é o padrão dos outros 24 controles do site.
+O balão saiu também porque escrevia a MESMA frase que já está na linha de apoio
+do botão — texto duplicado e uma animação a mais para dizer o que já estava
+dito. O desenho do balão continua em `ui/Quadrinhos` para quem precisar.
+
+Na mesma régua, o cartão de autor perdeu o `hover:shadow`: era o único hover de
+sombra do site. Ele já responde pelo sublinhado do título.
+
+### `conferir-formas.py` na integração contínua
+
+Verifica que `.icon-btn` continua redondo e que nenhum botão só de ícone usa
+canto quadrado. Nenhuma auditoria anterior pegou isso porque todas olhavam
+estrutura — import, rota, migration, tradução — e **nenhuma olhava forma**.
+
+O projeto tem dois formatos e os dois têm lugar: recorte irregular para cartão e
+botão com texto, que é a identidade; redondo para botão de ícone. Misturar os
+dois lado a lado é o que não funciona.
+
 ## [3.8.2] — 2026-11-02
 
 Correção dos defeitos de interação da roleta de autores, relatados por quem

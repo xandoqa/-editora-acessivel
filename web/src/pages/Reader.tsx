@@ -451,14 +451,21 @@ export default function Reader() {
                 </span>
                 <span className="truncate">{chapterAd?.chapterTitle ?? work.title}</span>
               </h2>
+              {/*
+                Redondas, como todo botão de ícone do site. Mas o efeito aqui é
+                OPACIDADE, e não o fundo preenchendo: esta área usa a paleta de
+                leitura escolhida pela pessoa (papel, sépia, amarelo...), e um
+                fundo tirado dos tokens do site destoaria dela. Opacidade é o
+                único efeito que funciona em qualquer paleta.
+              */}
               <nav className="flex items-center gap-1" aria-label="Paginação do leitor">
-                <button type="button" className="alvo-ampliado relative inline-flex h-10 w-10 items-center justify-center rounded-lg hover:opacity-80 disabled:opacity-30" onClick={() => goTo(page - 1)} disabled={page <= 1} aria-label="Página anterior">
+                <button type="button" className="alvo-ampliado relative inline-flex h-10 w-10 items-center justify-center rounded-full hover:opacity-80 disabled:opacity-30" onClick={() => goTo(page - 1)} disabled={page <= 1} aria-label="Página anterior">
                   <ChevronLeft className="h-5 w-5" aria-hidden />
                 </button>
                 <span className="min-w-[110px] text-center text-sm font-semibold" aria-live="polite">
                   Pág {pad2(page)} / {pad2(totalPages)}
                 </span>
-                <button type="button" className="alvo-ampliado relative inline-flex h-10 w-10 items-center justify-center rounded-lg hover:opacity-80 disabled:opacity-30" onClick={() => goTo(page + 1)} disabled={page >= totalPages} aria-label="Próxima página">
+                <button type="button" className="alvo-ampliado relative inline-flex h-10 w-10 items-center justify-center rounded-full hover:opacity-80 disabled:opacity-30" onClick={() => goTo(page + 1)} disabled={page >= totalPages} aria-label="Próxima página">
                   <ChevronRight className="h-5 w-5" aria-hidden />
                 </button>
               </nav>

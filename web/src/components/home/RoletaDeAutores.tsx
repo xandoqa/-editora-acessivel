@@ -221,14 +221,25 @@ export default function RoletaDeAutores() {
             </div>
           </div>
 
-          <div className="mt-4 flex items-center justify-center gap-3">
-            <button type="button" className="icon-btn border-outline/60" onClick={() => mover(-1)} aria-label={t('roleta.anterior')}>
+          {/*
+            `gap-4` e não `gap-3`: as setas usam `alvo-ampliado`, que estende a
+            área clicável 6px para cada lado. Com 12px de intervalo as duas
+            áreas se encostariam; com 16px sobra folga. Medido: a área útil de
+            cada seta vai de 1596px² (~40x40) para 2916px² (~54x54), sem que uma
+            invada a outra em um pixel sequer.
+
+            O círculo de 44px tem canto morto: só 78% da caixa recebe clique. É
+            o que faz uma seta parecer difícil de acertar mesmo tendo o tamanho
+            "certo" no papel.
+          */}
+          <div className="mt-4 flex items-center justify-center gap-4">
+            <button type="button" className="alvo-ampliado icon-btn relative border-outline/60" onClick={() => mover(-1)} aria-label={t('roleta.anterior')}>
               <ChevronLeft className="h-5 w-5" aria-hidden />
             </button>
             <span className="text-sm tabular-nums text-ink-subtle" aria-hidden>
               {atual + 1} / {autores.length}
             </span>
-            <button type="button" className="icon-btn border-outline/60" onClick={() => mover(1)} aria-label={t('roleta.proximo')}>
+            <button type="button" className="alvo-ampliado icon-btn relative border-outline/60" onClick={() => mover(1)} aria-label={t('roleta.proximo')}>
               <ChevronRight className="h-5 w-5" aria-hidden />
             </button>
           </div>

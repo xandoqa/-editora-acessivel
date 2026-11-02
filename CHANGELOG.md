@@ -2,6 +2,26 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.8.5] — 2026-11-02
+
+Área de toque das setas de carrossel, medida.
+
+O círculo de 44px tem **canto morto**: só 78% da caixa recebe clique. Medido
+numa varredura ponto a ponto, a área útil de cada seta era **1596px² — cerca de
+40x40**, mesmo tendo 44px no papel. É o que faz uma seta parecer difícil de
+acertar.
+
+As setas da roleta e da vitrine ganharam `alvo-ampliado`, que estende a área
+clicável 6px para cada lado, e o intervalo entre elas subiu para 16px para que
+as duas áreas não se encostem.
+
+| | área útil por seta | invade a vizinha |
+| --- | --- | --- |
+| antes | 1596px² (~40x40) | — |
+| depois | **2916px² (~54x54)** | **0px²** |
+
+Nenhuma mudança visual: o pseudo-elemento é invisível.
+
 ## [3.8.4] — 2026-11-02
 
 **O indicador de foco estava sobrescrevendo a forma de todo elemento do site.**

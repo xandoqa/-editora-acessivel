@@ -2,6 +2,62 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.8.4] — 2026-11-02
+
+**O indicador de foco estava sobrescrevendo a forma de todo elemento do site.**
+É a causa real do defeito reportado três vezes — "ao clicar, fica quadrado" — e
+nem a 3.8.3 nem as duas tentativas anteriores tinham chegado nela.
+
+### A causa
+
+```css
+:focus-visible {
+  outline: 3px solid rgb(var(--c-primary));
+  outline-offset: 2px;
+  border-radius: 6px;   /* <- aqui */
+}
+```
+
+A intenção do `border-radius: 6px` era arredondar o contorno em link de texto,
+que não tem raio nenhum. O efeito real era outro: `:focus-visible` é
+pseudoclasse, de especificidade **0-1-0 — a mesma de `.rounded-full`** — e está
+declarado depois do `@tailwind utilities`. Empate de especificidade é decidido
+pela ordem no arquivo, então esta regra vencia.
+
+Medido em navegador: ao receber foco, **todo elemento redondo do site** virava
+um quadrado de 6px.
+
+| Elemento | Em repouso | Com foco |
+| --- | --- | --- |
+| Botão de ícone | 9999px | **6px** |
+| Avatar | 9999px | **6px** |
+| Retrato de autoria | 9999px | **6px** |
+| Pílula do Fale Conosco | 9999px | **6px** |
+
+É a **mesma armadilha da 3.6.2** — naquela era `position` numa classe única
+disputando com as utilitárias do Tailwind; aqui é `border-radius` numa
+pseudoclasse. Eu tinha escrito a regra que impede o caso do `position` e não
+pensei em estender para forma.
+
+### A correção
+
+Remover `border-radius` das duas regras de foco. O contorno passa a seguir o
+raio de cada elemento, que é o comportamento de todo navegador atual: círculo
+recebe contorno circular, cartão recebe o raio do cartão, e link de texto
+recebe um retângulo — que é o certo para um link. Medido de novo: os quatro
+ficam em 9999px com foco.
+
+### Por que as três correções anteriores não acharam
+
+A 3.8.3 mexeu na forma **em repouso** (`.icon-btn` era um quadrado irregular) e
+no **hover**. Eram defeitos reais e precisavam ser corrigidos. Mas o relato
+dizia "ao CLICAR", e nenhuma das três olhou o estado de **foco** — que é o que
+o clique dispara.
+
+`conferir-formas.py` ganhou a segunda regra: **nenhum seletor de estado
+(`:focus`, `:hover`, `:active`...) pode declarar `border-radius`**. Estado não
+redefine forma.
+
 ## [3.8.3] — 2026-11-02
 
 Consistência de forma nos botões. Era o defeito que vinha sendo reportado desde

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, Link } from 'react-router-dom';
-import { ArrowLeft, BookCopy, Gauge, HandHeart, Menu, MessageSquareQuote, ShieldAlert, Tags, Users, X } from 'lucide-react';
+import { Inbox, ArrowLeft, BookCopy, Gauge, HandHeart, Menu, MessageSquareQuote, ShieldAlert, Tags, Users, X } from 'lucide-react';
 import { useAuth } from '../../auth/AuthContext';
 import { LogoMark } from '../layout/Logo';
 import { Avatar } from '../ui';
@@ -12,6 +12,7 @@ const NAV = [
   { to: '/admin/genres', label: 'Gêneros', icon: Tags },
   { to: '/admin/feedbacks', label: 'Avaliações', icon: MessageSquareQuote },
   { to: '/admin/donations', label: 'Apoios', icon: HandHeart },
+  { to: '/admin/contato', label: 'Fale Conosco', icon: Inbox },
 ];
 
 function AdminNav({ onNavigate }: { onNavigate?: () => void }) {

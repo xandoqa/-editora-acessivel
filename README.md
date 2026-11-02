@@ -8,7 +8,7 @@ Plataforma editorial aberta para quadrinhos e livros independentes, com acessibi
 
 O Livrin existe para que quem não tem como bancar um lançamento tradicional consiga publicar e ser lido. **A autoria decide como cada obra é disponibilizada** — leitura livre, obra paga ou leitura livre com publicidade — e leitura livre continua sendo o padrão. O apoio financeiro ao projeto é voluntário e nunca condiciona o acesso a uma obra: só a obra que a própria autoria marcou como paga exige aquisição.
 
-**Versão 3.7.0** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede; a 3.5.5 trouxe os seis temas e o sistema de tradução; a 3.5.6 levou os seletores de tema e idioma para junto do perfil; a 3.5.7 levou os recursos de acessibilidade para o menu lateral; a 3.5.8 traduziu o catálogo inteiro e acertou a tipografia e a busca no celular; a 3.6.0 trouxe o rodapé completo e a página **Sobre o Livrin**; a 3.6.1 corrigiu três defeitos encontrados em auditoria; a 3.6.2 trocou as linhas de borda do cabeçalho e da barra lateral por sombra em degradê; a 3.6.3 corrigiu o layout que essa troca quebrou — o cabeçalho voltou a grudar no topo e a barra lateral à altura da tela; a 3.6.4 tirou de fora da tela o painel dos seletores de tema e idioma no celular; e a 3.7.0 trouxe as coleções por autor, a vitrine de lançamentos e a roleta de autores.
+**Versão 3.8.0** — veja o [CHANGELOG](CHANGELOG.md) e o [relatório final](docs/relatorio-final.md). A 3.0.0 foi a auditoria completa; a série 3.1.x trouxe as obras de demonstração com conteúdo de leitura real, a revisão visual e as correções de leitura de PDF; a 3.2.0 trouxe a monetização e a aquisição de obras; a 3.3.0 fechou uma brecha de acesso a obra paga, levou a publicidade para dentro da leitura e criou o plano do leitor; a 3.4.0 trouxe a janela de Libras; a 3.5.0 trouxe o histórico de leitura, a página de planos e a audiodescrição que funciona em toda obra; a 3.5.1 corrigiu o layout do player de audiodescrição e passou a identificar a bandeira do cartão pelo número; a 3.5.2 deu licença ao repositório e organizou o que faltava em volta do código; a 3.5.3 aplicou as correções de uma auditoria completa; a 3.5.4 trouxe o plano B da apresentação, com a janela de Libras avisando na hora quando não há rede; a 3.5.5 trouxe os seis temas e o sistema de tradução; a 3.5.6 levou os seletores de tema e idioma para junto do perfil; a 3.5.7 levou os recursos de acessibilidade para o menu lateral; a 3.5.8 traduziu o catálogo inteiro e acertou a tipografia e a busca no celular; a 3.6.0 trouxe o rodapé completo e a página **Sobre o Livrin**; a 3.6.1 corrigiu três defeitos encontrados em auditoria; a 3.6.2 trocou as linhas de borda do cabeçalho e da barra lateral por sombra em degradê; a 3.6.3 corrigiu o layout que essa troca quebrou — o cabeçalho voltou a grudar no topo e a barra lateral à altura da tela; a 3.6.4 tirou de fora da tela o painel dos seletores de tema e idioma no celular; a 3.7.0 trouxe as coleções por autor, a vitrine de lançamentos e a roleta de autores; e a 3.8.0 trouxe o Fale Conosco funcionando, o mascote Pingo e a faixa honesta de selos.
 
 ---
 
@@ -779,6 +779,54 @@ node --experimental-strip-types ferramentas/previa-retratos.mjs
 Gera [docs/design/previa-retratos.png](docs/design/previa-retratos.png) importando **o mesmo módulo que o site desenha**. Existe porque a primeira versão do busto tinha um erro que nenhum teste pegaria: o arco dos ombros era um semicírculo, subia até a altura da cabeça e a engolia. SVG válido, tipos válidos, contraste intacto — e o desenho errado.
 
 Decisões e alternativas descartadas: [ADR 021](docs/decisions/021-autores-e-retratos.md).
+
+---
+
+## Fale Conosco
+
+`/contato` é um formulário que funciona de verdade, com uma regra no centro: **gravar primeiro, entregar depois**.
+
+A mensagem vai para o banco antes de qualquer tentativa de envio. O e-mail é uma segunda etapa, e o resultado dela fica registrado. Entrega falha de um jeito que a tela não prevê — servidor fora, senha de app revogada, rede caída —, e uma mensagem que só existisse no caminho do envio sumiria junto com a falha.
+
+Por isso a API responde `gravada` e `entregue` **separadamente**, e a tela diz os dois, com número de protocolo:
+
+| Situação | O que a pessoa vê |
+| --- | --- |
+| SMTP configurado e funcionando | "Guardada e o e-mail já saiu" |
+| Sem SMTP, ou envio falhou | "Guardada e aparece na caixa da equipe; o envio por e-mail está desligado" |
+
+Em Administração → **Fale Conosco** estão todas as mensagens, com o resultado da entrega de cada uma e um aviso no topo quando o envio está desligado. Sem esse aviso, o administrador olha para "e-mail não saiu" em tudo e procura defeito onde não há.
+
+### Para as mensagens chegarem no seu e-mail
+
+Quatro linhas no `api/.env` (que não é versionado) e reiniciar a API:
+
+```bash
+CONTATO_EMAIL_DESTINO=seu-endereco@gmail.com
+SMTP_HOST=smtp.gmail.com
+SMTP_USER=seu-endereco@gmail.com
+SMTP_PASS=a-senha-de-app-de-16-letras
+```
+
+`SMTP_PASS` é **senha de app**, nunca a senha da conta: no Gmail ela é gerada em Conta Google → Segurança → Senhas de app, e exige verificação em duas etapas ligada. O endereço não está escrito no repositório de propósito — e-mail pessoal em repositório público é varrido por robô de spam em poucos dias.
+
+**Sem nada disso configurado o formulário funciona por inteiro**, e é assim que ele roda na apresentação sem internet.
+
+### Sem "não sou um robô"
+
+O desafio de caixinha é barreira conhecida de acessibilidade, e pô-lo na única tela onde alguém pede ajuda contradiria o projeto. No lugar: campo-armadilha invisível, limitador de 5 mensagens por IP a cada 15 minutos, e limites de tamanho. A própria tela explica isso.
+
+### Pingo
+
+O mascote é uma gota de tinta com fone de atendimento — a identidade do projeto é papel e traço de tinta, e a logo é um livro que fala; o Pingo fecha o par, a tinta que escuta. Quatro humores, todos em tokens, nos sete temas.
+
+```bash
+node --experimental-strip-types ferramentas/previa-mascote.mjs
+```
+
+Gera [docs/design/previa-mascote.png](docs/design/previa-mascote.png) importando o mesmo módulo de geometria que o site usa.
+
+Decisões e o que foi recusado das referências: [ADR 022](docs/decisions/022-fale-conosco.md).
 
 ---
 

@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import * as authCtrl from '../controllers/auth.controller';
 import * as authorsCtrl from '../controllers/authors.controller';
+import * as contactCtrl from '../controllers/contact.controller';
 import * as donationsCtrl from '../controllers/donations.controller';
 import * as meCtrl from '../controllers/me.controller';
 import * as purchasesCtrl from '../controllers/purchases.controller';
 import * as worksCtrl from '../controllers/works.controller';
 import { authenticate, optionalAuth, requireWriter } from '../middlewares/auth';
-import { authLimiter, cobrancaLimiter, sessionLimiter } from '../middlewares/rate-limit';
+import { authLimiter, cobrancaLimiter, contatoLimiter, sessionLimiter } from '../middlewares/rate-limit';
 import { workUpload } from '../middlewares/upload';
 import adminRoutes from './admin';
 
@@ -69,6 +70,11 @@ router.post('/works/:id/feedbacks', authenticate, worksCtrl.upsertFeedback);
 router.post('/works/:id/sessions', sessionLimiter, optionalAuth, worksCtrl.startSession);
 // Exige o cabeçalho X-Session-Token devolvido na criação da sessão.
 router.patch('/sessions/:sessionId', worksCtrl.updateSession);
+
+/* ---------------------------- Fale Conosco ---------------------------- */
+// `optionalAuth` para a mensagem guardar quem estava logado, sem exigir conta:
+// quem precisa de ajuda muitas vezes é justamente quem não conseguiu entrar.
+router.post('/contato', contatoLimiter, optionalAuth, contactCtrl.enviar); // público
 
 /* ------------------------------ Doações ------------------------------- */
 router.get('/donations/options', donationsCtrl.options); // público

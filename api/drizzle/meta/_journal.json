@@ -71,6 +71,13 @@
       "when": 1793056051847,
       "tag": "0009_autores",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1793142451847,
+      "tag": "0010_contato",
+      "breakpoints": true
     }
   ]
 }

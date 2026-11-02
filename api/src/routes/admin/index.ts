@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as admin from '../../controllers/admin/admin.controller';
+import * as contact from '../../controllers/contact.controller';
 import * as donations from '../../controllers/donations.controller';
 import { authenticate, requireAdmin } from '../../middlewares/auth';
 import { workUpload } from '../../middlewares/upload';
@@ -32,6 +33,11 @@ router.patch('/works/:id/checks/:checkId', admin.updateCheck);
 router.delete('/works/:id/checks/:checkId', admin.deleteCheck);
 router.post('/works/:id/notes', admin.addNote);
 router.delete('/notes/:id', admin.deleteNote);
+
+// Caixa de entrada do Fale Conosco.
+router.get('/contact-messages', contact.listar);
+router.patch('/contact-messages/:id', contact.mudarStatus);
+router.delete('/contact-messages/:id', contact.apagar);
 
 router.get('/genres', admin.listGenres);
 router.post('/genres', admin.createGenre);

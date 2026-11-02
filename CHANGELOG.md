@@ -2,6 +2,89 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.8.0] — 2026-11-01
+
+Fale Conosco funcionando de verdade, mascote próprio e a linguagem de
+quadrinho desenhada para o projeto. Nenhuma funcionalidade removida.
+
+### O formulário de contato funciona — e diz a verdade sobre o que fez
+
+`/contato` grava a mensagem e, quando o SMTP está configurado, manda por
+e-mail. A ordem é essa e importa: **gravar primeiro, entregar depois**.
+Entrega de e-mail falha de um jeito que a tela não prevê — servidor fora,
+senha de app revogada, rede caída. Se a mensagem só existisse no caminho do
+envio, ela sumiria junto com a falha, e quem escreveu ficaria esperando
+resposta a um pedido que ninguém recebeu.
+
+Por isso a API responde `gravada` e `entregue` **separadamente**, e a tela diz
+os dois, com número de protocolo. Sem SMTP, ou sem internet, o formulário
+continua inteiro: a mensagem aparece em Administração → Fale Conosco. É também
+o modo da apresentação sem rede.
+
+A caixa de entrada mostra o resultado da entrega por mensagem, com aviso no
+topo quando o envio está desligado — sem ele, o administrador olha para
+"e-mail não saiu" em tudo e procura defeito onde não há.
+
+### Cliente SMTP escrito no projeto, sem dependência nova
+
+O lock está travado, a integração contínua roda `npm ci` e o registro npm não
+era alcançável. SMTP é um protocolo de texto de 1982: seis comandos. Estão em
+`api/src/services/smtp.ts`, com cinco testes contra um servidor de brinquedo
+que fala o protocolo de verdade — incluindo os três erros clássicos de cliente
+caseiro: resposta de várias linhas lida pela metade, acento virando lixo no
+assunto, e autenticação recusada tratada como sucesso.
+
+### Sem "não sou um robô"
+
+O desafio de caixinha é barreira conhecida de acessibilidade: o visual é
+impossível para quem não enxerga, o sonoro falha com frequência, e o invisível
+julga movimento de mouse — que quem navega por teclado não produz. Pôr
+justamente esse controle na **única tela onde alguém pede ajuda**, numa
+plataforma de acessibilidade, seria contradizer a proposta no pior lugar.
+
+No lugar: campo-armadilha invisível, limitador próprio de 5 mensagens por IP a
+cada 15 minutos, e limites de tamanho. A tela explica isso em voz alta, porque
+ausência de captcha costuma ser lida como descuido.
+
+### Pingo, o mascote
+
+Uma gota de tinta com fone de atendimento. A identidade do projeto é papel e
+traço de tinta, e a logo é um livro que fala — o mascote fecha o par: a tinta
+que escuta. Quatro humores (`oi`, `escutando`, `enviado`, `ops`), todos em
+tokens, acompanhando os sete temas.
+
+A geometria mora em `pingo.ts` para `ferramentas/previa-mascote.mjs` desenhar
+exatamente o que o site desenha, e isso pagou duas vezes: na prévia apareceu
+que o arco do fone sumia sobre a gota (tinta sobre tinta) e que as
+sobrancelhas do `ops` desciam para dentro, deixando o Pingo com **cara de
+bravo** em vez de preocupado — o oposto do que uma tela de erro deve passar.
+
+O botão flutuante é um **link**, não um chat: chat exige alguém do outro lado.
+Dá para fechar, lembra da escolha, e some sozinho no leitor, nas telas de conta
+e na própria página de contato.
+
+### A faixa de selos do rodapé, na versão honesta
+
+A referência trazia bandeiras de cartão, logotipos dos Correios e um selo
+"site seguro". Nenhum entra: são marcas registradas que não são nossas e,
+pior, seriam **mentira** — o pagamento é simulado, não há entrega física e
+ninguém certificou este site.
+
+Ficaram quatro selos do que é verdade e dá para conferir: pagamento simulado,
+contraste AAA medido por script, código aberto sob MIT, trabalho acadêmico. Os
+meios de pagamento continuam nomeados em texto; dizer "Pix, cartão e boleto" é
+verdade, desenhar a bandeira da Visa ao lado seria afirmar um acordo que não
+existe.
+
+### Linguagem de quadrinho, desenhada do zero
+
+Retícula, estrela de impacto, balão de fala e linhas de velocidade, em
+`ui/Quadrinhos.tsx`. A gramática do quadrinho não pertence a ninguém — as
+artes das referências, sim.
+
+Decisões e o que foi recusado da referência, com motivo:
+[ADR 022](docs/decisions/022-fale-conosco.md).
+
 ## [3.7.0] — 2026-11-01
 
 Três seções novas e duas rotas públicas, todas ligadas à API. Nenhuma

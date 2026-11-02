@@ -25,3 +25,4 @@ Cada arquivo responde: o que foi escolhido, por quê, quais alternativas existia
 | [019](019-internacionalizacao.md) | Internacionalização sem biblioteca, com as chaves tipadas a partir do português |
 | [020](020-temas.md) | Seis temas escolhidos por motivo e verificados por medição de contraste |
 | [021](021-autores-e-retratos.md) | Coleções por autor derivadas das obras; retratos desenhados em vez de fotos de pessoas reais |
+| [022](022-fale-conosco.md) | Fale Conosco: gravar antes de entregar, sem captcha, sem selo falso e com mascote próprio |

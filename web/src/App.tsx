@@ -24,6 +24,7 @@ const Historico = lazy(() => import('./pages/Historico'));
 const Planos = lazy(() => import('./pages/Planos'));
 const Sobre = lazy(() => import('./pages/Sobre'));
 const Autores = lazy(() => import('./pages/Autores'));
+const Contato = lazy(() => import('./pages/Contato'));
 const AutorColecao = lazy(() => import('./pages/AutorColecao'));
 const AdminLayout = lazy(() => import('./components/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
@@ -34,6 +35,7 @@ const AdminUsers = lazy(() => import('./pages/admin/AdminUsers'));
 const AdminGenres = lazy(() => import('./pages/admin/AdminGenres'));
 const AdminFeedbacks = lazy(() => import('./pages/admin/AdminFeedbacks'));
 const AdminDonations = lazy(() => import('./pages/admin/AdminDonations'));
+const AdminContato = lazy(() => import('./pages/admin/AdminContato'));
 
 /** Compatibilidade com o link antigo /obras/:id. */
 function LegacyWorkRedirect() {
@@ -68,6 +70,7 @@ export default function App() {
                 conseguir ler o que o plano oferece antes de criar uma. */}
             <Route path="/planos" element={<Planos />} />
             <Route path="/sobre" element={<Sobre />} />
+            <Route path="/contato" element={<Contato />} />
             <Route path="/autores" element={<Autores />} />
             <Route path="/autores/:id" element={<AutorColecao />} />
             {/* Qualquer conta autenticada */}
@@ -99,6 +102,7 @@ export default function App() {
               <Route path="genres" element={<AdminGenres />} />
               <Route path="feedbacks" element={<AdminFeedbacks />} />
               <Route path="donations" element={<AdminDonations />} />
+              <Route path="contato" element={<AdminContato />} />
             </Route>
           </Route>
         </Routes>

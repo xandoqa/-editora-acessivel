@@ -1,6 +1,11 @@
 import { Link } from 'react-router-dom';
+import type { ReactNode } from 'react';
 import {
   Clock,
+  Contrast,
+  GraduationCap,
+  Scale,
+  Wallet,
   Github,
   HandHeart,
   Mail,
@@ -64,12 +69,25 @@ const PUBLICAR_VISITANTE: ItemDeMenu[] = [
 const LIVRIN: ItemDeMenu[] = [
   { rotulo: 'rodape.sobre', para: '/sobre' },
   { rotulo: 'rodape.apoiar', para: '/apoiar' },
+  { rotulo: 'nav.contato', para: '/contato' },
 ];
 
 /** Meios de pagamento que a simulação aceita. Não são bandeiras de cartão. */
 const MEIOS = ['Pix', 'Cartão', 'Boleto'];
 
 const REPOSITORIO = 'https://github.com/xandoqa/-editora-acessivel';
+
+/**
+ * Os quatro selos da faixa. Cada um afirma algo CONFERÍVEL: o contraste tem
+ * script, a licença tem arquivo, a simulação está escrita na tela de compra, e
+ * o caráter acadêmico está no NOTICE. Selo que ninguém pode checar é enfeite.
+ */
+const SELOS: { icone: ReactNode; titulo: ChaveDeTraducao; texto: ChaveDeTraducao }[] = [
+  { icone: <Wallet className="h-5 w-5" aria-hidden />, titulo: 'selo.pagamento', texto: 'selo.pagamentoTexto' },
+  { icone: <Contrast className="h-5 w-5" aria-hidden />, titulo: 'selo.acessibilidade', texto: 'selo.acessibilidadeTexto' },
+  { icone: <Scale className="h-5 w-5" aria-hidden />, titulo: 'selo.codigo', texto: 'selo.codigoTexto' },
+  { icone: <GraduationCap className="h-5 w-5" aria-hidden />, titulo: 'selo.academico', texto: 'selo.academicoTexto' },
+];
 
 function Coluna({ titulo, itens }: { titulo: ChaveDeTraducao; itens: ItemDeMenu[] }) {
   const t = useT();
@@ -151,25 +169,51 @@ export default function Rodape() {
           </div>
         </div>
 
-        {/* Pagamento: o que de fato acontece, no lugar das bandeiras de cartão. */}
-        <div className="mt-10 flex flex-col gap-3 border-t border-outline/25 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wider text-ink-subtle">
-              {t('rodape.pagamentoTitulo')}
-            </p>
-            <p className="mt-1 max-w-xl text-sm text-ink-muted">{t('rodape.pagamentoTexto')}</p>
-          </div>
-          <ul className="flex flex-wrap gap-2" aria-hidden>
-            {MEIOS.map((meio) => (
-              <li
-                key={meio}
-                className="rounded-md border border-outline/50 px-2.5 py-1 text-xs font-semibold text-ink-muted"
-              >
-                {meio}
+        {/*
+          A faixa de selos.
+          ----------------
+          A referência que pediu esta faixa trazia bandeiras de cartão,
+          logotipos dos Correios e um selo "site seguro" do Google. Nenhum dos
+          três entra, e por dois motivos diferentes: são marcas registradas que
+          não são nossas, e todos os três seriam MENTIRA — o pagamento aqui é
+          simulado, não existe entrega física e ninguém certificou este site.
+
+          Selo serve para dizer em que confiar. Um selo falso estraga
+          exatamente a coisa que ele deveria construir. Então a faixa ficou,
+          com o que é verdade — e o que é verdade aqui é verificável: o
+          contraste é medido por script, a licença está no repositório, e a
+          simulação do pagamento está escrita na própria tela de compra.
+        */}
+        <section className="mt-10 border-t border-outline/25 pt-7" aria-labelledby="selos-titulo">
+          <h3 id="selos-titulo" className="eyebrow mb-4 text-center text-ink-subtle">
+            {t('selo.faixa')}
+          </h3>
+          <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            {SELOS.map((selo) => (
+              <li key={selo.titulo} className="flex items-start gap-3">
+                <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-highest text-accent" aria-hidden>
+                  {selo.icone}
+                </span>
+                <span className="min-w-0">
+                  <span className="block text-sm font-bold text-ink">{t(selo.titulo)}</span>
+                  <span className="mt-0.5 block text-xs leading-relaxed text-ink-muted">{t(selo.texto)}</span>
+                </span>
               </li>
             ))}
           </ul>
-        </div>
+
+          {/* Os meios de pagamento continuam nomeados em texto, sem bandeira:
+              dizer "Pix, cartão e boleto" é verdade; desenhar a bandeira da
+              Visa ao lado seria afirmar um acordo que não existe. */}
+          <p className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-ink-subtle">
+            <span className="font-bold uppercase tracking-wider">{t('rodape.pagamentoTitulo')}:</span>
+            {MEIOS.map((meio) => (
+              <span key={meio} className="rounded-md border border-outline/50 px-2 py-0.5 font-semibold text-ink-muted">
+                {meio}
+              </span>
+            ))}
+          </p>
+        </section>
       </div>
 
       <div className="border-t border-outline/25">

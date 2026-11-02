@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MessageCircle, X } from 'lucide-react';
 import { useT } from '../../i18n/I18nContext';
-import { BalaoDeFala } from '../ui/Quadrinhos';
 import Pingo from './Pingo';
 
 /**
@@ -72,7 +71,14 @@ export default function BotaoFaleConosco() {
     <div className="fixed bottom-4 right-4 z-40 flex items-end gap-2 sm:bottom-6 sm:right-6">
       <Link
         to="/contato"
-        className="group/pingo relative flex items-center gap-3 rounded-full border border-outline bg-surface py-2 pl-2 pr-3 shadow-card transition-transform hover:-translate-y-0.5 focus-visible:-translate-y-0.5 sm:pr-5"
+        /*
+          UMA animação, e a mesma do resto do site: o fundo preenche.
+          Tinha três — o cartão subia meio pixel, um balão aparecia por cima e
+          o X mudava de cor. Subir no `hover` era o único lugar do site que
+          fazia isso, e balão aparecendo era o único popup de passar o mouse.
+          Três efeitos diferentes num controle só é o oposto de consistência.
+        */
+        className="flex items-center gap-3 rounded-full border border-outline bg-surface py-2 pl-2 pr-3 shadow-card transition-colors hover:bg-surface-high sm:pr-5"
         aria-label={t('contato.abrir')}
       >
         <span className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-surface-high sm:h-14 sm:w-14">
@@ -88,19 +94,14 @@ export default function BotaoFaleConosco() {
 
         <MessageCircle className="hidden h-4 w-4 shrink-0 text-accent sm:block" aria-hidden />
 
-        {/* Balão de quadrinho que aparece no foco e no passar do mouse. É
-            decorativo: tudo que ele diz já está no rótulo do link. */}
-        <span
-          className="pointer-events-none absolute bottom-full right-2 mb-2 hidden w-56 opacity-0 transition-opacity group-hover/pingo:opacity-100 group-focus-visible/pingo:opacity-100 lg:block"
-          aria-hidden
-        >
-          <span className="relative block">
-            <BalaoDeFala className="h-20 w-full" />
-            <span className="absolute inset-0 flex items-center px-4 pb-4 text-[13px] font-semibold leading-snug text-ink">
-              {t('contato.convite')}
-            </span>
-          </span>
-        </span>
+        {/*
+          O balão de quadrinho saiu.
+
+          Ele escrevia `contato.convite` — exatamente a MESMA frase que já está
+          logo acima, na linha de apoio do botão. Era texto duplicado, uma
+          animação a mais e um popup que nenhum outro lugar do site tem. O
+          desenho do balão continua em `ui/Quadrinhos` para quem precisar dele.
+        */}
       </Link>
 
       <button

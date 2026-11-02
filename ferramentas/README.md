@@ -14,12 +14,14 @@ Python, e cada uma nasceu de um defeito que passou.
 | Script | O que mede | Nasceu de | Reprova o PR? |
 | --- | --- | --- | --- |
 | `conferir-contraste.py` | 273 pares de cor (39 por tema) pela fórmula da WCAG | Tokens de texto discreto abaixo de 7:1 | sim |
+| `conferir-formas.py` | Botão de ícone continua redondo, no CSS e na marcação | `.icon-btn` quadrado ao lado de cápsulas e avatar redondos | sim |
 | `conferir-jsx.py` | Balanceamento das tags JSX de todos os componentes | Sem `node_modules` no ambiente, tag desbalanceada só aparecia no CI | sim |
 | `conferir-posicionamento.py` | Classe única disputando `position`/`display`/`z-index` com o Tailwind; painel ancorado no botão | O layout quebrado da 3.6.2 e o painel fora da tela da 3.6.4 | sim |
 | `conferir-traducao.py` | Quanto da interface ainda não passa pelo dicionário | Listas de texto fixo que nunca eram traduzidas | não — a cobertura é parcial e declarada |
 
 ```bash
 python3 ferramentas/conferir-contraste.py
+python3 ferramentas/conferir-formas.py
 python3 ferramentas/conferir-jsx.py
 python3 ferramentas/conferir-posicionamento.py
 python3 ferramentas/conferir-traducao.py --detalhado

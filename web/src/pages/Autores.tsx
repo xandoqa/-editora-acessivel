@@ -56,8 +56,10 @@ function PilhaDeCapas({ autor }: { autor: AutorResumo }) {
 
 function CardDeAutor({ autor }: { autor: AutorResumo }) {
   const t = useT();
+  // Sem hover de sombra: era o único do site, e o cartão já responde pelo
+  // sublinhado do título, que é um dos três efeitos padrão daqui.
   return (
-    <li className="card flex flex-col gap-4 p-5 transition-shadow hover:shadow-card sm:p-6">
+    <li className="card flex flex-col gap-4 p-5 sm:p-6">
       <div className="flex items-start gap-4">
         <RetratoAutor nome={autor.name} className="h-16 w-16 shrink-0 rounded-full sm:h-[72px] sm:w-[72px]" />
         <div className="min-w-0 flex-1">

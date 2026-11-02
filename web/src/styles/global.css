@@ -615,9 +615,28 @@ p {
   .brand-mark {
     @apply border border-outline bg-primary text-primary-on;
   }
+  /*
+   * Botão de ícone: REDONDO.
+   *
+   * Era um quadrado de cantos irregulares (12px 14px 12px 14px), igual ao
+   * `.card` e ao `.btn`. Nos botões com texto esse recorte é a identidade do
+   * projeto e continua lá. Em botão de ícone ele era um problema, por dois
+   * motivos que se somavam:
+   *
+   *  1. A borda é transparente em repouso. Ou seja, a forma só APARECE quando
+   *     o mouse chega — e o que aparecia era um quadrado, do nada.
+   *  2. Esses botões convivem o tempo todo com coisas redondas: as cápsulas de
+   *     acessibilidade (`tool`, que é `rounded-full`), o avatar, os retratos
+   *     dos autores, as setas da roleta, a pílula do Fale Conosco. Metade
+   *     redonda e metade quadrada, lado a lado, na mesma barra.
+   *
+   * Quem usou descreveu exatamente isso: "algumas partes do site são redondas
+   * e, ao clicar, fica quadrado". São 31 botões em 15 arquivos, todos com
+   * altura igual à largura — por isso uma linha resolve em todos de uma vez,
+   * sem nenhum virar oval.
+   */
   .icon-btn {
-    @apply inline-flex h-11 w-11 items-center justify-center border border-transparent text-ink-muted transition-colors;
-    border-radius: 12px 14px 12px 14px;
+    @apply inline-flex h-11 w-11 items-center justify-center rounded-full border border-transparent text-ink-muted transition-colors;
   }
   .icon-btn:hover {
     @apply border-outline bg-surface-high text-ink;

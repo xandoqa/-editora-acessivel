@@ -94,6 +94,14 @@ jobs:
       - name: Medir o contraste dos sete temas
         run: python3 ferramentas/conferir-contraste.py
 
+      # `.icon-btn` era um quadrado de cantos irregulares com borda
+      # transparente: a forma só aparecia no hover, e aparecia QUADRADA ao lado
+      # de cápsulas, avatar e retratos redondos. Foi reportado duas vezes antes
+      # de alguém entender, e nenhuma auditoria pegou — todas olhavam estrutura,
+      # nenhuma olhava forma.
+      - name: Conferir a forma dos botões de ícone
+        run: python3 ferramentas/conferir-formas.py
+
       # Sem `node_modules` no ambiente onde este projeto é desenvolvido, uma
       # <div> aberta e não fechada só aparecia aqui, dois minutos depois do
       # commit. Este passo responde a mesma pergunta em menos de um segundo —

@@ -45,6 +45,27 @@ services:
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-false}
       DEMO_USER_PASSWORD: ${DEMO_USER_PASSWORD:-}
+      # Os três abaixo já tinham padrão no código e não chegavam ao contêiner:
+      # quem sobe pelo Docker não conseguia ajustá-los. Os valores aqui são os
+      # MESMOS padrões do api/src/config/env.ts, então nada muda de
+      # comportamento — só passa a ser ajustável pelo .env.
+      BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-10}
+      LOG_REQUESTS: ${LOG_REQUESTS:-true}
+      PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:-simulado}
+      # Fale Conosco. Todas vazias por padrão: sem elas o formulário continua
+      # funcionando por inteiro — a mensagem é gravada e aparece na caixa de
+      # entrada da administração. Preenchidas no .env da RAIZ, elas ligam a
+      # segunda etapa, que é o e-mail sair para uma caixa de verdade.
+      #
+      # Elas precisam estar listadas aqui: o Compose não repassa ao contêiner
+      # nada que não esteja nesta lista, e configurá-las só em api/.env não
+      # tem efeito nenhum em quem sobe o projeto pelo Docker.
+      CONTATO_EMAIL_DESTINO: ${CONTATO_EMAIL_DESTINO:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-Livrin - Fale Conosco}
     volumes:
       - uploads:/app/uploads
     ports:

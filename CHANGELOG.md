@@ -2,6 +2,64 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.8.1] — 2026-11-01
+
+Acabamento, auditoria e organização. Nenhuma funcionalidade nova, nenhuma
+removida, nenhuma rota ou API alterada.
+
+### Auditoria técnica
+
+Dezessete varreduras automatizadas mais leitura dirigida de autenticação,
+upload, caminhos de arquivo, cabeçalhos de segurança, CORS e tratamento de
+erros. **Seis defeitos reais corrigidos, todos pequenos e reversíveis**, e
+cinco problemas documentados sem correção porque o risco de mexer hoje é maior
+que o do próprio problema. Relatório completo em
+[docs/auditoria-3.8.1.md](docs/auditoria-3.8.1.md).
+
+O mais importante para a apresentação: **as variáveis do Fale Conosco não
+chegavam ao contêiner**. Elas foram documentadas em `api/.env.example` na
+3.8.0, mas o Compose só repassa ao contêiner o que está no bloco `environment`
+do serviço — então quem sobe pelo `./iniciar.sh` configurava o e-mail e não
+acontecia nada, sem nenhum aviso. Corrigido, junto com três outras variáveis
+que tinham a mesma lacuna.
+
+Também: o `setTimeout` do `?ouvir=1` no leitor não era cancelado na limpeza do
+efeito, e trocar de obra em menos de 300 ms fazia a audiodescrição começar
+sozinha **na obra nova**.
+
+### Retículas como ritmo, com regra escrita
+
+Quatro lugares novos — abertura do catálogo, cartão da roleta de autores,
+cabeçalho da coleção do autor e rodapé —, todos com máscara de desvanecimento
+para que o texto de apoio fique sobre papel limpo.
+
+A regra está escrita no próprio componente, para a próxima retícula não virar
+papel de parede: só atrás de bloco curto, no máximo uma por tela, opacidade
+entre 8% e 14%, e alternando seção com e sem. É o alternado que cria ritmo;
+retícula em tudo não cria nada.
+
+O id do `<pattern>` passou a sair do `useId`. Dois pattern com o mesmo id se
+atropelam — o segundo desenha com a definição do primeiro —, e com várias
+retículas espalhadas era questão de tempo até esquecer de inventar um id novo.
+
+### Verificador de JSX na integração contínua
+
+`ferramentas/conferir-jsx.py`. Este projeto é desenvolvido num ambiente sem
+`node_modules`, então uma `<div>` aberta e não fechada só aparecia dois minutos
+depois, no CI. Ele responde uma pergunta — toda tag que abre fecha, na ordem
+certa? — em menos de um segundo, e não substitui o compilador.
+
+É um varredor caractere a caractere, não expressão regular: JSX tem `>` dentro
+de chaves aninhadas dentro de atributos de quatro linhas. As duas armadilhas
+que ele custou a acertar estão comentadas no arquivo.
+
+### Organização
+
+O índice de `ferramentas/README.md` tinha ficado para trás: são sete scripts em
+três famílias — conferência, prévia e geração —, cada um com o defeito que o
+originou. Os arquivos de passo a passo da raiz (`LEIA-ME-RAPIDO.txt`,
+`README-PAGAMENTO.md`) ficaram exatamente onde estão, de propósito.
+
 ## [3.8.0] — 2026-11-01
 
 Fale Conosco funcionando de verdade, mascote próprio e a linguagem de

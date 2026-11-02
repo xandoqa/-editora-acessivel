@@ -4,6 +4,7 @@ import { ArrowRight, BookMarked, ChevronLeft, ChevronRight, Info, Users } from '
 import { useAutores } from '../../hooks/queries';
 import { useT } from '../../i18n/I18nContext';
 import { Badge, Spinner } from '../ui';
+import { Reticula } from '../ui/Quadrinhos';
 import RetratoAutor from '../autores/RetratoAutor';
 
 /**
@@ -104,7 +105,10 @@ export default function RoletaDeAutores() {
         <p className="mt-2 text-sm leading-relaxed text-ink-muted sm:text-base">{t('roleta.chamada')}</p>
       </div>
 
-      <div className="card grid gap-8 p-6 md:grid-cols-[minmax(0,360px)_minmax(0,1fr)] md:items-center md:gap-10 md:p-8">
+      <div className="card relative overflow-hidden p-6 md:p-8">
+        {/* A retícula fica só na metade da roda, não atrás da biografia. */}
+        <Reticula className="pointer-events-none absolute inset-y-0 left-0 h-full w-1/2 text-accent/[0.12] [mask-image:linear-gradient(to_right,black,transparent)]" />
+        <div className="relative grid gap-8 md:grid-cols-[minmax(0,360px)_minmax(0,1fr)] md:items-center md:gap-10">
         {/* ------------------------------- A roda ------------------------- */}
         <div className="mx-auto w-full max-w-[320px] md:max-w-none">
           <div className="relative aspect-square w-full">
@@ -216,6 +220,7 @@ export default function RoletaDeAutores() {
               {t('autores.naLista')} <ArrowRight className="h-4 w-4" aria-hidden />
             </Link>
           </div>
+        </div>
         </div>
       </div>
 

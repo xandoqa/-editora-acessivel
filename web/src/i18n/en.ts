@@ -309,6 +309,7 @@ export const en: Dicionario = {
   'contato.outra': 'Write another message',
   'contato.erro': 'The message could not be sent. Check the fields and try again.',
   'contato.prazo': 'We answer within two working days.',
+  'contato.semRoboTitulo': 'No "I am not a robot" test',
   'contato.semRobo':
     'No "I am not a robot" test. The checkbox challenge is a known barrier for screen-reader users, and on an accessibility platform it could not sit on the very screen where someone asks for help.',
   'contato.pingo': 'Pingo, the mascot of Livrin’s contact desk',

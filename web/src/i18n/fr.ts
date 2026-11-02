@@ -310,6 +310,7 @@ export const fr: Dicionario = {
   'contato.outra': 'Écrire un autre message',
   'contato.erro': 'Le message n’a pas pu être envoyé. Vérifiez les champs et réessayez.',
   'contato.prazo': 'Nous répondons sous deux jours ouvrés.',
+  'contato.semRoboTitulo': 'Pas de test « je ne suis pas un robot »',
   'contato.semRobo':
     'Pas de test « je ne suis pas un robot ». Le défi à cocher est une barrière connue pour les lecteurs d’écran, et sur une plateforme d’accessibilité il ne pouvait pas se trouver sur l’écran même où l’on demande de l’aide.',
   'contato.pingo': 'Pingo, la mascotte du service de contact de Livrin',

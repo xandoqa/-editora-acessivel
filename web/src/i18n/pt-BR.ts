@@ -317,6 +317,7 @@ export const ptBR = {
   'contato.outra': 'Escrever outra mensagem',
   'contato.erro': 'Não foi possível enviar a mensagem. Confira os campos e tente de novo.',
   'contato.prazo': 'Respondemos em até dois dias úteis.',
+  'contato.semRoboTitulo': 'Sem teste de "não sou um robô"',
   'contato.semRobo':
     'Sem teste de "não sou um robô". O desafio de caixinha é uma barreira conhecida para quem usa leitor de tela, e numa plataforma de acessibilidade ele não poderia estar justamente na tela de pedir ajuda.',
   'contato.pingo': 'Pingo, mascote do Fale Conosco do Livrin',

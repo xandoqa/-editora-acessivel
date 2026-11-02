@@ -92,7 +92,16 @@ export default function Reader() {
 
   // "Ouvir audiodescrição" vindo de outro lugar (?ouvir=1).
   useEffect(() => {
-    if (params.get('ouvir') === '1' && work) setTimeout(() => playerRef.current?.play(), 300);
+    if (params.get('ouvir') !== '1' || !work) return;
+    /*
+     * A espera de 300 ms dá tempo de o player existir — e PRECISA ser
+     * cancelada na limpeza. Sem o cancelamento, trocar de obra em menos de
+     * 300 ms deixava o temporizador antigo vivo, e ele chamava `play()` no
+     * player da obra NOVA: a audiodescrição começava sozinha numa obra que
+     * ninguém pediu para ouvir.
+     */
+    const t = setTimeout(() => playerRef.current?.play(), 300);
+    return () => clearTimeout(t);
     // Dependência intencionalmente só na obra: reiniciar a página ao trocar de obra, não a cada render.
   }, [work?.id]);
 

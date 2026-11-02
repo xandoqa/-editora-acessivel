@@ -1,4 +1,4 @@
-import { and, desc, eq, sql, type SQL } from 'drizzle-orm';
+import { desc, eq, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/client';
 import { contactMessages, type ContactStatus } from '../db/schema';
 import { env } from '../config/env';
@@ -194,13 +194,4 @@ export async function mudarStatus(id: number, status: ContactStatus) {
 export async function apagarMensagem(id: number) {
   const [linha] = await db.delete(contactMessages).where(eq(contactMessages.id, id)).returning({ id: contactMessages.id });
   if (!linha) throw notFound('Mensagem não encontrada.');
-}
-
-/** Quantas mensagens novas há. Usado pelo painel para o aviso no menu. */
-export async function contarNovas(): Promise<number> {
-  const [{ novas }] = await db
-    .select({ novas: sql<number>`count(*)`.mapWith(Number) })
-    .from(contactMessages)
-    .where(and(eq(contactMessages.status, 'NOVA')));
-  return novas;
 }

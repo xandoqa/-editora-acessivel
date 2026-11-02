@@ -144,7 +144,7 @@ export default function Contato() {
         o texto numa tela de pedir ajuda seria o oposto do que o projeto é.
       */}
       <header className="relative mb-10 overflow-hidden rounded-2xl border border-outline bg-surface-low px-6 py-8 sm:px-10 sm:py-10">
-        <Reticula className="pointer-events-none absolute inset-0 h-full w-full text-primary/[0.12]" id="reticula-contato" />
+        <Reticula className="pointer-events-none absolute inset-0 h-full w-full text-primary/[0.12]" />
         <EstrelaDeImpacto className="pointer-events-none absolute -right-8 -top-10 h-44 w-44 text-accent/20" />
         <LinhasDeVelocidade className="pointer-events-none absolute -left-3 bottom-4 hidden h-24 w-20 text-primary/20 sm:block" />
 
@@ -279,11 +279,15 @@ export default function Contato() {
           <div className="card p-5">
             <h2 className="flex items-center gap-2 font-display text-lg font-bold text-ink">
               <ShieldCheck className="h-5 w-5 text-accent" aria-hidden />
-              {t('contato.semRobo').split('.')[0]}.
+              {/*
+                Título e explicação em chaves separadas.
+                Antes o título saía de `split('.')` no texto traduzido — o que
+                funciona até alguém mudar a pontuação de uma tradução, e aí a
+                frase quebra no meio sem nada acusar.
+              */}
+              {t('contato.semRoboTitulo')}
             </h2>
-            <p className="mt-2 text-sm leading-relaxed text-ink-muted">
-              {t('contato.semRobo').split('. ').slice(1).join('. ')}
-            </p>
+            <p className="mt-2 text-sm leading-relaxed text-ink-muted">{t('contato.semRobo')}</p>
           </div>
 
           <div className="card p-5">

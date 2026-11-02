@@ -1,3 +1,5 @@
+import { useId } from 'react';
+
 /**
  * Vocabulário de quadrinho, desenhado para o Livrin.
  *
@@ -22,28 +24,50 @@
  *
  * É um `<pattern>` de SVG, não imagem: escala sem borrar, muda de cor com o
  * tema e pesa alguns bytes.
+ *
+ * ONDE ELA PODE ENTRAR — a regra, para não virar poluição:
+ *
+ *  1. **Só atrás de bloco curto**: abertura de página, cartão de destaque,
+ *     rodapé. Nunca atrás de texto corrido — ponto atrás de parágrafo é
+ *     ruído para quem tem baixa visão e para quem só está com pressa.
+ *  2. **No máximo uma por tela visível.** Se duas aparecem juntas, ela deixa
+ *     de ser sotaque e vira papel de parede.
+ *  3. **Opacidade baixa** (8% a 14%) e sempre em cor da marca. Acima disso
+ *     ela começa a disputar contraste com o texto que está por cima.
+ *  4. **Ritmo**: seção com retícula, seção sem. É o alternado que cria o
+ *     ritmo; retícula em tudo não cria nada.
+ *
+ * O `id` sai do `useId` do React porque dois `<pattern>` com o mesmo id na
+ * mesma página se atropelam — o segundo passa a desenhar com a definição do
+ * primeiro. Com várias retículas espalhadas pelo site, lembrar de inventar um
+ * id diferente a cada uso seria questão de tempo até esquecer.
  */
 export function Reticula({
   className = '',
   espaco = 10,
   raio = 2.2,
-  id = 'reticula',
+  id,
 }: {
   className?: string;
   /** Distância entre os centros dos pontos. */
   espaco?: number;
   raio?: number;
-  /** Precisa ser único na página: dois patterns com o mesmo id se atropelam. */
+  /** Só para quem precisar de um id estável; o padrão já é único. */
   id?: string;
 }) {
+  // Os dois-pontos que o `useId` devolve (`:r3:`) são válidos em atributo,
+  // mas atrapalham se alguém um dia mirar o pattern por seletor de CSS.
+  const automatico = useId().replace(/:/g, '');
+  const patternId = id ?? `reticula-${automatico}`;
+
   return (
     <svg className={className} aria-hidden focusable="false">
       <defs>
-        <pattern id={id} width={espaco} height={espaco} patternUnits="userSpaceOnUse">
+        <pattern id={patternId} width={espaco} height={espaco} patternUnits="userSpaceOnUse">
           <circle cx={espaco / 2} cy={espaco / 2} r={raio} fill="currentColor" />
         </pattern>
       </defs>
-      <rect width="100%" height="100%" fill={`url(#${id})`} />
+      <rect width="100%" height="100%" fill={`url(#${patternId})`} />
     </svg>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MessageCircle, X } from 'lucide-react';
 import { useT } from '../../i18n/I18nContext';
@@ -40,7 +40,6 @@ export default function BotaoFaleConosco() {
   const t = useT();
   const { pathname } = useLocation();
   const [fechado, setFechado] = useState(true);
-  const botao = useRef<HTMLAnchorElement>(null);
 
   /*
    * A leitura do `localStorage` fica em efeito, e o estado começa "fechado".
@@ -72,7 +71,6 @@ export default function BotaoFaleConosco() {
   return (
     <div className="fixed bottom-4 right-4 z-40 flex items-end gap-2 sm:bottom-6 sm:right-6">
       <Link
-        ref={botao}
         to="/contato"
         className="group/pingo relative flex items-center gap-3 rounded-full border border-outline bg-surface py-2 pl-2 pr-3 shadow-card transition-transform hover:-translate-y-0.5 focus-visible:-translate-y-0.5 sm:pr-5"
         aria-label={t('contato.abrir')}

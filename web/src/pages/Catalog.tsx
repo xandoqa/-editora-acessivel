@@ -11,6 +11,7 @@ import Vitrine from '../components/home/Vitrine';
 import RoletaDeAutores from '../components/home/RoletaDeAutores';
 import { EmptyState, ErrorState, LoadingState, Pagination } from '../components/ui';
 import { OndaDivisoria, OndasDeSom, Rabisco } from '../components/ui/Ornamentos';
+import { Reticula } from '../components/ui/Quadrinhos';
 import { useT } from '../i18n/I18nContext';
 import type { ChaveDeTraducao } from '../i18n/tipos';
 
@@ -106,6 +107,13 @@ export default function Catalog() {
         * moldura.
         */}
       <section className="relative mb-12 border-b border-outline/25 pb-10" aria-labelledby="catalog-title">
+        {/*
+          Retícula na abertura: é onde a identidade precisa se apresentar.
+          Ela some antes do fim da seção (`to-transparent`), para o texto de
+          apoio e os botões ficarem sobre papel limpo — ponto atrás de
+          parágrafo é ruído, principalmente para quem tem baixa visão.
+        */}
+        <Reticula className="pointer-events-none absolute inset-x-0 top-0 h-44 w-full text-primary/[0.1] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
         <Rabisco className="pointer-events-none absolute -right-1 -top-7 h-20 w-24 text-primary/20" />
         <OndasDeSom className="pointer-events-none absolute -bottom-2 right-8 hidden h-14 w-14 text-accent/20 lg:block" />
 

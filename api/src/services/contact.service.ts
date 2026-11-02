@@ -195,12 +195,3 @@ export async function apagarMensagem(id: number) {
   const [linha] = await db.delete(contactMessages).where(eq(contactMessages.id, id)).returning({ id: contactMessages.id });
   if (!linha) throw notFound('Mensagem não encontrada.');
 }
-
-/** Quantas mensagens novas há. Usado pelo painel para o aviso no menu. */
-export async function contarNovas(): Promise<number> {
-  const [{ novas }] = await db
-    .select({ novas: sql<number>`count(*)`.mapWith(Number) })
-    .from(contactMessages)
-    .where(and(eq(contactMessages.status, 'NOVA')));
-  return novas;
-}

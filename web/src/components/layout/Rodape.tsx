@@ -16,6 +16,7 @@ import { useAuth } from '../../auth/AuthContext';
 import { useT } from '../../i18n/I18nContext';
 import type { ChaveDeTraducao } from '../../i18n/tipos';
 import { LogoMark } from './Logo';
+import { Reticula } from '../ui/Quadrinhos';
 
 /**
  * Rodapé do site.
@@ -115,8 +116,11 @@ export default function Rodape() {
   const { isWriter } = useAuth();
 
   return (
-    <footer className="mt-20 border-t border-outline/25 bg-surface-low" aria-label={t('rodape.titulo')}>
-      <div className="mx-auto w-full max-w-[1280px] px-4 py-10 md:px-8">
+    <footer className="relative mt-20 overflow-hidden border-t border-outline/25 bg-surface-low" aria-label={t('rodape.titulo')}>
+      {/* A retícula fecha a página: densa na borda de cima e sumindo para
+          baixo, para o bloco de links e os selos ficarem sobre papel limpo. */}
+      <Reticula className="pointer-events-none absolute inset-x-0 top-0 h-52 w-full text-primary/[0.09] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
+      <div className="relative mx-auto w-full max-w-[1280px] px-4 py-10 md:px-8">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
           {/* Identidade */}
           <div className="sm:col-span-2 lg:col-span-1">

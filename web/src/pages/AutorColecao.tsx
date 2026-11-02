@@ -6,6 +6,7 @@ import { formatNumber } from '../lib/format';
 import WorkCard from '../components/works/WorkCard';
 import { Badge, EmptyState, ErrorState, LoadingState, Stars } from '../components/ui';
 import { OndaDivisoria } from '../components/ui/Ornamentos';
+import { Reticula } from '../components/ui/Quadrinhos';
 import RetratoAutor from '../components/autores/RetratoAutor';
 import { useT } from '../i18n/I18nContext';
 import type { ChaveDeTraducao } from '../i18n/tipos';
@@ -72,7 +73,11 @@ export default function AutorColecao() {
       </Link>
 
       {/* ------------------------------ Cabeçalho ------------------------- */}
-      <header className="card flex flex-col gap-6 p-6 sm:flex-row sm:items-start sm:gap-8 sm:p-8">
+      <header className="card relative overflow-hidden p-6 sm:p-8">
+        {/* Retícula só na faixa do alto, atrás do retrato e do nome: a
+            biografia logo abaixo é texto corrido e fica sobre papel limpo. */}
+        <Reticula className="pointer-events-none absolute inset-x-0 top-0 h-40 w-full text-primary/[0.1] [mask-image:linear-gradient(to_bottom,black,transparent)]" />
+        <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
         <RetratoAutor
           nome={autor.name}
           className="h-24 w-24 shrink-0 self-start rounded-full sm:h-32 sm:w-32"
@@ -139,6 +144,7 @@ export default function AutorColecao() {
               </div>
             )}
           </div>
+        </div>
         </div>
       </header>
 

@@ -94,6 +94,14 @@ jobs:
       - name: Medir o contraste dos sete temas
         run: python3 ferramentas/conferir-contraste.py
 
+      # Sem `node_modules` no ambiente onde este projeto é desenvolvido, uma
+      # <div> aberta e não fechada só aparecia aqui, dois minutos depois do
+      # commit. Este passo responde a mesma pergunta em menos de um segundo —
+      # e continua valendo aqui, como rede, para quem abrir PR de outra
+      # máquina. Não substitui o compilador, que roda logo acima.
+      - name: Conferir o balanceamento das tags JSX
+        run: python3 ferramentas/conferir-jsx.py
+
       # A 3.6.2 quebrou o layout com CSS válido: uma classe nossa declarou
       # `position: relative` e venceu as utilitárias `sticky`/`fixed` do
       # Tailwind por empate de especificidade (0-1-0) e ordem no arquivo.

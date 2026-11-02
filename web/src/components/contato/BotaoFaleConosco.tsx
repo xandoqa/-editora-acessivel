@@ -106,7 +106,9 @@ export default function BotaoFaleConosco() {
       <button
         type="button"
         onClick={dispensar}
-        className="icon-btn h-9 w-9 shrink-0 border-outline/50 bg-surface"
+        /* 44px de verdade (WCAG 2.5.5). Estava em 36px: é controle flutuante,
+           sem nada em volta para restringir o tamanho — não havia motivo. */
+        className="icon-btn h-11 w-11 shrink-0 border-outline/50 bg-surface"
         aria-label={t('contato.fechar')}
       >
         <X className="h-4 w-4" aria-hidden />

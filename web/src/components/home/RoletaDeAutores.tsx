@@ -45,7 +45,18 @@ export default function RoletaDeAutores() {
   const t = useT();
   const { data: autores = [], isLoading } = useAutores();
   const [atual, setAtual] = useState(0);
+  /**
+   * Quanto a roda está girada, SEPARADO de quem está selecionado.
+   *
+   * Eram a mesma coisa, e isso tornava a roleta difícil de usar: clicar num
+   * retrato girava a roda, e todos os outros saíam do lugar. Quem queria
+   * escolher dois autores seguidos errava o segundo clique, porque o alvo tinha
+   * se mudado. Agora clicar escolhe NO LUGAR; a roda gira só pelas setas e pelo
+   * teclado, que é onde ela não está embaixo do dedo de ninguém.
+   */
+  const [giro, setGiro] = useState(0);
   const botoes = useRef<(HTMLButtonElement | null)[]>([]);
+  const anel = useRef<HTMLDivElement>(null);
 
   if (isLoading) {
     return (
@@ -61,10 +72,37 @@ export default function RoletaDeAutores() {
   const selecionado = autores[atual] ?? autores[0];
   const passo = 360 / autores.length;
 
+  /**
+   * Leva o foco ao retrato escolhido — mas só quando o foco JÁ estava dentro da
+   * roda, ou seja, quando a navegação veio do teclado.
+   *
+   * No clique do mouse, mover o foco é ativamente ruim: o navegador rola a
+   * página para trazer o elemento focado à vista (medido: 930px num caso de
+   * teste), e a seta que a pessoa acabou de clicar sai de baixo do dedo. Daí a
+   * sensação de "às vezes não consigo clicar". O `preventScroll` é a segunda
+   * trava, para o caso de o foco estar na roda e o retrato estar fora da vista.
+   */
+  const focarSeVeioDoTeclado = (indice: number) => {
+    if (anel.current?.contains(document.activeElement)) {
+      botoes.current[indice]?.focus({ preventScroll: true });
+    }
+  };
+
+  /** Clique direto: escolhe sem girar a roda. O alvo não foge. */
+  const escolher = (indice: number) => setAtual(indice);
+
+  /** Setas e teclado: escolhe E gira, levando o escolhido ao topo. */
   const mover = (delta: number) => {
     const proximo = (atual + delta + autores.length) % autores.length;
     setAtual(proximo);
-    botoes.current[proximo]?.focus();
+    setGiro(proximo * passo);
+    focarSeVeioDoTeclado(proximo);
+  };
+
+  const irPara = (indice: number) => {
+    setAtual(indice);
+    setGiro(indice * passo);
+    focarSeVeioDoTeclado(indice);
   };
 
   const aoTeclar = (e: React.KeyboardEvent) => {
@@ -73,14 +111,8 @@ export default function RoletaDeAutores() {
       ArrowDown: () => mover(1),
       ArrowLeft: () => mover(-1),
       ArrowUp: () => mover(-1),
-      Home: () => {
-        setAtual(0);
-        botoes.current[0]?.focus();
-      },
-      End: () => {
-        setAtual(autores.length - 1);
-        botoes.current[autores.length - 1]?.focus();
-      },
+      Home: () => irPara(0),
+      End: () => irPara(autores.length - 1),
     };
     const acao = teclas[e.key];
     if (acao) {
@@ -113,17 +145,20 @@ export default function RoletaDeAutores() {
         <div className="mx-auto w-full max-w-[320px] md:max-w-none">
           <div className="relative aspect-square w-full">
             {/* Trilho da roda: o círculo que diz "isto gira". */}
+            {/* Trilho tracejado: decorativo, e `pointer-events-none` para não
+                roubar clique de nada que fique por cima dele. */}
             <div
-              className="absolute inset-[9%] rounded-full border border-dashed border-outline/40"
+              className="pointer-events-none absolute inset-[9%] rounded-full border border-dashed border-outline/40"
               aria-hidden
             />
 
             <div
+              ref={anel}
               role="radiogroup"
               aria-label={t('roleta.grupo')}
               onKeyDown={aoTeclar}
               className="roleta-anel absolute inset-0"
-              style={{ transform: `rotate(${-atual * passo}deg)` }}
+              style={{ transform: `rotate(${-giro}deg)` }}
             >
               {autores.map((autor, i) => {
                 const angulo = i * passo;
@@ -140,14 +175,23 @@ export default function RoletaDeAutores() {
                     aria-checked={escolhido}
                     // Foco itinerante: só o selecionado entra na tabulação.
                     tabIndex={escolhido ? 0 : -1}
-                    onClick={() => setAtual(i)}
+                    onClick={() => escolher(i)}
                     aria-label={t('roleta.selecionar', { nome: autor.name })}
                     className="roleta-retrato absolute rounded-full"
                     style={{
                       left: `${50 + RAIO * Math.sin(radianos)}%`,
                       top: `${50 - RAIO * Math.cos(radianos)}%`,
-                      // Desfaz o giro da roda, para o retrato ficar de pé.
-                      transform: `translate(-50%, -50%) rotate(${atual * passo}deg) scale(${
+                      /*
+                       * Desfaz o giro da roda, para o retrato ficar de pé.
+                       *
+                       * A conta precisa usar `giro`, o mesmo valor que o anel
+                       * usa — e as DUAS transições precisam ter a mesma
+                       * duração, senão a soma não é zero no meio do caminho e
+                       * o retrato gira sozinho antes de assentar. Era isso que
+                       * fazia a cabeça quadrada parecer "mudar de redondo para
+                       * quadrado": 6,2° de giro parasita, medidos.
+                       */
+                      transform: `translate(-50%, -50%) rotate(${giro}deg) scale(${
                         escolhido ? 1.22 : 1
                       })`,
                       opacity: escolhido ? 1 : 0.62,

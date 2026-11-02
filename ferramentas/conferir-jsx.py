@@ -37,6 +37,13 @@ RAIZ = Path(__file__).resolve().parent.parent
 # mas um `<br>` solto acontece e não é erro de balanceamento.
 VAZIAS = {"br", "hr", "img", "input", "meta", "link", "source", "track", "wbr", "area", "base", "col", "embed", "param"}
 
+# Elementos que recebem clique por conta própria. Um dentro do outro é HTML
+# inválido: o analisador do navegador REORGANIZA a árvore, tirando o de dentro
+# para fora, e o clique passa a ir para o lugar errado — com layout quebrado de
+# brinde. É um defeito que não aparece em nenhum teste de tipo e que só se
+# manifesta no navegador, geralmente como "às vezes não consigo clicar".
+INTERATIVOS = {"button", "a", "Link", "NavLink", "select", "textarea", "summary"}
+
 
 class Varredor:
     """Percorre o arquivo guardando onde está: código, string, comentário."""
@@ -184,6 +191,14 @@ def conferir(caminho: Path) -> list[str]:
         nome, fechamento, auto, pos = tag
         if auto or nome in VAZIAS:
             continue
+        if not fechamento and nome in INTERATIVOS:
+            dentro = next(((n, l) for n, l in reversed(pilha) if n in INTERATIVOS), None)
+            if dentro:
+                problemas.append(
+                    f"{relativo}:{v.linha(pos)}  <{nome}> dentro de <{dentro[0]}> (linha {dentro[1]}) "
+                    "— elemento clicável dentro de outro é HTML inválido"
+                )
+
         if fechamento:
             if not pilha:
                 problemas.append(f"{relativo}:{v.linha(pos)}  </{nome}> sem abertura correspondente")
@@ -213,10 +228,15 @@ def main() -> int:
         print("JSX: FALHOU\n")
         for p in problemas:
             print(f"  - {p}")
-        print("\nIsto confere apenas o balanceamento das tags. O compilador continua sendo o juiz.")
+        print(
+            "\nIsto confere balanceamento de tag e aninhamento de elemento clicável."
+            "\nO compilador continua sendo o juiz do resto."
+        )
         return 1
 
-    print(f"JSX: OK — {len(alvos)} arquivo(s), todas as tags fecham na ordem certa")
+    print(f"JSX: OK — {len(alvos)} arquivo(s)")
+    print("  - todas as tags fecham na ordem certa")
+    print("  - nenhum elemento clicável dentro de outro")
     return 0
 
 

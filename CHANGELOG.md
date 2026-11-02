@@ -2,6 +2,71 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.8.2] — 2026-11-02
+
+Correção dos defeitos de interação da roleta de autores, relatados por quem
+usou, e a documentação de hospedagem.
+
+### A roleta estava difícil de clicar — três causas
+
+**1. O retrato girava sozinho.** O anel gira −θ e cada retrato gira +θ para
+continuar de pé. As duas transições tinham durações diferentes — 0,6 s no anel
+e 0,45 s no retrato —, então a soma só dava zero no fim. Medido em navegador
+headless: **6,2° de giro parasita** aos 100 ms. Como um dos dois formatos de
+cabeça do retrato é um quadrado arredondado, seis graus são bem visíveis. O
+relato foi exato: *"fica mudando de redondo para quadrado"*. Com as durações
+iguais, o giro parasita é 0° em todos os instantes amostrados.
+
+**2. Clicar na seta rolava a página.** `mover()` levava o foco ao retrato
+sempre, inclusive vindo do mouse, e o navegador rola a página para trazer o
+elemento focado à vista — **930 px** num caso de teste. No celular a seta saía
+de baixo do dedo. Agora o foco só se move quando já estava dentro da roda, ou
+seja, quando veio do teclado, e com `preventScroll`.
+
+**3. O alvo fugia depois do clique.** O giro e a seleção eram o mesmo valor:
+clicar num retrato girava a roda e todos os outros saíam do lugar. Agora o giro
+é estado próprio — **clicar escolhe no lugar**, e a roda gira pelas setas e pelo
+teclado, que é onde ela não está embaixo do dedo de ninguém.
+
+### Alvos de toque
+
+O botão de fechar do Pingo tinha 36 px, abaixo dos 44 px que o projeto promete
+(WCAG 2.5.5): é controle flutuante, sem nada em volta restringindo o tamanho.
+Agora tem 44 px.
+
+As setas de página do leitor tinham 40 px e ganharam a classe `.alvo-ampliado`,
+que estende a área clicável 6 px para cada lado com um pseudo-elemento
+invisível — **sem mudar o desenho**. Os vizinhos das duas são o contador de
+páginas, que é texto, então nada é roubado.
+
+Dois alvos de 32 px ficaram documentados sem correção: o X da busca no celular,
+cujo vizinho é o próprio campo de texto (ampliar roubaria o clique de quem quer
+digitar), e um botão de linha de tabela na administração.
+
+### Segunda regra no verificador de JSX
+
+`conferir-jsx.py` passa a reprovar **elemento clicável dentro de outro**. Um
+`<button>` dentro de `<a>` é HTML inválido: o navegador reorganiza a árvore,
+tira o de dentro para fora, e o clique vai para o lugar errado. Não aparece em
+teste de tipo nenhum e se manifesta exatamente como "às vezes não consigo
+clicar".
+
+### Sobre a auditoria da 3.8.1
+
+Ela foi estrutural — import, rota, migration, chave de tradução — e **não
+testou comportamento de interação em nenhum momento**. Por isso não achou o que
+quem usou achou em dois minutos. Isso ficou registrado no adendo de
+[docs/auditoria-3.8.1.md](docs/auditoria-3.8.1.md), para a próxima auditoria não
+repetir o método.
+
+### Documentação de hospedagem
+
+[docs/hospedagem.md](docs/hospedagem.md): o arranjo gratuito que serve ao
+projeto (front em CDN, banco na Neon, API na Render), o passo a passo, e os dois
+problemas da camada gratuita — a API dormindo por 15 minutos e, o mais
+importante, **os arquivos das obras sumindo no primeiro cochilo**, porque o seed
+encontra o banco já populado e não recopia nada.
+
 ## [3.8.1] — 2026-11-01
 
 Acabamento, auditoria e organização. Nenhuma funcionalidade nova, nenhuma

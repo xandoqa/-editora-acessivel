@@ -668,6 +668,30 @@ p {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='10' viewBox='0 0 28 10'%3E%3Cpath d='M0 7 Q 7 0 14 7 T 28 7' fill='none' stroke='%23B8B2C8' stroke-width='2'/%3E%3C/svg%3E");
   }
 
+  /* --- Área de toque ampliada ------------------------------------------
+   *
+   * O critério 2.5.5 da WCAG pede 44px de alvo, e o projeto promete isso. Mas
+   * alguns controles pequenos vivem dentro de barras densas, onde crescer
+   * para 44px mudaria o layout — e mudar layout de barra apertada na véspera
+   * de uma apresentação é trocar um problema pequeno por um grande.
+   *
+   * Esta classe resolve sem tocar no desenho: um pseudo-elemento invisível
+   * estende a área clicável 6px para cada lado, levando 32px a 44px.
+   *
+   * ONDE NÃO USAR: ao lado de outro elemento clicável a menos de 6px — a área
+   * ampliada passaria por cima dele e roubaria o clique. Por isso ela não
+   * entrou no X da busca, cujo vizinho é o próprio campo de texto.
+   *
+   * O elemento precisa carregar `relative` na marcação. A classe não declara
+   * `position`, porque classe única disputando `position` com as utilitárias
+   * do Tailwind foi o bug da 3.6.2.
+   * -------------------------------------------------------------------- */
+  .alvo-ampliado::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+  }
+
   /* --- Vitrine de lançamentos (3.7.0) ----------------------------------
    *
    * O livro na vitrine é um OBJETO, não um retângulo: tem lombada, tem
@@ -749,11 +773,22 @@ p {
 
   /* --- Roleta de autores (3.7.0) --------------------------------------- */
 
-  .roleta-anel {
+  /*
+   * O anel gira -θ e cada retrato gira +θ para continuar de pé. Para a soma dar
+   * zero em TODO instante da animação, e não só no fim, as duas transições
+   * precisam da mesma duração e da mesma curva.
+   *
+   * Estavam em 0,6s e 0,45s. O retrato terminava 150ms antes do anel, e no meio
+   * do caminho sobravam até 6,2° de giro — medidos. Num retrato de cabeça
+   * quadrada isso é bem visível, e foi descrito por quem usou como "fica
+   * mudando de redondo para quadrado".
+   */
+  .roleta-anel,
+  .roleta-retrato {
     transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.3, 1);
   }
   .roleta-retrato {
-    transition: transform 0.45s cubic-bezier(0.25, 0.8, 0.3, 1), opacity 0.45s ease;
+    transition: transform 0.6s cubic-bezier(0.25, 0.8, 0.3, 1), opacity 0.45s ease;
   }
 
   /*

@@ -140,3 +140,104 @@ Já documentado na 3.6.1: com a gaveta do celular aberta, a `Sidebar` é montada
 `ferramentas/conferir-jsx.py`, agora na integração contínua. Sem `node_modules` no ambiente de desenvolvimento, uma `<div>` aberta e não fechada só aparecia dois minutos depois, no CI, normalmente com o commit já publicado. Ele responde **uma** pergunta — toda tag que abre fecha, na ordem certa? — em menos de um segundo, e não substitui o compilador.
 
 As duas armadilhas que ele custou a acertar estão comentadas no arquivo: genérico de TypeScript (`useState<string>`) sendo confundido com tag, e a regra que resolvia isso engolindo as tags de fechamento, que vêm coladas no texto. A primeira versão acusava 140 problemas num projeto correto — relatório cheio de ruído é pior do que nenhum relatório.
+
+---
+
+# Adendo — auditoria de interação (3.8.2)
+
+A auditoria acima foi **estrutural**: varreu import, rota, migration, chave de
+tradução, caminho de arquivo. Ela não testou **comportamento de interação em
+nenhum momento**, e por isso não achou o defeito que quem usou achou em dois
+minutos: a roleta de autores era difícil de clicar.
+
+Isso é uma falha de método, não de execução. Fica registrado para a próxima
+auditoria não repetir: varredura estática não substitui clicar.
+
+## Bug 7 — Retrato girava sozinho durante a transição da roleta
+
+- **Local:** `web/src/styles/global.css` (`.roleta-anel`, `.roleta-retrato`)
+- **Relato de quem usou:** *"fica mudando de redondo para quadrado, não consigo clicar direito nessa parte"*
+- **Causa:** o anel gira −θ e cada retrato gira +θ para continuar de pé. As duas
+  transições tinham durações diferentes — **0,6 s no anel e 0,45 s no retrato** —,
+  então a soma só dava zero no fim. No meio do caminho sobrava giro.
+- **Impacto:** medido em navegador headless, **6,2° de giro parasita** aos 100 ms,
+  4,8° aos 200 ms, 2,6° aos 300 ms. Como um dos dois formatos de cabeça do
+  retrato é um quadrado arredondado, seis graus de inclinação são bem visíveis —
+  daí a descrição de "mudando de redondo para quadrado".
+- **Correção:** mesma duração e mesma curva nas duas. Medido de novo: **0° em
+  todos os instantes amostrados**.
+- **Risco da correção:** nenhum. Só muda a duração de uma transição.
+- **Status:** corrigido.
+
+## Bug 8 — Clicar na seta rolava a página e tirava a seta do dedo
+
+- **Local:** `web/src/components/home/RoletaDeAutores.tsx`
+- **Causa:** `mover()` chamava `botoes.current[proximo]?.focus()` sempre, inclusive
+  quando a navegação veio do mouse. O navegador rola a página para trazer o
+  elemento focado à vista.
+- **Impacto:** medido, **930 px de rolagem** num caso de teste. No celular, onde a
+  roda fica parcialmente fora da tela, clicar na seta rola a página e a seta sai
+  de baixo do dedo. É a outra metade do "às vezes não consigo clicar".
+- **Correção:** o foco só se move quando **já estava dentro da roda** — ou seja,
+  quando veio do teclado, onde mover o foco é obrigatório para o padrão de foco
+  itinerante. E com `preventScroll: true` como segunda trava. Medido: **0 px**.
+- **Risco da correção:** nenhum para o teclado, que continua igual.
+- **Status:** corrigido.
+
+## Bug 9 — O alvo fugia depois do clique
+
+- **Local:** `web/src/components/home/RoletaDeAutores.tsx`
+- **Causa:** o giro da roda e a seleção eram o mesmo valor. Clicar num retrato
+  girava a roda inteira, e **todos os outros saíam do lugar**. Quem queria
+  escolher dois autores seguidos errava o segundo clique.
+- **Correção:** o giro virou estado próprio. **Clicar escolhe no lugar**; a roda
+  gira pelas setas e pelo teclado, que é onde ela não está embaixo do dedo de
+  ninguém.
+- **Risco da correção:** contido a um componente. Nenhuma rota, API ou dado.
+- **Status:** corrigido.
+
+## Bug 10 — Alvo de toque de 36 px no botão de fechar do Pingo
+
+- **Local:** `web/src/components/contato/BotaoFaleConosco.tsx`
+- **Causa:** `h-9 w-9` (36 px) sobrescrevendo o `icon-btn`, que tem 44 px.
+- **Impacto:** abaixo dos 44 px do critério 2.5.5 da WCAG, que este projeto
+  promete. É controle flutuante, sem nada em volta restringindo o tamanho — não
+  havia motivo para ser menor.
+- **Correção:** 44 px.
+- **Status:** corrigido.
+
+## Bug 11 — Setas de página do leitor com 40 px
+
+- **Local:** `web/src/pages/Reader.tsx`
+- **Correção:** classe `.alvo-ampliado`, que estende a área clicável 6 px para
+  cada lado com um pseudo-elemento invisível — 40 px viram 52 px **sem mudar o
+  desenho**. Os vizinhos das duas setas são o contador de páginas, que é texto,
+  então a área ampliada não rouba clique de ninguém.
+- **Status:** corrigido.
+
+## Documentados e não corrigidos nesta rodada
+
+| Local | Problema | Por que não mexer |
+| --- | --- | --- |
+| `Topbar.tsx` (X da busca no celular) | Alvo de 32 px | O vizinho é o **próprio campo de texto**. Ampliar a área passaria por cima dele e roubaria o clique de quem quer digitar — trocaria um problema pequeno por um pior. Crescer para 44 px mexe no layout da barra de busca |
+| `AdminWorkDetail.tsx` | Alvo de 32 px | Linha de tabela densa, com botões clicáveis vizinhos a menos de 6 px. Só administração |
+
+Os dois passam no critério 2.5.8 da WCAG 2.2 (24 px, nível AA) e reprovam no
+2.5.5 (44 px, AAA).
+
+## Verificação nova, permanente
+
+`conferir-jsx.py` ganhou uma segunda regra: **elemento clicável dentro de outro
+elemento clicável**. Um `<button>` dentro de `<a>` é HTML inválido — o
+analisador do navegador reorganiza a árvore, tira o de dentro para fora, e o
+clique passa a ir para o lugar errado, com o layout quebrado de brinde. É
+exatamente o tipo de defeito que não aparece em teste de tipo nenhum e que se
+manifesta como "às vezes não consigo clicar".
+
+Hoje o projeto não tem nenhum. A regra existe para continuar assim.
+
+Vale registrar como ela entrou: a primeira versão desta verificação, escrita
+com expressão regular, acusou três aninhamentos que **não existem** — ela
+tropeçava no `=>` dentro de `onClick={() => ...}` e lia um botão autofechado
+como aberto. Por isso a regra foi para dentro do `conferir-jsx.py`, que já tem
+um varredor caractere a caractere correto, em vez de virar script novo.

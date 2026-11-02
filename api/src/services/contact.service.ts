@@ -1,4 +1,4 @@
-import { and, desc, eq, sql, type SQL } from 'drizzle-orm';
+import { desc, eq, sql, type SQL } from 'drizzle-orm';
 import { db } from '../db/client';
 import { contactMessages, type ContactStatus } from '../db/schema';
 import { env } from '../config/env';

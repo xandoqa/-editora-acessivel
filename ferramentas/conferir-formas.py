@@ -17,7 +17,11 @@ migration — e nenhuma olhava **forma**.
 O que este script verifica
 --------------------------
 1. `.icon-btn` continua redondo no `global.css`.
-2. Nenhum botão SÓ DE ÍCONE usa raio de canto quadrado (`rounded-sm`, `-md`,
+2. Nenhum seletor de estado (`:focus`, `:hover`, `:active`...) declara
+   `border-radius` — fazer isso sobrescreve a forma de todo elemento naquele
+   estado, e foi o que transformava cada controle redondo num quadrado de 6px
+   ao receber foco.
+3. Nenhum botão SÓ DE ÍCONE usa raio de canto quadrado (`rounded-sm`, `-md`,
    `-lg`, `-xl`, `-2xl` ou valor arbitrário). Botão com texto fica de fora: o
    recorte irregular do `.btn` é identidade do projeto e continua valendo.
 
@@ -74,6 +78,45 @@ def conferir_css() -> list[str]:
     return []
 
 
+def conferir_estados() -> list[str]:
+    """Regra 2: nenhum seletor de ESTADO global declara `border-radius`.
+
+    O defeito: `:focus-visible { border-radius: 6px }`. A intenção era
+    arredondar o contorno em link de texto. O efeito foi outro — pseudoclasse
+    tem especificidade 0-1-0, a mesma de `.rounded-full`, e o bloco está
+    declarado depois do `@tailwind utilities`; empate é decidido pela ordem no
+    arquivo, então ela vencia. Ao receber foco, TODO elemento redondo do site
+    virava um quadrado de 6px: botão de ícone, avatar, retrato de autoria,
+    pílula do Fale Conosco, seta da roleta.
+
+    Foi reportado três vezes ("ao clicar, fica quadrado") antes de alguém
+    procurar no lugar certo. Duas correções anteriores mexeram na forma em
+    repouso e no hover, e nenhuma olhou o estado de foco.
+
+    É a mesma armadilha da 3.6.2, com outra propriedade. `border-radius` é a
+    forma do elemento e pertence ao elemento — estado não redefine forma.
+    """
+    problemas: list[str] = []
+    texto = CSS.read_text(encoding="utf-8")
+    deslocamento = 0
+    for linha in texto.split("\n"):
+        deslocamento += 1
+        pass
+    # Blocos cujo seletor é só pseudoclasse de estado, no nível raiz.
+    for m in re.finditer(
+        r"(?m)^(:(?:focus|focus-visible|focus-within|hover|active|target)[^{\n]*)\{([^}]*)\}",
+        texto,
+    ):
+        if "border-radius" in m.group(2):
+            linha = texto[: m.start()].count("\n") + 1
+            problemas.append(
+                f"global.css:{linha}  `{m.group(1).strip()}` declara `border-radius` — "
+                "isso sobrescreve a forma de TODO elemento focado, incluindo os "
+                "redondos. Estado não redefine forma."
+            )
+    return problemas
+
+
 def conferir_marcacao() -> list[str]:
     problemas: list[str] = []
     for arquivo in sorted(COMPONENTES.rglob("*.tsx")):
@@ -107,7 +150,7 @@ def conferir_marcacao() -> list[str]:
 
 
 def main() -> int:
-    problemas = conferir_css() + conferir_marcacao()
+    problemas = conferir_css() + conferir_estados() + conferir_marcacao()
     if problemas:
         print("Formas: FALHOU\n")
         for p in problemas:
@@ -121,6 +164,7 @@ def main() -> int:
 
     print("Formas: OK")
     print("  - `.icon-btn` é redondo")
+    print("  - nenhum seletor de estado redefine `border-radius`")
     print("  - nenhum botão só de ícone com canto quadrado")
     return 0
 

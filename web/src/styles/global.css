@@ -451,10 +451,29 @@ p {
    nos campos de formulário e apagava justamente o indicador de foco — uma
    falha do critério WCAG 2.4.7 numa plataforma de acessibilidade.
    ========================================================================== */
+/*
+ * O indicador de foco NÃO declara `border-radius`. Isto é o conserto de um
+ * defeito que durou várias versões e foi reportado três vezes.
+ *
+ * Havia aqui `border-radius: 6px`. A intenção era arredondar o contorno em
+ * link de texto, que não tem raio nenhum. O efeito real era outro: `:focus-
+ * visible` é pseudoclasse, de especificidade 0-1-0 — a MESMA de `.rounded-full`
+ * — e está declarado depois do `@tailwind utilities`. Empate de especificidade
+ * é decidido pela ordem no arquivo, então esta regra vencia.
+ *
+ * Resultado medido: ao receber foco, TODO elemento redondo do site virava um
+ * quadrado de 6px. Botão de ícone, avatar, retrato de autoria, pílula do Fale
+ * Conosco, seta da roleta — 9999px viravam 6px no clique.
+ *
+ * É a mesma armadilha da 3.6.2 (`position` em classe única disputando com as
+ * utilitárias do Tailwind), com outra propriedade. Sem o `border-radius`, o
+ * contorno segue o raio de cada elemento, que é o comportamento de todo
+ * navegador atual: círculo recebe contorno circular, cartão recebe o raio do
+ * cartão, e link de texto recebe um retângulo — que é o certo para um link.
+ */
 :focus-visible {
   outline: 3px solid rgb(var(--c-primary));
   outline-offset: 2px;
-  border-radius: 6px;
 }
 
 /*
@@ -467,7 +486,6 @@ p {
 :focus {
   outline: 3px solid rgb(var(--c-primary));
   outline-offset: 2px;
-  border-radius: 6px;
 }
 @supports selector(:focus-visible) {
   :focus:not(:focus-visible) {

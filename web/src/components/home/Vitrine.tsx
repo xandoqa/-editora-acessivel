@@ -177,10 +177,12 @@ export default function Vitrine() {
 
         {/* As setas ficam no alto, junto do título: no pé elas competiriam com
             a barra de rolagem do próprio trilho em telas pequenas. */}
-        <div className="flex shrink-0 items-center gap-2">
+        {/* `gap-4` pelo mesmo motivo da roleta: as setas têm área ampliada, e
+            com 8px de intervalo as duas áreas se sobreporiam. */}
+        <div className="flex shrink-0 items-center gap-4">
           <button
             type="button"
-            className="icon-btn border-outline/60 disabled:opacity-35"
+            className="alvo-ampliado icon-btn relative border-outline/60 disabled:opacity-35"
             onClick={() => rolar(-1)}
             disabled={pontas.inicio}
             aria-label={t('vitrine.anterior')}
@@ -189,7 +191,7 @@ export default function Vitrine() {
           </button>
           <button
             type="button"
-            className="icon-btn border-outline/60 disabled:opacity-35"
+            className="alvo-ampliado icon-btn relative border-outline/60 disabled:opacity-35"
             onClick={() => rolar(1)}
             disabled={pontas.fim}
             aria-label={t('vitrine.proximo')}

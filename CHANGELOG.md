@@ -2,6 +2,34 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.8.6] — 2026-11-03
+
+### O Pingo não some mais em definitivo
+
+Fechar o Fale Conosco no X gravava `livrin:fale-conosco-fechado` no navegador,
+e o componente lia essa chave a cada carregamento. Quem apertou o X uma vez —
+inclusive sem querer — **perdia o mascote para sempre**, porque não havia
+nenhum "reabrir" na interface.
+
+Não era defeito de código: era uma decisão minha, com o argumento de que botão
+flutuante que volta a cada página é o motivo de tanta gente odiar botão
+flutuante. O argumento vale para um site de verdade e estava errado aqui. Um
+enfeite que some em definitivo por um clique não pode guardar essa decisão.
+
+Agora fechar vale só para a visita atual: **qualquer recarregamento traz o
+Pingo de volta**. E como o código não lê mais a chave antiga, quem já a tinha
+gravada volta a ver o mascote sem precisar limpar nada no navegador.
+
+De quebra, o estado inicial deixou de ser "fechado": antes o componente
+começava escondido e um efeito consultava o armazenamento, o que fazia o Pingo
+piscar para fora da tela por um quadro em todo carregamento.
+
+### Conferido no resto do projeto
+
+Os outros usos de armazenamento são preferências que a pessoa muda de volta
+pela interface — tema, idioma, janela de Libras, ajustes do leitor, sessão. O
+Pingo era o único que sumia sem caminho de volta.
+
 ## [3.8.5] — 2026-11-02
 
 Área de toque das setas de carrossel, medida.

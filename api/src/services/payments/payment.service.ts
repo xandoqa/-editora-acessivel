@@ -8,6 +8,7 @@ import { badRequest, conflict, notFound } from '../../utils/http-error';
 import { logger } from '../../utils/logger';
 import { paginated } from '../../validators/common';
 import type { adminDonationListSchema, donationSchema } from '../../validators/donations.schemas';
+import { AbacatePayProvider } from './abacatepay.provider';
 import type { PaymentProvider } from './payment-provider';
 import { SimulatedPaymentProvider } from './simulated.provider';
 
@@ -25,6 +26,23 @@ import { SimulatedPaymentProvider } from './simulated.provider';
 const PROVEDORES: Record<string, PaymentProvider> = {
   simulado: new SimulatedPaymentProvider(),
 };
+
+/*
+ * O AbacatePay só entra no registro quando existe chave. Sem chave ele não é
+ * uma opção, e `PAYMENT_PROVIDER=abacatepay` cai no simulado pelo caminho que
+ * já existia para provedor desconhecido — a instalação continua funcionando em
+ * vez de subir quebrada. O aviso abaixo existe para que o motivo apareça no
+ * log, porque "não está registrado" sozinho não explica que falta a chave.
+ */
+const abacatepay = new AbacatePayProvider();
+if (abacatepay.configurado) {
+  PROVEDORES[abacatepay.name] = abacatepay;
+} else if (env.PAYMENT_PROVIDER === abacatepay.name) {
+  logger.warn(
+    'PAYMENT_PROVIDER="abacatepay" mas ABACATEPAY_API_KEY está vazia: o provedor não foi ' +
+      'registrado e esta instalação segue no simulado.',
+  );
+}
 
 export function provedorAtual(): PaymentProvider {
   const escolhido = PROVEDORES[env.PAYMENT_PROVIDER];

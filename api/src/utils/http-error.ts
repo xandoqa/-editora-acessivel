@@ -23,3 +23,10 @@ export const notFound = (message = 'Recurso não encontrado.') => new HttpError(
 export const conflict = (message: string, details?: unknown) => new HttpError(409, 'CONFLICT', message, details);
 export const unprocessable = (message: string, details?: unknown) =>
   new HttpError(422, 'UNPROCESSABLE', message, details);
+/**
+ * Serviço de fora falhou — provedor de pagamento fora do ar, tempo esgotado,
+ * credencial recusada. 502 e não 500: o defeito não está nesta aplicação, e a
+ * diferença importa para quem lê o log depois.
+ */
+export const badGateway = (message: string, details?: unknown) =>
+  new HttpError(502, 'BAD_GATEWAY', message, details);

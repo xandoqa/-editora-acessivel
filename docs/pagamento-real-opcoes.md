@@ -1,6 +1,8 @@
 # Apoio com pagamento real — opções
 
-Estudo de alternativas para o Livrin receber apoio de verdade, sem orçamento. **Nada aqui foi implementado.** O provedor em uso continua sendo o `simulado`, e a [ADR 011](decisions/011-doacoes-provedor-simulado.md) continua valendo.
+Estudo de alternativas para o Livrin receber apoio de verdade, sem orçamento.
+
+> **Atualização de 03/11/2026.** A "camada 2" recomendada no fim deste documento **foi implementada**: existe um provedor AbacatePay fazendo cobrança PIX, ativado por `PAYMENT_PROVIDER=abacatepay` e por uma chave de API. Ver [ADR 023](decisions/023-abacatepay.md). O resto deste estudo segue valendo como comparação, e o `simulado` **continua sendo o provedor padrão** — a [ADR 011](decisions/011-doacoes-provedor-simulado.md) não foi revogada.
 
 > **Condições verificadas em outubro de 2026.** Taxa e exigência de cadastro são as coisas que mudam mais rápido em meio de pagamento. Confirme na fonte antes de contratar qualquer coisa — os links estão no fim.
 
@@ -32,7 +34,7 @@ Antes de escolher, vale saber que a parte difícil está pronta:
 
 Trocar de provedor é implementar `createCharge` e `confirmCharge` e registrar a classe. **Nenhuma rota, controller ou tela muda.**
 
-> **Pendência conhecida:** `PAYMENT_PROVIDER` não está declarada em nenhum dos três `.env.example`. Quem for mexer nisso deve documentá-la lá.
+> **Resolvido na 3.9.0:** `PAYMENT_PROVIDER` passou a estar declarada nos `.env.example` da raiz e da API, com os valores aceitos. O `web/.env.example` ficou de fora de propósito — variável de pagamento no navegador não tem o que fazer ali.
 
 ---
 
@@ -123,6 +125,8 @@ A pergunta "qual provedor usar" tem uma resposta melhor que um nome: **mais de u
 
 **Camada 2 — um segundo provedor em sandbox, para provar a abstração.** Ativado por `PAYMENT_PROVIDER`, com o simulado como padrão. Isso transforma a afirmação da ADR 011 — "trocar de provedor é implementar duas funções" — de promessa em fato demonstrado. É o maior ganho acadêmico disponível a custo zero.
 
+> **Feito na 3.9.0, com o AbacatePay.** Só PIX, para que dado de cartão continue não existindo nesta aplicação; o ambiente é declarado em `ABACATEPAY_DEV_MODE` e **conferido** contra o `devMode` que cada cobrança devolve; e sem chave o provedor nem é registrado, então a instalação padrão não muda em nada. Dezoito testes contra um servidor falso, nenhum tocando a internet. Ver [ADR 023](decisions/023-abacatepay.md).
+
 **Camada 3 — Pix estático, para quem realmente quiser apoiar.** É a única forma de receber sem taxa, e resolve o pedido literal: alguém que queira apoiar, consegue. Com confirmação manual pela administração, que já existe. Se for adotado, o aviso sobre o nome do titular aparecer na tela precisa ser uma decisão consciente, não um efeito colateral.
 
 ### O que faltaria no código
@@ -131,7 +135,7 @@ Fora de escopo aqui, anotado para depois:
 
 1. **Webhook com idempotência.** É onde mora a complexidade real de pagamento: a notificação chega duas vezes, fora de ordem, ou nunca. O índice único em `provider_ref` já prepara o terreno. Tratar isso bem é o que separa integração de brinquedo — e **dá para demonstrar com o simulado**, sem chave nenhuma.
 2. **Expiração de cobrança pendente.** Todo sistema de pagamento tem esse estado; quase todo trabalho acadêmico esquece dele.
-3. **`PAYMENT_PROVIDER` nos `.env.example`**, com os valores aceitos.
+3. ~~**`PAYMENT_PROVIDER` nos `.env.example`**, com os valores aceitos.~~ Feito na 3.9.0.
 4. **Credenciais fora do repositório.** O repositório é público. Nem chave de teste entra — vai por `.env`, como o resto.
 
 Os itens 1 e 2 valem **mesmo que nenhum provedor novo seja integrado**, e são os de melhor retorno.

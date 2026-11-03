@@ -2,6 +2,74 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.9.0] — 2026-11-03
+
+### Adicionado — AbacatePay: cobrança PIX de verdade, opcional
+
+O estudo em `docs/pagamento-real-opcoes.md` recomendava "um segundo provedor em
+sandbox, para provar a abstração". Era a recomendação de melhor retorno do
+documento e agora existe: `AbacatePayProvider`, implementando a mesma interface
+`PaymentProvider` do simulado.
+
+**Nenhuma rota, controller, validador, tela ou tabela mudou.** A arquitetura
+`PaymentService → PaymentProvider → método` existia justamente para isto, e a
+afirmação da ADR 011 — "trocar de provedor é implementar duas funções" — deixou
+de ser promessa.
+
+**Só PIX.** A regra escrita na interface é que dado de cartão nunca passa por
+esta aplicação, e PIX cumpre isso sem esforço: volta um código copiável, e quem
+paga paga no aplicativo do banco. Não existe número, CVV ou validade para
+guardar, mascarar em log ou esquecer de mascarar. O objeto `customer` também não
+é enviado — ele exigiria CPF, e apoiar um projeto não é motivo para pedir CPF.
+
+**O simulado continua sendo o padrão, e nada quebra sem chave.** O AbacatePay só
+entra no registro de provedores quando existe `ABACATEPAY_API_KEY`. Sem chave,
+`PAYMENT_PROVIDER=abacatepay` cai no simulado com aviso no log explicando que
+falta a chave. Quem clonar o repositório e rodar `./iniciar.sh` vê exatamente o
+que via antes.
+
+**O ambiente é declarado e conferido.** Quem decide se a cobrança é real é a
+chave de API, e cada cobrança volta com `devMode` dizendo em que ambiente
+nasceu. `ABACATEPAY_DEV_MODE` declara o esperado (padrão `true`) e o provedor
+compara com o que voltou: declarar desenvolvimento e receber cobrança real vira
+`logger.error` mandando parar e trocar a chave. O texto que vai para a tela sai
+do `devMode` respondido, nunca da declaração.
+
+**Em desenvolvimento, confirmar simula o pagamento.** A situação real de uma
+cobrança PIX que ninguém pagou é "pendente" para sempre, o que empacaria a
+demonstração. Com `ABACATEPAY_DEV_MODE=true`, uma cobrança pendente dispara
+`simulate-payment` antes de reconsultar — cada uso registrado no log, e nunca
+com `false`. Simulação que falha devolve `PENDENTE` em vez de derrubar a
+confirmação.
+
+**Tempo limite de 8 segundos** em cada chamada. A lição do Fale Conosco é que
+dependência externa sem tempo limite trava a resposta inteira. Esgotado o
+tempo, é 502 com texto que a pessoa entende — e `badGateway` foi acrescentado
+ao `http-error.ts`, porque o defeito não está nesta aplicação.
+
+**Dezoito testes contra um AbacatePay de mentira**, nenhum tocando a internet. O
+servidor falso grava o que recebeu, então os testes conferem o que foi enviado e
+não só o que voltou: valor em centavos (não em reais), 200 com `error` tratado
+como erro, situação desconhecida caindo em `FALHOU` em vez de liberar acesso,
+provedor fora do ar, simulação não disparando fora do ambiente de
+desenvolvimento, e chave de API não aparecendo em mensagem de erro.
+
+Decisão registrada na [ADR 023](docs/decisions/023-abacatepay.md).
+
+### Documentado — pendências honestas, não entregues
+
+Webhook (exige endereço público e verificação de assinatura), a imagem do QR
+Code na tela (`brCodeBase64` está disponível; mexer na interface na véspera da
+apresentação é risco sem necessidade) e expiração automática de cobrança
+pendente. Nenhuma das três foi feita, e nenhuma é descrita como feita.
+
+### Segurança
+
+Nenhuma credencial entrou no repositório. `ABACATEPAY_API_KEY` aparece **vazia**
+nos `.env.example` da raiz e da API e no `docker-compose.yml`, com o motivo
+escrito ao lado. O `web/.env.example` ficou de fora de propósito: chave de
+pagamento no navegador é chave vazada.
+
 ## [3.8.6] — 2026-11-03
 
 ### O Pingo não some mais em definitivo

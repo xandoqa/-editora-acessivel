@@ -82,6 +82,26 @@ const envSchema = z.object({
   PAYMENT_PROVIDER: z.string().default('simulado'),
 
   /*
+   * AbacatePay (PIX). As duas são opcionais: sem chave, o provedor nem entra no
+   * registro e a instalação segue no simulado, com aviso no log.
+   *
+   * `ABACATEPAY_API_KEY` não tem valor padrão escrito aqui de propósito — chave
+   * de API em repositório público é chave vazada. Ela mora no `.env`, que não é
+   * versionado.
+   *
+   * `ABACATEPAY_DEV_MODE` declara em que ambiente a chave está. Quem decide de
+   * verdade é a chave, e cada cobrança volta com `devMode` dizendo o que
+   * aconteceu; o provedor confere um contra o outro e grita no log se
+   * discordarem. O padrão é `true` porque a opção segura é a que não movimenta
+   * dinheiro por engano.
+   */
+  ABACATEPAY_API_KEY: z.string().optional().or(z.literal('').transform(() => undefined)),
+  ABACATEPAY_DEV_MODE: z
+    .enum(['true', 'false'])
+    .default('true')
+    .transform((v) => v === 'true'),
+
+  /*
    * Fale Conosco.
    *
    * Todas opcionais, de propósito: sem nenhuma delas o formulário continua

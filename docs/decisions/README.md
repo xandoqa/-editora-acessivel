@@ -26,3 +26,4 @@ Cada arquivo responde: o que foi escolhido, por quê, quais alternativas existia
 | [020](020-temas.md) | Seis temas escolhidos por motivo e verificados por medição de contraste |
 | [021](021-autores-e-retratos.md) | Coleções por autor derivadas das obras; retratos desenhados em vez de fotos de pessoas reais |
 | [022](022-fale-conosco.md) | Fale Conosco: gravar antes de entregar, sem captcha, sem selo falso e com mascote próprio |
+| [023](023-abacatepay.md) | AbacatePay: PIX de verdade em ambiente de desenvolvimento, opcional e com o simulado ainda padrão |

@@ -52,6 +52,12 @@ services:
       BCRYPT_ROUNDS: ${BCRYPT_ROUNDS:-10}
       LOG_REQUESTS: ${LOG_REQUESTS:-true}
       PAYMENT_PROVIDER: ${PAYMENT_PROVIDER:-simulado}
+      # AbacatePay (PIX). Vazias por padrão: sem chave o provedor não é
+      # registrado e a instalação segue no simulado. Preenchidas no .env da
+      # RAIZ, elas ligam a cobrança PIX de verdade. DEV_MODE=true é o padrão
+      # seguro — ver docs/decisions/023-abacatepay.md.
+      ABACATEPAY_API_KEY: ${ABACATEPAY_API_KEY:-}
+      ABACATEPAY_DEV_MODE: ${ABACATEPAY_DEV_MODE:-true}
       # Fale Conosco. Todas vazias por padrão: sem elas o formulário continua
       # funcionando por inteiro — a mensagem é gravada e aparece na caixa de
       # entrada da administração. Preenchidas no .env da RAIZ, elas ligam a

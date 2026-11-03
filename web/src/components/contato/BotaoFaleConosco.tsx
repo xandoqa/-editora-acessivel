@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MessageCircle, X } from 'lucide-react';
 import { useT } from '../../i18n/I18nContext';
@@ -17,9 +17,19 @@ import Pingo from './Pingo';
  * Três cuidados que o impedem de virar aquele widget que todo mundo fecha
  * antes de ler:
  *
- *  1. **Dá para fechar, e ele lembra.** A escolha fica no `localStorage` da
- *     pessoa. Botão flutuante que volta a cada página é o motivo de tanta
- *     gente odiar botão flutuante.
+ *  1. **Dá para fechar, mas ele NÃO lembra disso.** Fechar vale só para esta
+ *     visita; qualquer recarregamento traz o Pingo de volta.
+ *
+ *     Antes a escolha ficava no `localStorage`, com o argumento de que botão
+ *     flutuante que volta a cada página é o motivo de tanta gente odiar botão
+ *     flutuante. O argumento é bom para um site de verdade e estava errado
+ *     aqui: quem apertou o X uma vez — inclusive sem querer, que foi o que
+ *     aconteceu — perdia o mascote para sempre, sem nenhuma forma de trazê-lo
+ *     de volta pela interface. Não havia "reabrir". Um enfeite que some em
+ *     definitivo por um clique não pode guardar essa decisão.
+ *
+ *     Como o código não lê mais a chave antiga, quem já a tinha gravada volta
+ *     a ver o Pingo sem precisar limpar nada no navegador.
  *  2. **Não cobre o rodapé nem o conteúdo em tela estreita.** Abaixo de 640px
  *     ele vira só o mascote, sem a faixa de texto.
  *  3. **Some na própria página de contato.** Convidar para a tela em que a
@@ -30,40 +40,23 @@ import Pingo from './Pingo';
  * ampliação de tela.
  */
 
-const CHAVE = 'livrin:fale-conosco-fechado';
-
 /** Rotas onde o convite não aparece. */
 const SILENCIO = ['/contato', '/reader/', '/login', '/register', '/forgot-password', '/admin'];
 
 export default function BotaoFaleConosco() {
   const t = useT();
   const { pathname } = useLocation();
-  const [fechado, setFechado] = useState(true);
-
   /*
-   * A leitura do `localStorage` fica em efeito, e o estado começa "fechado".
+   * Começa VISÍVEL, e nada é lido de armazenamento nenhum.
    *
-   * Lendo direto no estado inicial, o convite pisca na tela de quem já o
-   * dispensou — e armazenamento pode simplesmente lançar (janela anônima,
-   * dados de site bloqueados), o que derrubaria a renderização inteira.
+   * Antes começava fechado e um efeito consultava o `localStorage`, o que
+   * deixava o Pingo piscando para fora da tela por um quadro em todo
+   * carregamento. Sem armazenamento, o estado inicial já é o certo.
    */
-  useEffect(() => {
-    try {
-      setFechado(window.localStorage.getItem(CHAVE) === '1');
-    } catch {
-      setFechado(false);
-    }
-  }, []);
+  const [fechado, setFechado] = useState(false);
 
-  const dispensar = () => {
-    setFechado(true);
-    try {
-      window.localStorage.setItem(CHAVE, '1');
-    } catch {
-      // Sem armazenamento, o convite volta na próxima página. Melhor isso do
-      // que a tela quebrar por causa de um enfeite.
-    }
-  };
+  /** Fecha só por esta visita. Recarregar a página traz o Pingo de volta. */
+  const dispensar = () => setFechado(true);
 
   if (fechado || SILENCIO.some((rota) => pathname.startsWith(rota))) return null;
 

@@ -5,9 +5,32 @@ Como publicar o Livrin sem pagar nada, o que funciona bem nesse arranjo e o que
 limites antes de seguir.
 
 > **Antes de tudo:** para uma apresentação com hora marcada, rodar localmente
-> pelo `./iniciar.sh` é mais confiável do que qualquer camada gratuita. Publique
-> depois, com calma, para o repositório e o portfólio. O motivo está na seção
-> "Os dois problemas que a camada gratuita traz".
+> é mais confiável do que qualquer camada gratuita. Publique depois, com calma,
+> para o repositório e o portfólio. O motivo está na seção "Os dois problemas
+> que a camada gratuita traz".
+
+## Se o problema é a rede do lugar, não falta de servidor
+
+Vale conferir isto antes de hospedar coisa alguma, porque resolve o caso mais
+comum e não depende de provedor nenhum.
+
+Rede de faculdade, de evento ou de hotel costuma bloquear download de pacotes.
+Como o `iniciar.sh` termina em `docker compose up --build`, e `--build` roda
+`npm ci` dentro do contêiner, **é o build que falha nesses lugares, não o
+Docker.** O sintoma engana: parece que o Docker não sobe.
+
+Imagem já construída sobe sem rede nenhuma, e é o que o `apresentar.sh` faz:
+
+```bash
+./iniciar.sh        # uma vez, em casa, numa rede que funcione
+./apresentar.sh     # no lugar da apresentação — sem reconstruir, sem internet
+```
+
+Nada no front busca fonte ou CDN em tempo de execução, então catálogo, leitura,
+audiodescrição, temas, idiomas e Fale Conosco funcionam offline. A exceção é a
+janela de Libras, que depende do VLibras e avisa na hora quando não há rede.
+
+**Teste com o wi-fi desligado antes do dia**, em vez de descobrir na hora.
 
 ## O arranjo
 

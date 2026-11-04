@@ -2,6 +2,47 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/). Versionamento semântico.
 
+## [3.9.1] — 2026-11-03
+
+### Adicionado — `apresentar.sh` / `apresentar.bat`: subir sem rede
+
+"A internet da universidade derruba o Docker toda vez que tento subir."
+
+O diagnóstico é outro, e é melhor: **a rede não derruba o Docker rodando, ela
+derruba o Docker construindo.** O `iniciar.sh` termina em
+`docker compose up --build`, e `--build` roda `npm ci` dentro do contêiner, o
+que precisa do registro npm. Rede de faculdade, de evento ou de hotel bloqueia
+esse download — portal cativo, proxy, saída filtrada — e o sintoma engana: dá a
+impressão de que o Docker não sobe, quando o Docker está ótimo e é a rede que
+não deixa **baixar**.
+
+Imagem já construída sobe sem rede nenhuma. O `apresentar.sh` confere que as
+três imagens (`livrin-api`, `livrin-web`, `postgres:16-alpine`) estão em disco e
+sobe com `--no-build`. Faltando alguma, ele **se recusa a tentar** e diz para
+rodar o `iniciar.sh` numa rede que funcione — em vez de deixar a pessoa
+esperando um download que não vai completar na frente da banca.
+
+O `iniciar.sh` não foi tocado: continua sendo o caminho da primeira execução.
+
+### Verificado
+
+Nada no front busca fonte ou CDN em tempo de execução — sem Google Fonts, sem
+CDN — então catálogo, leitura, audiodescrição, temas, idiomas e Fale Conosco
+funcionam offline. A janela de Libras depende do VLibras e, desde a 3.5.4, avisa
+na hora quando não há rede. O `docker-compose.yml` não declara `pull_policy`,
+então imagem já baixada não é rebaixada.
+
+A sintaxe do `apresentar.sh` foi conferida com `sh -n`. **Os dois scripts não
+foram executados contra um Docker de verdade** — não existe Docker no ambiente
+onde foram escritos. Testar com o wi-fi desligado, antes do dia, é parte do
+procedimento e está escrito no README e em `docs/hospedagem.md`.
+
+### Documentação
+
+`README.md` ganhou a seção "Apresentar numa rede que você não controla" e
+`docs/hospedagem.md` ganhou "Se o problema é a rede do lugar, não falta de
+servidor" — porque hospedar não era a solução do problema relatado.
+
 ## [3.9.0] — 2026-11-03
 
 ### Adicionado — AbacatePay: cobrança PIX de verdade, opcional
